@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "203127659668",
+    "project_id": "hedstock-9f5fd",
+    "storage_bucket": "hedstock-9f5fd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:203127659668:android:351a4e044a30b056f8e881",
+        "android_client_info": {
+          "package_name": "es.cursos.android.ejercicios.stocksnma"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDVLiwjmgLcOiwJKgf65iiXQvB86xmv2zM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

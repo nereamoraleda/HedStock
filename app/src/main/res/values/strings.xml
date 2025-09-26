@@ -1,0 +1,206 @@
+<resources>
+    <string name="app_name">HedStock</string>
+
+
+    <!-- Elements Drawer -->
+    <string name="purchase_order_title"> Pedidos </string>
+    <string name="product_title"> Productos </string>
+    <string name="discount_title"> Descuentos </string>
+    <string name="supplier_title"> Proveedores </string>
+    <string name="user_title"> Usuarios </string>
+    <string name="settings_title"> Configuración </string>
+    <string name="about_title"> Acerca de </string>
+
+
+    <!-- Elements About (Dialog) -->
+    <string name="about_dialog_title">¡Bienvenid@ a la aplicación HedStock!</string>
+    <string name="about_dialog_description">
+        "En esta aplicación podrás gestionar el inventario de tu tienda. "
+        "\n- Podrás crear, editar y eliminar tus productos y proveedores. "
+        "\n"
+        "\n- También podrás realizar búsquedas y filtros para encontrar los productos y proveedores que necesitas."
+    </string>
+    <string name="about_dialog_version">Versión 1.0.0</string>
+    <string name="about_dialog_developer">Desarrollada por Nerea Moraleda Almansa</string>
+    <string name="about_dialog_close">Cerrar</string>
+
+
+    <!-- Elements Dialog -->
+    <string name="confirm_create_new_product_with_barcode_title">Crear nuevo producto</string>
+    <string name="confirm_create_new_product_with_barcode">No se encontró ningún producto con el código de barras %s. ¿Deseas crear uno nuevo?</string>
+
+    <string name="confirm_delete_selected_products_title">Eliminar productos seleccionados</string>
+    <string name="confirm_delete_selected_products">¿Estás seguro de que deseas eliminar todos los productos seleccionados? Esta acción no se puede deshacer.</string>
+
+    <string name="confirm_delete_selected_suppliers_title">Eliminar proveedores seleccionados</string>
+    <string name="confirm_delete_selected_suppliers">¿Estás seguro de que deseas eliminar todos los proveedores seleccionados? Esta acción no se puede deshacer.</string>
+
+
+
+    <!-- Elements DropDownMenu -->
+    <!-- Home -->
+    <string name="group_by_categories">Agrupar por categorías</string>
+    <string name="order_by_name_asc">Ordenar por nombre ascendente</string>
+    <string name="order_by_name_desc">Ordenar por nombre descendente</string>
+
+    <!-- Products (Create, Details) -->
+    <string name="no_results">Sin resultados</string>
+
+    <string name="select_supplier">Selecciona un proveedor</string>
+    <string name="no_supplier">Sin proveedor</string>
+    <string name="no_suppliers_available">No hay proveedores disponibles</string>">
+
+    <string name="select_category">Selecciona una categoría</string>
+    <string name="no_categories_available">No hay categorías disponibles</string>
+    <string name="create_category">Crear nueva categoría</string>"
+
+
+
+    <!-- Elements FABs -->
+    <string name="add_purchase_order">Pedido</string>
+    <string name="add_product">Producto</string>
+    <string name="add_discount">Descuento</string>
+    <string name="add_supplier">Proveedor</string>
+    <string name="add_user">Usuario</string>a
+
+
+
+    <!-- Elements Search Bar -->
+    <string name="search_product">Buscar producto</string>
+    <string name="search_supplier">Buscar proveedor</string>
+    <string name="search_user">Buscar usuario</string>
+    <string name="search_no_results">No se encontraron resultados</string>
+    <string name="clean_history">Limpiar historial</string>"
+
+
+    <!-- Elements Bottom Bar -->
+    <string name="selected_products_singular">%d producto seleccionado</string>
+    <string name="selected_product_plural">%d productos seleccionados</string>
+
+    <string name="selected_suppliers_singular">%d proveedor seleccionado</string>
+    <string name="selected_supplier_plural">%d proveedores seleccionados</string>
+
+    <string name="no_products">No se encontró ningún producto \n¡Empecemos creando uno!</string>
+    <string name="no_suppliers">No se encontró ningún proveedor \n¡Empecemos creando uno!</string>
+    <string name="no_users">No se encontró ningún usuario \n¡Empecemos creando uno!</string>
+
+
+
+    <!-- Strings Products -->
+    <string name="product_create_title">Crear producto</string>
+    <string name="product_details_title">Producto"</string>
+
+    <string name="product_form_name">Nombre del producto</string>
+    <string name="product_name">Producto</string>
+
+    <string name="product_description">Descripción</string>
+    <string name="product_no_description">Sin descripción</string>
+    <string name="product_no_description_short">Sin desc.</string>
+
+    <string name="product_brand">Marca</string>
+    <string name="product_barcode">Código de barras</string>
+    <string name="scan_text_title">Escanea un código de barras</string>
+
+    <string name="product_supplier">Proveedor</string>
+    <string name="product_no_supplier">Sin proveedor</string>
+
+    <string name="product_category">Categoría</string>
+    <string name="product_no_category">Sin categoría</string>
+
+    <!-- <string name="product_cost_price_title">Precios</string> -->
+    <string name="product_cost_price">Precio de coste</string>
+    <string name="product_sold_price">Precio de venta</string>
+    <string name="product_price_symbol">%.2f€</string>
+
+    <!-- <string name="product_stock_title">Inventario</string> -->
+    <string name="product_stock">Stock</string>
+    <string name="product_min_stock">Mín. Stock</string>
+    <string name="product_max_stock">Máx. Stock</string>
+
+    <string name="product_image">Imagen</string>
+    <string name="product_no_image">Sin imagen</string>
+
+
+
+    <!-- Strings Supplier -->
+    <string name="supplier_create_title">Nuevo proveedor</string>
+    <string name="supplier_details_title">Proveedor</string>
+
+    <string name="supplier_form_name">Nombre del proveedor</string>
+    <string name="supplier_name">Proveedor</string>
+
+    <string name="supplier_contact_name">Nombre de contacto</string>
+    <string name="supplier_phone">Núm. de teléfono</string>
+    <string name="supplier_email">Email</string>
+
+    <string name="supplier_address">Dirección</string>
+    <string name="supplier_no_address">Sin dirección</string>
+
+    <string name="supplier_create_country">País</string>
+    <string name="supplier_create_city">Ciudad</string>
+    <string name="supplier_create_zip_code">C.P</string>
+
+
+
+    <!-- Strings Users -->
+    <string name="user_create_title">Crear usuario</string>
+    <string name="user_details_title">Usuario</string>
+
+    <string name="user_name">Nombre</string>
+    <string name="user_username">Nombre de usuario</string>
+    <string name="user_password">Contraseña</string>
+    <string name="user_email">Email</string>
+    <string name="user_phone">Núm. de teléfono</string>
+    <string name="user_role">Rol</string>
+
+
+    <string name="user_store">Tienda</string>
+    <string name="no_stores_available">No hay tiendas disponibles</string>
+    <string name="no_store">Sin tienda</string>
+
+    <string name="user_active">Activo</string>
+
+    <string name="user_count_singular">%d usuario</string>
+    <string name="user_count_plural">%d usuarios</string>
+
+    <string name="user_add_photo">Añadir foto</string>
+    <string name="user_edit_photo">Editar foto</string>"
+
+    <string name="user_edit_title">Editar usuario</string>
+    <string name="user_delete_title">Eliminar usuario</string>
+
+
+
+    <!-- Strings Category -->
+    <string name="category_create_title">Crear categoría</string>
+    <string name="category_edit_title">Editar categoría</string>
+    <string name="category_delete_title">Eliminar categoría</string>
+    <string name="category_delete_message">¿Estás seguro de que deseas eliminar la categoría %s? Todos los productos asociados a esta categoría perderán su categoría.</string>
+    <string name="category_create_name">Nombre de la categoría</string>
+
+
+
+    <!-- Images / Icons / Buttons Descriptions -->
+    <string name="open_menu_drawer_icon_description">Abrir menú lateral</string>
+    <string name="clean_search_bar_icon_description">Limpiar texto barra de búsqueda</string>
+    <string name="go_back_search_bar_icon_description">Volver atrás barra de búsqueda</string>
+    <string name="image_animated_description">Gif</string>
+    <string name="action_button">Botón de acción flotante</string>
+
+    <string name="no_available">No disponible</string>
+
+    <string name="group_by_store">Agrupar por tienda</string>
+    <string name="group_by_role">Agrupar por rol</string>
+    <string name="sort_by_date_oldest">Ordenar por fecha de creación (Antiguos primero)</string>
+    <string name="sort_by_date_newest">Ordenar por fecha de creación (Nuevos primero)</string>
+
+
+    <!-- Buttons Text -->
+    <string name="button_create">Crear</string>
+    <string name="button_edit">Editar</string>
+    <string name="button_delete">Eliminar</string>
+    <string name="button_accept">Aceptar</string>
+    <string name="button_cancel">Cancelar</string>
+    <string name="button_save">Guardar</string>
+    <string name="button_close">Cerrar</string>
+</resources>
