@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <style name="Theme.Splash" parent="Theme.SplashScreen">
+        <!-- Icono del splash -->
+        <item name="windowSplashScreenAnimatedIcon">@drawable/img_logo_no_background</item>
+
+        <!-- Fondo del splash -->
+        <item name="windowSplashScreenBackground">@color/background</item>
+
+        <!-- Tiempo del splash -->
+        <item name="windowSplashScreenAnimationDuration">10000</item>
+
+        <item name="postSplashScreenTheme">@style/Theme.StocksNMA</item>
+    </style>
 
     <style name="Theme.StocksNMA" parent="android:Theme.Material.Light.NoActionBar" />
 </resources>

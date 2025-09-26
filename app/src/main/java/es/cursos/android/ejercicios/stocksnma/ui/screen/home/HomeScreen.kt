@@ -1,6 +1,5 @@
 package es.cursos.android.ejercicios.stocksnma.ui.screen.home
 
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.updateTransition
@@ -68,8 +67,8 @@ import es.cursos.android.ejercicios.stocksnma.utils.enums.ProductSortOptions
 import es.cursos.android.ejercicios.stocksnma.utils.enums.SupplierSortOptions
 import es.cursos.android.ejercicios.stocksnma.utils.enums.UserGroupOptions
 import es.cursos.android.ejercicios.stocksnma.utils.enums.UserSortOptions
-import es.cursos.android.ejercicios.stocksnma.utils.item.DropDownMenuItem
-import es.cursos.android.ejercicios.stocksnma.utils.item.FABItem
+import es.cursos.android.ejercicios.stocksnma.utils.items.DropDownMenuItem
+import es.cursos.android.ejercicios.stocksnma.utils.items.FABItem
 import kotlinx.coroutines.launch
 
 
@@ -107,8 +106,8 @@ fun HomeScreen(
     // Variables - Dialog
     val showAboutDialog by viewModel.showAboutDialog.collectAsState()               // Muestra el diálogo "Acerca de" (Elemento del Navigation Drawer)
     var showDialogScanner by remember { mutableStateOf(false) }               // Muestra el diálogo de creacion de producto con el código de barras escaneado
-    var showDeleteProductsConfirmation by remember { mutableStateOf(false) }  // Muestra el diálogo de confirmación de eliminación de productos/proveedores
-    var showDeleteSuppliersConfirmation by remember { mutableStateOf(false) } // Muestra el diálogo de confirmación de eliminación de productos/proveedores
+    // Muestra el diálogo de confirmación de eliminación de productos/proveedores
+    // Muestra el diálogo de confirmación de eliminación de productos/proveedores
     var showNewFunction by remember { mutableStateOf(false) }
 
     // Variables - Navigation Drawer
@@ -121,15 +120,15 @@ fun HomeScreen(
     // Variables - Búsqueda en Search Bar
     //val isSearching by viewModel.isSearching.collectAsState()                     // Si estamos en búsqueda o no
     val searchQuery by viewModel.searchQuery.collectAsState()                     // Consulta de búsqueda
-    //val productSearchHistory by viewModel.productSearchHistory.collectAsState()   // Historial de búsquedas
-    //val supplierSearchHistory by viewModel.supplierSearchHistory.collectAsState() // Historial de búsquedas
-    //val productSearchResults by viewModel.productSearchResults.collectAsState()   // Lista de resultados de búsqueda de productos
-    //val supplierSearchResults by viewModel.supplierSearchResults.collectAsState() // Lista de resultados de búsqueda de proveedores
+    // Historial de búsquedas
+    // Historial de búsquedas
+    // Lista de resultados de búsqueda de productos
+    // Lista de resultados de búsqueda de proveedores
 
 
     // Variables - CheckBoxes
-    //val selectedProducts by viewModel.selectedProducts.collectAsState()           // Lista de productos seleccionados (solo Ids)
-    //val selectedSuppliers by viewModel.selectedSuppliers.collectAsState()         // Lista de proveedores seleccionados (solo Ids)
+    // Lista de productos seleccionados (solo Ids)
+    // Lista de proveedores seleccionados (solo Ids)
 
 
     // Variables - Floating Action Button

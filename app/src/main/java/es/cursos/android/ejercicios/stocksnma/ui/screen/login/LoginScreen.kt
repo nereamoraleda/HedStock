@@ -142,7 +142,8 @@ fun LoginBodyScreen(
                 modifier = Modifier.fillMaxSize().padding(24.dp)
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.img_hedstock_without_background),
+                    //painter = painterResource(id = R.drawable.img_hedstock_without_background),
+                    painter = painterResource(id = R.drawable.img_logo_no_background),
                     contentDescription = null,
                     modifier = Modifier.size(200.dp)
                 )

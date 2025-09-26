@@ -28,7 +28,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import es.cursos.android.ejercicios.stocksnma.R
-import es.cursos.android.ejercicios.stocksnma.utils.item.NavDrawerItem
+import es.cursos.android.ejercicios.stocksnma.utils.items.NavDrawerItem
 import es.cursos.android.ejercicios.stocksnma.utils.enums.HomeSections
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -75,7 +75,7 @@ fun HeaderNavDrawer(modifier: Modifier = Modifier) {
         modifier = modifier
     ) {
         Icon(
-            painter = painterResource(R.drawable.ic_logo),
+            painter = painterResource(R.drawable.ic_logo_import),
             modifier = Modifier.size(36.dp),
             contentDescription = null
         )

@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import es.cursos.android.ejercicios.stocksnma.R
 import es.cursos.android.ejercicios.stocksnma.data.local.entity.CategoryEntity
 import es.cursos.android.ejercicios.stocksnma.data.local.entity.SupplierEntity
-import es.cursos.android.ejercicios.stocksnma.utils.item.DropDownMenuItem
+import es.cursos.android.ejercicios.stocksnma.utils.items.DropDownMenuItem
 
 
 @Composable

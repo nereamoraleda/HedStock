@@ -49,7 +49,7 @@ fun GifImage(modifier: Modifier = Modifier) {
         painter = rememberDrawablePainter(
             drawable = getDrawable(
                 LocalContext.current,
-                R.drawable.gif_hedgehog_sleeping
+                R.drawable.hedgehog_sleep
             )
         ),
         contentDescription = stringResource(R.string.image_animated_description),
