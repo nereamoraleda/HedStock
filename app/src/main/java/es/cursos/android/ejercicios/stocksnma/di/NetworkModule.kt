@@ -1,4 +1,4 @@
-package es.cursos.android.ejercicios.stocksnma.data.di
+package es.cursos.android.ejercicios.stocksnma.di
 
 import dagger.Module
 import dagger.Provides

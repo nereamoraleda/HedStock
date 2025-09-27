@@ -33,7 +33,6 @@ import es.cursos.android.ejercicios.stocksnma.utils.enums.HomeSections
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-
 @Composable
 fun AppNavigationDrawer(
     navItems: List<NavDrawerItem>,

@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import es.cursos.android.ejercicios.stocksnma.data.datastore.AppDataStore
+import es.cursos.android.ejercicios.stocksnma.data.local.AppDataStore
 import es.cursos.android.ejercicios.stocksnma.data.local.entity.relations.ProductWithSupplierAndCategory
 import es.cursos.android.ejercicios.stocksnma.data.repository.product.ProductRepository
 import es.cursos.android.ejercicios.stocksnma.ui.screen.home.ProductHomeUiState

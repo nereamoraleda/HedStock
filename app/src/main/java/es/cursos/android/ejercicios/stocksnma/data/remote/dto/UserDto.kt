@@ -1,4 +1,4 @@
-package es.cursos.android.ejercicios.stocksnma.data.dto
+package es.cursos.android.ejercicios.stocksnma.data.remote.dto
 
 data class UserDto(
     val id: Long? = null,

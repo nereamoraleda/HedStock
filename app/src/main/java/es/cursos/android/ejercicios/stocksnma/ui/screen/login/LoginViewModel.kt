@@ -1,15 +1,12 @@
 package es.cursos.android.ejercicios.stocksnma.ui.screen.login
 
 import android.util.Log
-import androidx.datastore.dataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import es.cursos.android.ejercicios.stocksnma.data.remote.ChangePasswordRequest
 import es.cursos.android.ejercicios.stocksnma.data.remote.LoginCredentials
 import es.cursos.android.ejercicios.stocksnma.data.remote.HedstockApiService
-import es.cursos.android.ejercicios.stocksnma.data.remote.LoginResponse
-import es.cursos.android.ejercicios.stocksnma.data.session.SessionManager
 import es.cursos.android.ejercicios.stocksnma.utils.enums.UserRoles
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

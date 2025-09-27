@@ -1,6 +1,6 @@
 package es.cursos.android.ejercicios.stocksnma.data.remote
 
-import es.cursos.android.ejercicios.stocksnma.data.dto.UserDto
+import es.cursos.android.ejercicios.stocksnma.data.remote.dto.UserDto
 import es.cursos.android.ejercicios.stocksnma.domain.model.Store
 import retrofit2.Response
 import retrofit2.http.Body
