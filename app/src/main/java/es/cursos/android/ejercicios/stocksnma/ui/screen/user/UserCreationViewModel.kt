@@ -10,7 +10,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import es.cursos.android.ejercicios.stocksnma.data.mapper.toUserDto
-import es.cursos.android.ejercicios.stocksnma.data.remote.HedstockApiService
+import es.cursos.android.ejercicios.stocksnma.data.remote.api.HedstockApiService
+import es.cursos.android.ejercicios.stocksnma.data.remote.api.UserApi
 import es.cursos.android.ejercicios.stocksnma.domain.model.Store
 import es.cursos.android.ejercicios.stocksnma.domain.model.User
 import es.cursos.android.ejercicios.stocksnma.ui.state.CreationUiState
@@ -23,14 +24,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UserCreationViewModel @Inject constructor(
-    private val apiService: HedstockApiService
+    private val api: UserApi
 ) : ViewModel() {
 
     var userUiState by mutableStateOf(CreationUiState(User()))
         private set
-
-    //private val _user = MutableStateFlow(User())
-    //val user: StateFlow<User> = _user.asStateFlow()
 
     private val _storeOptions = MutableStateFlow<List<Store>>(emptyList())
     val storeOptions: StateFlow<List<Store>> = _storeOptions.asStateFlow()
@@ -51,9 +49,9 @@ class UserCreationViewModel @Inject constructor(
                 try {
                     // val userDto = user.toUserDto()
                     // val userDto = userUiState.item.toUserDto()
-                    val usernameExists = apiService.checkUsername(user.username).body() ?: false
-                    val emailExists = apiService.checkEmail(user.email).body() ?: false
-                    val phoneExists = apiService.checkPhone(user.phone).body() ?: false
+                    val usernameExists = api.checkUsername(user.username).body() ?: false
+                    val emailExists = api.checkEmail(user.email).body() ?: false
+                    val phoneExists = api.checkPhone(user.phone).body() ?: false
 
                     if (usernameExists) {
                         _validationState.value = _validationState.value.copy(usernameError = "El nombre de usuario ya existe")
@@ -71,7 +69,7 @@ class UserCreationViewModel @Inject constructor(
                     }
 
 
-                    val response = apiService.createUser(user.toUserDto())
+                    val response = api.createUser(user.toUserDto())
                     if (response.isSuccessful) {
                         Log.d("USER-CREATION", "Usuario creado: ${response.body()}")
                         cleanUserUiState()
@@ -103,7 +101,7 @@ class UserCreationViewModel @Inject constructor(
     private fun loadStoresList() {
         viewModelScope.launch {
             try {
-                val response = apiService.getAllStores()
+                val response = api.getStoresSummary()
                 if (response.isSuccessful) {
                     val stores = response.body() ?: emptyList()
                     _storeOptions.value = stores

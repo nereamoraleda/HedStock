@@ -6,7 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import es.cursos.android.ejercicios.stocksnma.R
 import es.cursos.android.ejercicios.stocksnma.data.local.AppDataStore
 import es.cursos.android.ejercicios.stocksnma.data.local.entity.relations.ProductWithSupplierAndCategory
-import es.cursos.android.ejercicios.stocksnma.data.remote.HedstockApiService
+import es.cursos.android.ejercicios.stocksnma.data.remote.api.HedstockApiService
 import es.cursos.android.ejercicios.stocksnma.data.repository.product.ProductRepository
 import es.cursos.android.ejercicios.stocksnma.data.repository.supplier.SupplierRepository
 import es.cursos.android.ejercicios.stocksnma.utils.enums.ActiveFilters
@@ -37,7 +37,6 @@ class HomeViewModel @Inject constructor(
     private val productRepository: ProductRepository,
     private val supplierRepository: SupplierRepository,
     private val dataStoreManager: AppDataStore,
-    private val apiService: HedstockApiService
 ) : ViewModel() {
 
     init {

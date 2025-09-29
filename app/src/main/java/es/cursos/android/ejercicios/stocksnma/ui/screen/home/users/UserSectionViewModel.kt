@@ -6,7 +6,8 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import es.cursos.android.ejercicios.stocksnma.data.local.AppDataStore
 import es.cursos.android.ejercicios.stocksnma.data.mapper.toUser
-import es.cursos.android.ejercicios.stocksnma.data.remote.HedstockApiService
+import es.cursos.android.ejercicios.stocksnma.data.remote.api.HedstockApiService
+import es.cursos.android.ejercicios.stocksnma.data.remote.api.UserApi
 import es.cursos.android.ejercicios.stocksnma.domain.model.User
 import es.cursos.android.ejercicios.stocksnma.ui.screen.home.UserHomeUiState
 import es.cursos.android.ejercicios.stocksnma.utils.enums.ActiveFilters
@@ -27,7 +28,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UserSectionViewModel @Inject constructor(
-    private val apiService: HedstockApiService,
+    private val api: UserApi,
     private val dataStoreManager: AppDataStore
 ): ViewModel() {
 
@@ -71,7 +72,7 @@ class UserSectionViewModel @Inject constructor(
             flow {
                 emit(UserHomeUiState.Loading)
 
-                val response = apiService.getUsers(
+                val response = api.getUsers(
                     sortBy = filter.sortOption.sortBy ?: "name",
                     direction = filter.sortOption.direction ?: "asc",
                     active = filter.activeFilter.value
@@ -128,7 +129,7 @@ class UserSectionViewModel @Inject constructor(
     fun searchUserByName(query: String) {
         viewModelScope.launch {
             try {
-                val response = apiService.searchUsers(query)
+                val response = api.searchUsers(query)
                 if (response.isSuccessful) {
                     val users = response.body()?.map { it.toUser() } ?: emptyList()
                     _userSearchResults.value = users

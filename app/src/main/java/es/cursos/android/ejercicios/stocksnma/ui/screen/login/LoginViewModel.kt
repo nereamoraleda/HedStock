@@ -4,9 +4,9 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import es.cursos.android.ejercicios.stocksnma.data.remote.ChangePasswordRequest
-import es.cursos.android.ejercicios.stocksnma.data.remote.LoginCredentials
-import es.cursos.android.ejercicios.stocksnma.data.remote.HedstockApiService
+import es.cursos.android.ejercicios.stocksnma.data.remote.api.AuthApi
+import es.cursos.android.ejercicios.stocksnma.data.remote.dto.ChangePasswordRequest
+import es.cursos.android.ejercicios.stocksnma.data.remote.dto.LoginRequest
 import es.cursos.android.ejercicios.stocksnma.utils.enums.UserRoles
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,14 +15,14 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val apiService: HedstockApiService,
+    private val api: AuthApi,
     private val sessionManager: SessionManager,
 ) : ViewModel() {
     private val _loginState = MutableStateFlow<LoginUiState>(LoginUiState.Idle)
     val loginState: StateFlow<LoginUiState> = _loginState
 
     val showChangePasswordDialog = MutableStateFlow(false)
-    fun onShowChangePasswordDialogChanged(value: Boolean) {
+    private fun onShowChangePasswordDialogChanged(value: Boolean) {
         showChangePasswordDialog.value = value
     }
 
@@ -34,7 +34,7 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 _loginState.value = LoginUiState.Loading
-                val response = apiService.login(LoginCredentials(username, password))
+                val response = api.login(LoginRequest(username, password))
 
                 if (response.isSuccessful) {
                     response.body()?.let { authResponse ->
@@ -75,11 +75,11 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 //_loginState.value = LoginUiState.Loading
-                val response = apiService.changePassword(token, ChangePasswordRequest(username, oldPassword, newPassword))
+                val response = api.changePassword(token, ChangePasswordRequest(username, oldPassword, newPassword))
                 Log.d("LoginViewModel", "Response: $response")
                 onShowChangePasswordDialogChanged(false)
                 if (response.isSuccessful) {
-                    val loginResponse = apiService.login(LoginCredentials(username, newPassword))
+                    val loginResponse = api.login(LoginRequest(username, newPassword))
                     if (loginResponse.isSuccessful) {
                         Log.d("LoginViewModel", "Login goin to change password")
                         loginResponse.body()?.let { authResponse ->
