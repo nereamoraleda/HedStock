@@ -1,5 +1,6 @@
 package es.cursos.android.ejercicios.stocksnma.ui.screen.user
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -28,6 +29,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,11 +39,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -57,18 +62,29 @@ import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralIconButton
 import es.cursos.android.ejercicios.stocksnma.ui.state.DetailsUiState
 import es.cursos.android.ejercicios.stocksnma.utils.enums.UserRoles.Companion.getRoles
 import es.cursos.android.ejercicios.stocksnma.utils.UserValidationState
+import kotlinx.coroutines.launch
 import androidx.compose.material3.OutlinedTextField as OutlinedTextField
 
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserDetailsScreen(
     viewModel: UserDetailsViewModel,
     userId: Long,
     navigateBack: () -> Unit
 ) {
+    val context = LocalContext.current
+
     LaunchedEffect(userId) {
         viewModel.loadUserDetails(userId)
+    }
+
+
+    val resetResult by viewModel.resetResult.collectAsState()
+    LaunchedEffect(resetResult) {
+        if (resetResult) {
+            Toast.makeText(context, "Contraseña reseteada correctamente", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(context, "Error al resetear la contraseña", Toast.LENGTH_SHORT).show()
+        }
     }
 
     val state by viewModel.uiState.collectAsState()
@@ -76,11 +92,18 @@ fun UserDetailsScreen(
     val validationState by viewModel.validationState.collectAsState()
     val storeOptions by viewModel.storeOptions.collectAsState()
 
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
     var showConfirmationDialog by remember { mutableStateOf(false) }
     var showChangeCredentialsDialog by remember { mutableStateOf(false) }
     var isMenuExpanded by remember { mutableStateOf(false) }
 
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
+
         topBar = {
             GeneralTopAppBar(
                 title = stringResource(R.string.user_details_title),
@@ -102,7 +125,12 @@ fun UserDetailsScreen(
                             onDismissRequest = { isMenuExpanded = false },
                         ) {
                             DropdownMenuItem(
-                                onClick = { viewModel.resetPassword() },
+                                onClick = {
+                                    viewModel.resetPassword()
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar("Contraseña del usuario \"${user.username}\" reseteada")
+                                    }
+                                },
                                 text = {
                                     Text(
                                         text = "Cambiar credenciales",//stringResource(),

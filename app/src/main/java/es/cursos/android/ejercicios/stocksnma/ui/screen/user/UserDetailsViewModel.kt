@@ -38,6 +38,9 @@ class UserDetailsViewModel @Inject constructor(
     private val _userEditable = MutableStateFlow(User())
     val userEditable: StateFlow<User> = _userEditable.asStateFlow()
 
+    private val _resetResult = MutableStateFlow(false)
+    val resetResult: StateFlow<Boolean> = _resetResult.asStateFlow()
+
     private val emailNotChanged = MutableStateFlow("")
     private val phoneNotChanged = MutableStateFlow("")
 
@@ -133,11 +136,17 @@ class UserDetailsViewModel @Inject constructor(
     fun resetPassword() {
         viewModelScope.launch {
             try {
-                api.resetPassword(_userOriginal.value.id!!)
-                Log.d("RESET-PASSWORD", "Contraseña reseteada?")
+                val response = api.resetPassword(_userOriginal.value.id!!)
+                if (response.isSuccessful) {
+                    _resetResult.value = true
+                    Log.d("RESET-PASSWORD", "Contraseña reseteada correctamente: ${response.body()}")
+                } else {
+                    _resetResult.value = false
+                    Log.e("RESET-PASSWORD", "Error en reset: ${response.code()} - ${response.message()}")
+                }
 
             } catch (e: Exception) {
-
+                Log.e("RESET-PASSWORD", "Error: ${e.message}", e)
             }
         }
     }
