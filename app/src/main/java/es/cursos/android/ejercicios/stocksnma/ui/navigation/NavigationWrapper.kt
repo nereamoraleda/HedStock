@@ -171,7 +171,7 @@ fun NavigationWrapper() {
             UserDetailsScreen(
                 viewModel = userDetailsViewModel,
                 userId = idUser.idUser,
-                navigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 

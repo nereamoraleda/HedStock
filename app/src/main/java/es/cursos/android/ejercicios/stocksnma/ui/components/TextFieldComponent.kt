@@ -27,7 +27,41 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import es.cursos.android.ejercicios.stocksnma.R
+import es.cursos.android.ejercicios.stocksnma.ui.screen.user.supportingErrorText
 import es.cursos.android.ejercicios.stocksnma.utils.getCurrencySymbol
+
+@Composable
+fun GeneralOutlinedTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    leadingIcon: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null,
+    supportingText: @Composable (() -> Unit)? = null,
+    isError: Boolean = false,
+    enabled: Boolean = true,
+    readOnly: Boolean = false,
+    singleLine: Boolean = true,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    modifier: Modifier = Modifier
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = { onValueChange(it) },
+        label = { Text(text = label) },
+        leadingIcon = leadingIcon,
+        trailingIcon = trailingIcon,
+        supportingText = supportingText,
+        isError = isError,
+        enabled = enabled,
+        readOnly = readOnly,
+        singleLine = singleLine,
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+        colors = coloresOutlinedTextField(),
+        //colors = colorsSimpleTextField(),
+        modifier = modifier.fillMaxWidth()
+    )
+}
 
 
 @Composable

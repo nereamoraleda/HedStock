@@ -1,7 +1,6 @@
 package es.cursos.android.ejercicios.stocksnma.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -116,7 +115,7 @@ fun SupplierPrices() {
                 //textField("Precio de venta", "")
             }
 
-            Spacer(modifier = Modifier.padding(dimensionResource(R.dimen.padding_small)))
+            Spacer(modifier = Modifier.padding(dimensionResource(R.dimen.padding_8dp)))
 
             Column(
                 modifier = Modifier.weight(1f)) {

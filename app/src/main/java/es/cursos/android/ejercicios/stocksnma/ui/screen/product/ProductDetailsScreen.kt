@@ -42,7 +42,7 @@ import es.cursos.android.ejercicios.stocksnma.data.local.entity.SupplierEntity
 import es.cursos.android.ejercicios.stocksnma.domain.model.Product
 import es.cursos.android.ejercicios.stocksnma.ui.components.CategoryDialog
 import es.cursos.android.ejercicios.stocksnma.ui.components.ConfirmationDialog
-import es.cursos.android.ejercicios.stocksnma.ui.components.CustomBottomAppBar
+import es.cursos.android.ejercicios.stocksnma.ui.components.ButtonsBottomBar
 import es.cursos.android.ejercicios.stocksnma.ui.components.CustomDropDownMenuCategoriesExposed
 import es.cursos.android.ejercicios.stocksnma.ui.components.CustomDropDownMenuSuppliersExposed
 import es.cursos.android.ejercicios.stocksnma.ui.components.CustomOutlinedTextField
@@ -52,7 +52,7 @@ import es.cursos.android.ejercicios.stocksnma.ui.components.CustomSegmentedButto
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralTopAppBar
 import es.cursos.android.ejercicios.stocksnma.ui.components.DetailsCard
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralIconButton
-import es.cursos.android.ejercicios.stocksnma.ui.components.IconButtonGoBack
+import es.cursos.android.ejercicios.stocksnma.ui.components.NavigateBackButton
 import es.cursos.android.ejercicios.stocksnma.ui.components.ShowMessageErrorText
 import es.cursos.android.ejercicios.stocksnma.ui.components.colorsSimpleTextField
 import es.cursos.android.ejercicios.stocksnma.ui.state.DetailsUiState
@@ -84,7 +84,7 @@ fun ProductoDetailsScreen(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(dimensionResource(R.dimen.padding_medium))
+                    .padding(dimensionResource(R.dimen.padding_16dp))
             ) {
                 CircularProgressIndicator(modifier = Modifier.size(50.dp))
             }
@@ -197,7 +197,7 @@ fun ProductDetailsBodyScreen(
         topBar = {
             GeneralTopAppBar(
                 title = stringResource(R.string.product_details_title),
-                navigationButton = { if (!isEditing) IconButtonGoBack(onNavigateBack) },
+                navigationButton = { if (!isEditing) NavigateBackButton(onNavigateBack) },
                 actionButton = {
                     GeneralIconButton(
                         icon = R.drawable.ic_edit,
@@ -216,7 +216,7 @@ fun ProductDetailsBodyScreen(
         },
         bottomBar = {
             if (isEditing) {
-                CustomBottomAppBar(
+                ButtonsBottomBar(
                     enabled = stateProduct.isEntryValid,
                     onAcceptAction = {
                         Log.d(
@@ -262,7 +262,7 @@ fun ProductDetailsBodyScreen(
                 onProductSectionChange = { activeProductSection = it },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(dimensionResource(R.dimen.padding_medium))
+                    .padding(dimensionResource(R.dimen.padding_16dp))
                     .clip(RoundedCornerShape(50.dp))
                     .background(MaterialTheme.colorScheme.primary)
             )
@@ -307,7 +307,7 @@ fun ProductInfoCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(dimensionResource(R.dimen.padding_medium))
+            .padding(dimensionResource(R.dimen.padding_16dp))
     ) {
         DetailsCard(
             content = {
@@ -329,7 +329,7 @@ fun ProductInfoCard(
                             onValueChange = viewModel::updateField,
                             validacionState = validationState,
                             isEditing = isEditing,
-                            modifier = Modifier.padding(dimensionResource(R.dimen.padding_medium))
+                            modifier = Modifier.padding(dimensionResource(R.dimen.padding_16dp))
                         )
                     }
 
@@ -339,7 +339,7 @@ fun ProductInfoCard(
                         ),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(dimensionResource(R.dimen.padding_medium))
+                            .padding(dimensionResource(R.dimen.padding_16dp))
                     ) {
                         // Contenido Card
                         when (selectedProductSection) {
@@ -403,7 +403,7 @@ fun EncabezadoCard(
             colors = colorsSimpleTextField(),
             modifier = Modifier.fillMaxWidth()
         )
-        ShowMessageErrorText(validacionState.nameError, modifier = Modifier.padding(horizontal = dimensionResource(R.dimen.padding_medium)))
+        ShowMessageErrorText(validacionState.nameError, modifier = Modifier.padding(horizontal = dimensionResource(R.dimen.padding_16dp)))
 
         TextField(
             value = tempProduct.description,
@@ -519,7 +519,7 @@ fun PricesSection(
     isEditing: Boolean
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_medium)),
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_16dp)),
         modifier = Modifier
             .background(MaterialTheme.colorScheme.background)
     ) {

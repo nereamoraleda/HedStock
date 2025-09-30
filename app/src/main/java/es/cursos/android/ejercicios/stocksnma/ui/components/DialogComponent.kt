@@ -7,8 +7,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.BasicAlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -26,10 +29,11 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import es.cursos.android.ejercicios.stocksnma.R
-
+import es.cursos.android.ejercicios.stocksnma.ui.theme.StocksNMATheme
 
 @Composable
 fun ConfirmationDialog(
@@ -101,7 +105,7 @@ fun CategoryDialog(
             content = {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = modifier.padding(dimensionResource(R.dimen.padding_medium))
+                    modifier = modifier.padding(dimensionResource(R.dimen.padding_16dp))
                 ) {
                     Text(
                         text = title,
@@ -109,7 +113,7 @@ fun CategoryDialog(
                         fontWeight = FontWeight.Bold
                     )
 
-                    Spacer(modifier = modifier.height(dimensionResource(R.dimen.padding_medium)))
+                    Spacer(modifier = modifier.height(dimensionResource(R.dimen.padding_16dp)))
 
                     TextField(
                         value = categoryName,
@@ -166,13 +170,13 @@ fun AboutAppDialog(
             elevation = CardDefaults.cardElevation(8.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             modifier = modifier
-                .padding(dimensionResource(R.dimen.padding_medium))
+                .padding(dimensionResource(R.dimen.padding_16dp))
                 .fillMaxWidth()
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
-                    .padding(dimensionResource(R.dimen.padding_medium))
+                    .padding(dimensionResource(R.dimen.padding_16dp))
                     .fillMaxWidth()
             ) {
                 // Título
@@ -183,7 +187,7 @@ fun AboutAppDialog(
                     textAlign = TextAlign.Center,
                 )
 
-                Spacer(modifier = Modifier.height(dimensionResource(R.dimen.padding_medium)))
+                Spacer(modifier = Modifier.height(dimensionResource(R.dimen.padding_16dp)))
 
                 // Descripción
                 Text(
@@ -200,7 +204,7 @@ fun AboutAppDialog(
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
 
-                Spacer(modifier = Modifier.height(dimensionResource(R.dimen.padding_very_small)))
+                Spacer(modifier = Modifier.height(dimensionResource(R.dimen.padding_4dp)))
 
                 // Desarrollador
                 Text(
@@ -226,5 +230,36 @@ fun AboutAppDialog(
                 }
             }
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun InfoDialog() {
+    var showDialog by remember { mutableStateOf(true) }
+    StocksNMATheme {
+        BasicAlertDialog(onDismissRequest = { showDialog = false }) {
+            //Card() {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Text(text = "Confirmación")
+                Text(text = "La contraseña del usuario ... se ha reseteado correctamente")
+                Row(
+                    horizontalArrangement = Arrangement.End,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Button(
+                        onClick = {}
+                    ) {
+                        Text(text = "Ok")
+                    }
+                }
+            }
+        }
+        //}
     }
 }

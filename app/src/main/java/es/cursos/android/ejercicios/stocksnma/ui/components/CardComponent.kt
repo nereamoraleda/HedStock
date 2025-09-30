@@ -30,6 +30,16 @@ fun CustomCard(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     )
 }
 
+
+@Composable
+fun GeneralCard(content: @Composable () -> Unit) {
+    Card(
+        elevation = CardDefaults.cardElevation(16.dp),
+        modifier = Modifier.padding(16.dp),
+        content = { content() }
+    )
+}
+
 @Composable
 fun DetailsCard(
     content: @Composable () -> Unit,
@@ -54,7 +64,7 @@ fun CreateCategoryCard(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
         modifier = modifier
-            .padding(dimensionResource(R.dimen.padding_medium))
+            .padding(dimensionResource(R.dimen.padding_16dp))
             .fillMaxWidth()
     ) {
         content()

@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.dp
 import es.cursos.android.ejercicios.stocksnma.R
 import es.cursos.android.ejercicios.stocksnma.domain.model.Store
 import es.cursos.android.ejercicios.stocksnma.domain.model.User
-import es.cursos.android.ejercicios.stocksnma.ui.components.CustomBottomAppBar
+import es.cursos.android.ejercicios.stocksnma.ui.components.ButtonsBottomBar
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralTopAppBar
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralHorizontalDivider
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralIconButton
@@ -74,7 +74,7 @@ fun UserCreationScreen(
                 )
             },
             bottomBar = {
-                CustomBottomAppBar(
+                ButtonsBottomBar(
                     enabled = viewModel.userUiState.isEntryValid,
                     onAcceptAction = {
                         viewModel.createUser()

@@ -34,7 +34,7 @@ fun CustomSegmentedButton(
     SingleChoiceSegmentedButtonRow(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(dimensionResource(R.dimen.padding_medium))
+            .padding(dimensionResource(R.dimen.padding_16dp))
             .clip(RoundedCornerShape(50.dp))
             .background(MaterialTheme.colorScheme.secondary)
     ) {

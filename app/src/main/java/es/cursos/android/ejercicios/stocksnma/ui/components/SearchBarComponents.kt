@@ -79,7 +79,7 @@ fun GeneralSearchBar(
         if (active) Modifier.fillMaxSize()
         else Modifier
             .fillMaxWidth()
-            .padding(dimensionResource(R.dimen.padding_medium))
+            .padding(dimensionResource(R.dimen.padding_16dp))
     )
 }
 
@@ -97,7 +97,7 @@ fun CustomSearchBarHistory(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(dimensionResource(R.dimen.padding_medium))
+                    .padding(dimensionResource(R.dimen.padding_16dp))
                     .clickable { onClickSearch(recentSearch) }
             ) {
                 Icon(
@@ -115,7 +115,7 @@ fun CustomSearchBarHistory(
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(dimensionResource(R.dimen.padding_medium))
+                .padding(dimensionResource(R.dimen.padding_16dp))
                 .clickable { onClearHistory() }
         ) {
             Text(text = stringResource(R.string.clean_history))

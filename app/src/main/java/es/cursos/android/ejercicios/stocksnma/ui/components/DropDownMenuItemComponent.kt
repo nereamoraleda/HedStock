@@ -35,6 +35,37 @@ import es.cursos.android.ejercicios.stocksnma.data.local.entity.CategoryEntity
 import es.cursos.android.ejercicios.stocksnma.data.local.entity.SupplierEntity
 import es.cursos.android.ejercicios.stocksnma.utils.items.DropDownMenuItem
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun GeneralExposedDropDownBox(
+    expandedMenu: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    valueSelected: String,
+    label: String,
+    contentDropDownMenu: @Composable () -> Unit
+) {
+    ExposedDropdownMenuBox(
+        expanded = expandedMenu,
+        onExpandedChange = { onExpandedChange(!expandedMenu) }
+    ) {
+        GeneralOutlinedTextField(
+            value = valueSelected,
+            onValueChange = {},
+            label = label,
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedMenu) },
+            readOnly = true,
+            modifier = Modifier.menuAnchor()
+        )
+
+        ExposedDropdownMenu(
+            expanded = expandedMenu,
+            onDismissRequest = { onExpandedChange(false) }
+        ) {
+            contentDropDownMenu()
+        }
+    }
+}
+
 
 @Composable
 fun DobleDropDownMenu(
@@ -69,7 +100,7 @@ fun DobleDropDownMenu(
                                 Text(
                                     text = stringResource(item.title),
                                     style = MaterialTheme.typography.bodyLarge,
-                                    modifier = Modifier.padding(vertical = dimensionResource(R.dimen.padding_small))
+                                    modifier = Modifier.padding(vertical = dimensionResource(R.dimen.padding_8dp))
                                 )
                             },
                             leadingIcon = {
@@ -105,7 +136,7 @@ fun DobleDropDownMenu(
                                 Text(
                                     text = stringResource(item.title),
                                     style = MaterialTheme.typography.bodyLarge,
-                                    modifier = Modifier.padding(vertical = dimensionResource(R.dimen.padding_small))
+                                    modifier = Modifier.padding(vertical = dimensionResource(R.dimen.padding_8dp))
                                 )
                             },
                             leadingIcon = {
@@ -161,7 +192,7 @@ fun FilterDropDownMenu(
                                 Text(
                                     text = stringResource(item.title),
                                     style = MaterialTheme.typography.bodyLarge,
-                                    modifier = Modifier.padding(vertical = dimensionResource(R.dimen.padding_small))
+                                    modifier = Modifier.padding(vertical = dimensionResource(R.dimen.padding_8dp))
                                 )
                             },
                             leadingIcon = {
@@ -422,5 +453,4 @@ fun colorsDropDownMenu() = OutlinedTextFieldDefaults.colors(
     unfocusedContainerColor = MaterialTheme.colorScheme.background,
     disabledContainerColor = MaterialTheme.colorScheme.background,
     disabledBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-
 )

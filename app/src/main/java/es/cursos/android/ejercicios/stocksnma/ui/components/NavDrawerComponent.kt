@@ -48,7 +48,7 @@ fun AppNavigationDrawer(
         HeaderNavDrawer(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(dimensionResource(R.dimen.padding_medium))
+                .padding(dimensionResource(R.dimen.padding_16dp))
         )
 
         GeneralHorizontalDivider()
@@ -101,8 +101,8 @@ fun BodyNavDrawer(
         modifier = Modifier
             .fillMaxHeight()
             .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = dimensionResource(R.dimen.padding_small))
-            .padding(vertical = dimensionResource(R.dimen.padding_medium))
+            .padding(horizontal = dimensionResource(R.dimen.padding_8dp))
+            .padding(vertical = dimensionResource(R.dimen.padding_16dp))
             .verticalScroll(rememberScrollState())
     ) {
         items.forEach { item ->
