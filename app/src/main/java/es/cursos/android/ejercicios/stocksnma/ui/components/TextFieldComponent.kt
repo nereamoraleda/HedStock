@@ -11,7 +11,6 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,7 +26,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import es.cursos.android.ejercicios.stocksnma.R
-import es.cursos.android.ejercicios.stocksnma.ui.screen.user.supportingErrorText
 import es.cursos.android.ejercicios.stocksnma.utils.getCurrencySymbol
 
 @Composable
@@ -272,6 +270,12 @@ fun ShowMessageErrorText(message: String? = null, isEditing: Boolean = true, mod
             modifier = modifier
         )
     }
+}
+
+@Composable
+fun supportingErrorText(vararg errors: String?): (@Composable (() -> Unit))? {
+    val error = errors.firstOrNull { it != null }
+    return error?.let { { Text(text = it) } }
 }
 
 

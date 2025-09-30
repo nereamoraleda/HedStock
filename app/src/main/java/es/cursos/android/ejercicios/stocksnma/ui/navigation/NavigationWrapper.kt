@@ -161,7 +161,7 @@ fun NavigationWrapper() {
         composable<UserCreation> {
             UserCreationScreen(
                 viewModel = userCreationViewModel,
-                navigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 

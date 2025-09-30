@@ -1,9 +1,5 @@
 package es.cursos.android.ejercicios.stocksnma.ui.screen.user
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,14 +7,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ElevatedButton
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
@@ -37,8 +27,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -60,6 +48,7 @@ import es.cursos.android.ejercicios.stocksnma.ui.components.LoadingContent
 import es.cursos.android.ejercicios.stocksnma.ui.components.NavigateBackButton
 import es.cursos.android.ejercicios.stocksnma.ui.components.NotFoundContent
 import es.cursos.android.ejercicios.stocksnma.ui.components.VerticalScrollableColumn
+import es.cursos.android.ejercicios.stocksnma.ui.components.supportingErrorText
 import es.cursos.android.ejercicios.stocksnma.ui.state.DetailsUiState
 import es.cursos.android.ejercicios.stocksnma.utils.enums.UserRoles.Companion.getRoles
 import es.cursos.android.ejercicios.stocksnma.utils.UserValidationState
@@ -182,15 +171,15 @@ fun UserDetailsScreen(
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .padding(innerPadding)
                 .fillMaxSize()
+                .padding(innerPadding)
         ) {
             when (state) {
                 is DetailsUiState.Loading -> { LoadingContent() }
                 is DetailsUiState.NotFound -> { NotFoundContent(stringResource(R.string.user_not_found)) }
                 is DetailsUiState.Error -> { ErrorContent(stringResource(R.string.message_error, (state as DetailsUiState.Error).messageError)) }
                 is DetailsUiState.Success -> {
-                    UserDetailsBody(
+                    UserDetailsBodyScreen(
                         user = user,
                         onFieldChange = viewModel::updateUserEditable,
                         validationState = validationState,
@@ -220,7 +209,7 @@ fun UserDetailsScreen(
 
 
 @Composable
-fun UserDetailsBody(
+fun UserDetailsBodyScreen(
     user: User,
     onFieldChange: (String, Any) -> Unit,
     validationState: UserValidationState,
@@ -233,7 +222,7 @@ fun UserDetailsBody(
     VerticalScrollableColumn {
         GeneralCard {
             // Cabecera de la tarjeta de detalles de usuario
-            HeaderUserDetailsCard()
+            UserFormHeader()
 
             // Cuerpo de la tarjeta de detalles de usuario
             Column(
@@ -282,7 +271,9 @@ fun UserDetailsBody(
                     expandedMenu = expandedRoleMenu,
                     onExpandedChange = { expandedRoleMenu = it },
                     valueSelected = user.role,
-                    label = stringResource(id = R.string.user_role)
+                    label = stringResource(id = R.string.user_role),
+                    supportingText = supportingErrorText(validationState.roleError),
+                    isError = validationState.roleError != null
                 ) {
                     getRoles().forEachIndexed { index, roleName ->
                         DropdownMenuItem(
@@ -351,38 +342,6 @@ fun UserDetailsBody(
                     )
                 }
             }
-        }
-    }
-}
-
-
-@Composable
-fun HeaderUserDetailsCard() {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_12dp)),
-        modifier = Modifier
-            .background(MaterialTheme.colorScheme.secondary)
-            .fillMaxWidth()
-            .padding(dimensionResource(id = R.dimen.padding_16dp))
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.img_user_no_photo),
-            contentDescription = stringResource(id = R.string.profile_image_description),
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .size(150.dp)
-                .border(4.dp, MaterialTheme.colorScheme.primary, CircleShape)
-                .padding(dimensionResource(id = R.dimen.padding_4dp))
-                .clip(CircleShape)
-                .clickable { /*TODO*/ }
-        )
-
-        ElevatedButton(
-            onClick = { /*TODO*/ },
-            enabled = false
-        ) {
-            Text(text = stringResource(id = R.string.user_add_photo))
         }
     }
 }

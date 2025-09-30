@@ -42,6 +42,8 @@ fun GeneralExposedDropDownBox(
     onExpandedChange: (Boolean) -> Unit,
     valueSelected: String,
     label: String,
+    supportingText: (@Composable (() -> Unit))? = null,
+    isError: Boolean = false,
     contentDropDownMenu: @Composable () -> Unit
 ) {
     ExposedDropdownMenuBox(
@@ -54,6 +56,8 @@ fun GeneralExposedDropDownBox(
             label = label,
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedMenu) },
             readOnly = true,
+            supportingText = supportingText,
+            isError = isError,
             modifier = Modifier.menuAnchor()
         )
 

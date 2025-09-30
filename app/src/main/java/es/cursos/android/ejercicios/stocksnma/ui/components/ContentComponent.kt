@@ -23,10 +23,10 @@ fun CenteredContent(content: @Composable () -> Unit) {
 }
 
 @Composable
-fun VerticalScrollableColumn(content: @Composable () -> Unit) {
+fun VerticalScrollableColumn(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     Column(
         content = { content() },
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
     )
@@ -34,21 +34,21 @@ fun VerticalScrollableColumn(content: @Composable () -> Unit) {
 
 @Composable
 fun LoadingContent() {
-    CenteredContent {
+    //CenteredContent {
         CircularProgressIndicator(modifier = Modifier.size(50.dp))
-    }
+    //}
 }
 
 @Composable
 fun NotFoundContent(itemNotFound: String) {
-    CenteredContent {
+    //CenteredContent {
         Text(text = itemNotFound)
-    }
+    //}
 }
 
 @Composable
 fun ErrorContent(message: String) {
-    CenteredContent {
+    //CenteredContent {
         Text(text = message)
-    }
+    //}
 }

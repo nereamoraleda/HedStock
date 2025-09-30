@@ -10,7 +10,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import es.cursos.android.ejercicios.stocksnma.data.mapper.toUserDto
-import es.cursos.android.ejercicios.stocksnma.data.remote.api.HedstockApiService
 import es.cursos.android.ejercicios.stocksnma.data.remote.api.UserApi
 import es.cursos.android.ejercicios.stocksnma.domain.model.Store
 import es.cursos.android.ejercicios.stocksnma.domain.model.User
@@ -41,7 +40,7 @@ class UserCreationViewModel @Inject constructor(
         loadStoresList()
     }
 
-    fun createUser() {
+    fun saveNewUser() {
         val user = userUiState.item
 
         if ( !validateInput() ) return
@@ -72,7 +71,7 @@ class UserCreationViewModel @Inject constructor(
                     val response = api.createUser(user.toUserDto())
                     if (response.isSuccessful) {
                         Log.d("USER-CREATION", "Usuario creado: ${response.body()}")
-                        cleanUserUiState()
+                        resetUiState()
 
                     } else {
                         Log.e("USER-CREATION", "Respuesta API no exitosa: ${response.code()}")
@@ -93,7 +92,7 @@ class UserCreationViewModel @Inject constructor(
         userUiState = userUiState.copy(isEntryValid = isValid)
     }
 
-    fun cleanUserUiState() {
+    fun resetUiState() {
         userUiState = CreationUiState(User())
         _validationState.value = UserValidationState()
     }
@@ -119,7 +118,6 @@ class UserCreationViewModel @Inject constructor(
         _validationState.value = UserValidationState(
             nameError = validateName(user.name),
             usernameError = validateUsername(user.username),
-            passwordError = validatePassword(user.password),
             emailError = validateEmail(user.email),
             phoneError = validatePhone(user.phone),
             emailOrPhoneError = validateEmailOrPhone(user.email, user.phone),
@@ -129,7 +127,6 @@ class UserCreationViewModel @Inject constructor(
         return listOf(
             validateName(user.name),
             validateUsername(user.username),
-            validatePassword(user.password),
             validateEmail(user.email),
             validatePhone(user.phone),
             validateEmailOrPhone(user.email, user.phone),
@@ -147,10 +144,10 @@ class UserCreationViewModel @Inject constructor(
         return null
     }
 
-    private fun validatePassword(passwordText: String): String? {
-        if (passwordText.isBlank()) return "El empleado debe tener una contraseña"
-        return null
-    }
+//    private fun validatePassword(passwordText: String): String? {
+//        if (passwordText.isBlank()) return "El empleado debe tener una contraseña"
+//        return null
+//    }
 
     private fun validateEmail(emailText: String): String? {
         //val emailRegex = Regex("^\\S+@\\S+\\.\\S+\$")
