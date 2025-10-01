@@ -34,21 +34,21 @@ fun VerticalScrollableColumn(modifier: Modifier = Modifier, content: @Composable
 
 @Composable
 fun LoadingContent() {
-    //CenteredContent {
+    CenteredContent {
         CircularProgressIndicator(modifier = Modifier.size(50.dp))
-    //}
+    }
 }
 
 @Composable
 fun NotFoundContent(itemNotFound: String) {
-    //CenteredContent {
+    CenteredContent {
         Text(text = itemNotFound)
-    //}
+    }
 }
 
 @Composable
-fun ErrorContent(message: String) {
-    //CenteredContent {
-        Text(text = message)
-    //}
+fun ErrorContent(messageError: String) {
+    CenteredContent {
+        Text(text = messageError)
+    }
 }

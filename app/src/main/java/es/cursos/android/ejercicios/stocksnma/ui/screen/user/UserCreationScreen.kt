@@ -69,7 +69,6 @@ fun UserCreationScreen(
         }
     ) { innerPadding ->
         Box(
-            contentAlignment = Alignment.Center,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
