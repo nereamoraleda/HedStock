@@ -10,6 +10,8 @@ import es.cursos.android.ejercicios.stocksnma.R
 
 // Set of Material typography styles to start with
 val Typography = Typography(
+
+
     bodyLarge = TextStyle(
         fontFamily = FontFamily(Font(R.font.ci_gamedev)),
         fontWeight = FontWeight.Normal,
@@ -45,8 +47,9 @@ val Typography = Typography(
     // Subtítulos o encabezados dentro de cards o listas
     titleMedium = TextStyle(
         fontFamily = FontFamily(Font(R.font.ci_gamedev)),
-        fontSize = 16.sp,
-        fontWeight = FontWeight.Medium
+        fontWeight = FontWeight.Normal,
+        fontSize = 24.sp,
+        lineHeight = 32.sp,
     ),
 
 
