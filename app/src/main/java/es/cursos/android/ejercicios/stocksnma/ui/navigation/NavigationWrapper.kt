@@ -17,6 +17,8 @@ import es.cursos.android.ejercicios.stocksnma.ui.screen.login.LoginViewModel
 import es.cursos.android.ejercicios.stocksnma.ui.screen.product.ProductCreationViewModel
 import es.cursos.android.ejercicios.stocksnma.ui.screen.product.ProductDetailsViewModel
 import es.cursos.android.ejercicios.stocksnma.ui.screen.settings.SettingsScreen
+import es.cursos.android.ejercicios.stocksnma.ui.screen.store.StoreCreationScreen
+import es.cursos.android.ejercicios.stocksnma.ui.screen.store.StoreDetailsScreen
 import es.cursos.android.ejercicios.stocksnma.ui.screen.supplier.SupplierDetailsViewModel
 import es.cursos.android.ejercicios.stocksnma.ui.screen.supplier.SupplierCreationViewModel
 import es.cursos.android.ejercicios.stocksnma.ui.screen.user.UserCreationScreen
@@ -76,7 +78,7 @@ fun NavigationWrapper() {
         composable<Login> {
             LoginScreen(
                 viewModel = loginViewModel,
-                onLoginSuccess = { navController.navigate(Home) { popUpTo(Login) { inclusive = true } } }
+                navigateToHome = { navController.navigate(Home) { popUpTo(Login) { inclusive = true } } }
             )
         }
 
@@ -90,12 +92,18 @@ fun NavigationWrapper() {
             HomeScreen(
                 viewModel = homeViewModel,
                 navigateToSettings = { navController.navigate(Settings) },
+
                 navigateToProductCreation = { navController.navigate(ProductCreation(barcodeScanner = it)) },
-                navigateToSupplierCreation = { navController.navigate(SupplierCreation) },
                 navigateToProductDetails = { navController.navigate(ProductDetails(idProduct = it)) },
+
+                navigateToSupplierCreation = { navController.navigate(SupplierCreation) },
                 navigateToSupplierDetails = { navController.navigate(SupplierDetails(idSupplier = it)) },
+
                 navigateToUserCreation = { navController.navigate(UserCreation) },
-                navigateToUserDetails = { navController.navigate(UserDetails(idUser = it)) }
+                navigateToUserDetails = { navController.navigate(UserDetails(idUser = it)) },
+
+                navigateToStoreCreation = { navController.navigate(StoreCreation) },
+                navigateToStoreDetails = { navController.navigate(StoreDetails(idStore = it)) }
             )
         }
 
@@ -117,19 +125,6 @@ fun NavigationWrapper() {
 
 
         /**
-         * Pantalla Creación Proveedor
-         * Muestra un formulario para crear un nuevo proveedor
-         */
-        composable<SupplierCreation> {
-            SupplierCreationScreen(
-                viewModel = supplierCreationViewModel,
-                onSupplierCreated = { navController.navigate(Home) { popUpTo(Home) { inclusive = true } } },
-                navigateBack = { navController.popBackStack() }
-            )
-        }
-
-
-        /**
          * Pantalla Detalles Productos - Obtiene el id pasado del producto seleccionado
          * Muestra toda la información del producto seleccionado
          */
@@ -139,6 +134,19 @@ fun NavigationWrapper() {
             ProductoDetailsScreen(
                 viewModel = productDetailsViewModel,
                 idProduct = idProduct.idProduct,
+                navigateBack = { navController.popBackStack() }
+            )
+        }
+
+
+        /**
+         * Pantalla Creación Proveedor
+         * Muestra un formulario para crear un nuevo proveedor
+         */
+        composable<SupplierCreation> {
+            SupplierCreationScreen(
+                viewModel = supplierCreationViewModel,
+                onSupplierCreated = { navController.navigate(Home) { popUpTo(Home) { inclusive = true } } },
                 navigateBack = { navController.popBackStack() }
             )
         }
@@ -161,7 +169,7 @@ fun NavigationWrapper() {
         composable<UserCreation> {
             UserCreationScreen(
                 viewModel = userCreationViewModel,
-                onNavigateBack = { navController.popBackStack() }
+                navigateBack = { navController.popBackStack() }
             )
         }
 
@@ -171,7 +179,24 @@ fun NavigationWrapper() {
             UserDetailsScreen(
                 viewModel = userDetailsViewModel,
                 userId = idUser.idUser,
-                onNavigateBack = { navController.popBackStack() }
+                navigateBack = { navController.popBackStack() }
+            )
+        }
+
+
+        composable<StoreCreation> {
+            StoreCreationScreen(
+                navigateBack = { navController.popBackStack() }
+            )
+        }
+
+
+        composable<StoreDetails> { backStackEntry ->
+            val store: StoreDetails = backStackEntry.toRoute()
+
+            StoreDetailsScreen(
+                storeId = store.idStore,
+                navigateBack = { navController.popBackStack() }
             )
         }
 
