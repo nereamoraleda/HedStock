@@ -6,6 +6,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import es.cursos.android.ejercicios.stocksnma.data.remote.api.AuthApi
 import es.cursos.android.ejercicios.stocksnma.data.remote.api.HedstockApiService
+import es.cursos.android.ejercicios.stocksnma.data.remote.api.StoreApi
 import es.cursos.android.ejercicios.stocksnma.data.remote.api.UserApi
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -39,6 +40,12 @@ object NetworkModule {
     @Singleton
     fun provideUserApi(retrofit: Retrofit): UserApi {
         return retrofit.create(UserApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideStoreApi(retrofit: Retrofit): StoreApi {
+        return retrofit.create(StoreApi::class.java)
     }
 
     @Provides
