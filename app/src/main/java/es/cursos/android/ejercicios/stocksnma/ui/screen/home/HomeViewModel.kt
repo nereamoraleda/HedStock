@@ -6,7 +6,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import es.cursos.android.ejercicios.stocksnma.R
 import es.cursos.android.ejercicios.stocksnma.data.local.AppDataStore
 import es.cursos.android.ejercicios.stocksnma.data.local.entity.relations.ProductWithSupplierAndCategory
-import es.cursos.android.ejercicios.stocksnma.data.remote.api.HedstockApiService
 import es.cursos.android.ejercicios.stocksnma.data.repository.product.ProductRepository
 import es.cursos.android.ejercicios.stocksnma.data.repository.supplier.SupplierRepository
 import es.cursos.android.ejercicios.stocksnma.utils.enums.ActiveFilters
@@ -336,6 +335,12 @@ class HomeViewModel @Inject constructor(
                         iconSelected = R.drawable.ic_user_filled,
                         iconUnselected = R.drawable.ic_user,
                         action = { setSelectedItem(HomeSections.USERS) }
+                    ),
+                    NavDrawerItem.Item(
+                        title = R.string.store_title,
+                        iconSelected = R.drawable.ic_store_filled,
+                        iconUnselected = R.drawable.ic_store,
+                        action = { setSelectedItem(HomeSections.STORES) }
                     ),
 
                     NavDrawerItem.Divider,
