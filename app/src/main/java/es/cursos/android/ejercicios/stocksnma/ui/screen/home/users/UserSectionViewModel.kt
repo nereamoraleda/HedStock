@@ -4,9 +4,8 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import es.cursos.android.ejercicios.stocksnma.data.local.AppDataStore
+import es.cursos.android.ejercicios.stocksnma.data.local.datastore.AppDataStore
 import es.cursos.android.ejercicios.stocksnma.data.mapper.toUser
-import es.cursos.android.ejercicios.stocksnma.data.remote.api.HedstockApiService
 import es.cursos.android.ejercicios.stocksnma.data.remote.api.UserApi
 import es.cursos.android.ejercicios.stocksnma.domain.model.User
 import es.cursos.android.ejercicios.stocksnma.ui.screen.home.UserHomeUiState
@@ -37,7 +36,7 @@ class UserSectionViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            dataStoreManager.userSearchHistory.collect {
+            dataStoreManager.search.userSearchHistory.collect {
                 _userSearchHistory.value = it
             }
         }
@@ -152,13 +151,13 @@ class UserSectionViewModel @Inject constructor(
 
     fun addSearchHistory(query: String) {
         viewModelScope.launch {
-            dataStoreManager.addUserSearchHistory(query)
+            dataStoreManager.search.addUserSearchHistory(query)
         }
     }
 
     fun resetSearchHistory() {
         viewModelScope.launch {
-            dataStoreManager.resetUserSearchHistory()
+            dataStoreManager.search.clearUserHistory()
         }
     }
 

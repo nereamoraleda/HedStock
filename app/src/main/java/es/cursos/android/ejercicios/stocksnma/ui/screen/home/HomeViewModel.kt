@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import es.cursos.android.ejercicios.stocksnma.R
-import es.cursos.android.ejercicios.stocksnma.data.local.AppDataStore
+import es.cursos.android.ejercicios.stocksnma.data.local.datastore.AppDataStore
 import es.cursos.android.ejercicios.stocksnma.data.local.entity.relations.ProductWithSupplierAndCategory
 import es.cursos.android.ejercicios.stocksnma.data.repository.product.ProductRepository
 import es.cursos.android.ejercicios.stocksnma.data.repository.supplier.SupplierRepository
@@ -38,6 +38,8 @@ class HomeViewModel @Inject constructor(
     private val dataStoreManager: AppDataStore,
 ) : ViewModel() {
 
+    private val sortProduct = dataStoreManager.sort.productSortBy
+
     init {
         viewModelScope.launch {
             dataStoreManager.userRole.collect {
@@ -46,17 +48,17 @@ class HomeViewModel @Inject constructor(
             }
         }
 
-        viewModelScope.launch {
-            dataStoreManager.productOrderBy.collect {
-                _productOrderType.value = it
-            }
-        }
+//        viewModelScope.launch {
+//            dataStoreManager.productOrderBy.collect {
+//                _productOrderType.value = it
+//            }
+//        }
 
-        viewModelScope.launch {
-            dataStoreManager.supplierOrderBy.collect {
-                _supplierOrderType.value = it
-            }
-        }
+//        viewModelScope.launch {
+//            dataStoreManager.supplierOrderBy.collect {
+//                _supplierOrderType.value = it
+//            }
+//        }
     }
 
     private val _userRole = MutableStateFlow(UserRoles.DESCONOCIDO)
@@ -67,8 +69,13 @@ class HomeViewModel @Inject constructor(
     // -------------------- VARIABLES - OBTENCIÓN DE PRODUCTOS --------------------
 
     // Variables - Tipos de orden de la tabla Products
-    private val _productOrderType = MutableStateFlow(ProductSortOptions.NAME_ASC)
-    val productOrderTypeProducts: StateFlow<ProductSortOptions> = _productOrderType.asStateFlow()
+    private val _productOrderType = sortProduct.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = ProductSortOptions.NAME_ASC
+    )
+    //private val _productOrderType = MutableStateFlow(ProductSortOptions.NAME_ASC)
+    //val productOrderTypeProducts: StateFlow<ProductSortOptions> = _productOrderType.asStateFlow()
 
     private val _supplierOrderType = MutableStateFlow(SupplierSortOptions.NAME_ASC)
     val supplierOrderTypeSuppliers: StateFlow<SupplierSortOptions> = _supplierOrderType.asStateFlow()
@@ -172,13 +179,13 @@ class HomeViewModel @Inject constructor(
     // -------------------- VARIABLES - SEARCH BAR --------------------
 
     // Variables - Está buscando (Boolean)
-    private val _isSearching = MutableStateFlow(false)
-    val isSearching = _isSearching.asStateFlow()
+    //private val _isSearching = MutableStateFlow(false)
+    //val isSearching = _isSearching.asStateFlow()
 
 
     // Variables - Texto escrito en el Search Bar (String)
     private val _searchQuery = MutableStateFlow("")
-    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+    //val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
     // Variables - Resultados de búsqueda de productos
     //private val _productSearchResults = MutableStateFlow<List<ProductWithSupplierAndCategory>>(emptyList())

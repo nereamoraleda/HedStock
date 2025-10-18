@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import es.cursos.android.ejercicios.stocksnma.data.local.AppDataStore
+import es.cursos.android.ejercicios.stocksnma.data.local.datastore.AppDataStore
 import es.cursos.android.ejercicios.stocksnma.data.local.entity.relations.ProductWithSupplierAndCategory
 import es.cursos.android.ejercicios.stocksnma.data.repository.product.ProductRepository
 import es.cursos.android.ejercicios.stocksnma.ui.screen.home.ProductHomeUiState
@@ -27,36 +27,11 @@ class ProductSectionViewModel @Inject constructor(
     private val productRepository: ProductRepository,
     private val dataStoreManager: AppDataStore
 ): ViewModel() {
-
-    private val _productSortOption = MutableStateFlow(ProductSortOptions.NAME_ASC)
-    val productSortOption: StateFlow<ProductSortOptions> = _productSortOption.asStateFlow()
-
-    fun setProductSortOption(orderBy: ProductSortOptions) {
-        viewModelScope.launch {
-            dataStoreManager.setProductOrderBy(orderBy)
-        }
-    }
-
-    private val _productSearchHistory = MutableStateFlow<List<String>>(emptyList())
-    val productSearchHistory: StateFlow<List<String>> = _productSearchHistory.asStateFlow()
-
-
-    init {
-        viewModelScope.launch {
-            dataStoreManager.productOrderBy.collect {
-                _productSortOption.value = it
-            }
-        }
-
-        viewModelScope.launch {
-            dataStoreManager.productSearchHistory.collect {
-                _productSearchHistory.value = it
-            }
-        }
-    }
+    private val sort = dataStoreManager.sort
+    private val search = dataStoreManager.search
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val uiState: StateFlow<ProductHomeUiState> = _productSortOption
+    val uiState: StateFlow<ProductHomeUiState> = sort.productSortBy
         .flatMapLatest { sortOption ->
             productRepository.getAllProducts(sortOption)
                 .map<List<ProductWithSupplierAndCategory>, ProductHomeUiState> { products ->
@@ -72,7 +47,23 @@ class ProductSectionViewModel @Inject constructor(
         )
 
 
-    // -------------------- SEARCH BAR --------------------
+    val productSortOption: StateFlow<ProductSortOptions> =
+        sort.productSortBy.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = ProductSortOptions.NAME_ASC
+        )
+
+
+    fun setProductSortOption(orderBy: ProductSortOptions) {
+        viewModelScope.launch {
+            sort.setProductSortOption(orderBy)
+        }
+    }
+
+
+
+    // -------------------- SEARCH BAR -------------------- //
     private val _isSearching = MutableStateFlow(false)
     val isSearching = _isSearching.asStateFlow()
 
@@ -82,8 +73,12 @@ class ProductSectionViewModel @Inject constructor(
     private val _productSearchResults = MutableStateFlow<List<ProductWithSupplierAndCategory>>(emptyList())
     val productSearchResults: StateFlow<List<ProductWithSupplierAndCategory>> = _productSearchResults.asStateFlow()
 
-    //private val _productSearchHistory = MutableStateFlow<List<String>>(emptyList())
-    //val productSearchHistory: StateFlow<List<String>> = _productSearchHistory.asStateFlow()
+    val productSearchHistory: StateFlow<List<String>> =
+        dataStoreManager.search.productSearchHistory.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
 
     fun searchProductByName(nameQuery: String) {
@@ -109,13 +104,13 @@ class ProductSectionViewModel @Inject constructor(
 
     fun addProductSearchHistory(query: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            dataStoreManager.addProductSearchHistory(query)
+            search.addProductSearchHistory(query)
         }
     }
 
     fun resetProductSearchHistory() {
         viewModelScope.launch(Dispatchers.IO) {
-            dataStoreManager.resetProductSearchHistory()
+            search.clearProductHistory()
         }
     }
 
@@ -131,7 +126,7 @@ class ProductSectionViewModel @Inject constructor(
     }
 
 
-    // -------------------- CHECK BOX --------------------
+    // -------------------- CHECK BOX -------------------- //
     private val _selectedProducts = MutableStateFlow<Set<String>>(emptySet())
     val selectedProducts: StateFlow<Set<String>> = _selectedProducts.asStateFlow()  // Habrá que modificar a Long más adelante
 

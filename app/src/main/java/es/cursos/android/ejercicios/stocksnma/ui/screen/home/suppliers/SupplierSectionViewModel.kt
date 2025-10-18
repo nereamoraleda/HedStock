@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import es.cursos.android.ejercicios.stocksnma.data.local.AppDataStore
+import es.cursos.android.ejercicios.stocksnma.data.local.datastore.AppDataStore
 import es.cursos.android.ejercicios.stocksnma.data.local.entity.SupplierEntity
 import es.cursos.android.ejercicios.stocksnma.data.repository.supplier.SupplierRepository
 import es.cursos.android.ejercicios.stocksnma.domain.model.Supplier
@@ -30,34 +30,46 @@ class SupplierSectionViewModel @Inject constructor(
     private val dataStoreManager: AppDataStore
 ): ViewModel() {
 
-    private val _supplierSearchHistory = MutableStateFlow<List<String>>(emptyList())
-    val supplierSearchHistory: StateFlow<List<String>> = _supplierSearchHistory.asStateFlow()
+//    private val _supplierSearchHistory = MutableStateFlow<List<String>>(emptyList())
+//    val supplierSearchHistory: StateFlow<List<String>> = _supplierSearchHistory.asStateFlow()
+    val supplierSearchHistory: StateFlow<List<String>> =
+        dataStoreManager.search.supplierSearchHistory.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
-    private val _supplierSortOption = MutableStateFlow(SupplierSortOptions.NAME_ASC)
-    val supplierSortOption: StateFlow<SupplierSortOptions> = _supplierSortOption.asStateFlow()
+//    private val _supplierSortOption = MutableStateFlow(SupplierSortOptions.NAME_ASC)
+//    val supplierSortOption: StateFlow<SupplierSortOptions> = _supplierSortOption.asStateFlow()
+    val supplierSortOption: StateFlow<SupplierSortOptions> =
+        dataStoreManager.sort.supplierSortBy.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = SupplierSortOptions.NAME_ASC
+        )
 
     fun setSupplierSortOption(orderBy: SupplierSortOptions) {
         viewModelScope.launch {
-            dataStoreManager.setSupplierOrderBy(orderBy)
+            dataStoreManager.sort.setSupplierSortOption(orderBy)
         }
     }
 
-    init {
-        viewModelScope.launch {
-            dataStoreManager.supplierOrderBy.collect {
-                _supplierSortOption.value = it
-            }
-        }
-
-        viewModelScope.launch {
-            dataStoreManager.supplierSearchHistory.collect {
-                _supplierSearchHistory.value = it
-            }
-        }
-    }
+//    init {
+//        viewModelScope.launch {
+//            dataStoreManager.supplierOrderBy.collect {
+//                _supplierSortOption.value = it
+//            }
+//        }
+//
+//        viewModelScope.launch {
+//            dataStoreManager.supplierSearchHistory.collect {
+//                _supplierSearchHistory.value = it
+//            }
+//        }
+//    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val uiState: StateFlow<SupplierHomeUiState> = _supplierSortOption
+    val uiState: StateFlow<SupplierHomeUiState> = dataStoreManager.sort.supplierSortBy //_supplierSortOption
         .flatMapLatest { sortOption ->
             supplierRepository.getAllSuppliers(sortOption)
                 .map<List<SupplierEntity>, SupplierHomeUiState> { suppliers ->
@@ -106,13 +118,13 @@ class SupplierSectionViewModel @Inject constructor(
 
     fun addSupplierSearchHistory(query: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            dataStoreManager.addSupplierSearchHistory(query)
+            dataStoreManager.search.addSupplierSearchHistory(query)
         }
     }
 
     fun resetSupplierSearchHistory() {
         viewModelScope.launch(Dispatchers.IO) {
-            dataStoreManager.resetSupplierSearchHistory()
+            dataStoreManager.search.clearSupplierHistory()
         }
     }
 
