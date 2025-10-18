@@ -13,13 +13,19 @@ enum class SupplierSortOptions {
 }
 
 
+enum class StoreSortOptions(val sortBy: String?, val direction: String?) {
+    NAME_ASC("name", "asc"),
+    NAME_DESC("name", "desc"),
+    DATE_OLDEST("createdAt", "asc"),
+    DATE_NEWEST("createdAt", "desc")
+}
+
+
 enum class UserSortOptions(val sortBy: String?, val direction: String?) {
     NAME_ASC("name", "asc"),
     NAME_DESC("name", "desc"),
     DATE_OLDEST("createdAt", "asc"),
-    DATE_NEWEST("createdAt", "desc"),
-    ROLE("role", null),
-    STORE("store", null)
+    DATE_NEWEST("createdAt", "desc")
 }
 
 
