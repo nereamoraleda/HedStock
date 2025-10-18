@@ -8,12 +8,11 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import es.cursos.android.ejercicios.stocksnma.data.mapper.toUser
 import es.cursos.android.ejercicios.stocksnma.data.mapper.toUserDto
-import es.cursos.android.ejercicios.stocksnma.data.remote.api.HedstockApiService
 import es.cursos.android.ejercicios.stocksnma.data.remote.api.UserApi
-import es.cursos.android.ejercicios.stocksnma.domain.model.Store
+import es.cursos.android.ejercicios.stocksnma.domain.model.StoreSelection
 import es.cursos.android.ejercicios.stocksnma.domain.model.User
 import es.cursos.android.ejercicios.stocksnma.ui.state.DetailsUiState
-import es.cursos.android.ejercicios.stocksnma.utils.UserValidationState
+import es.cursos.android.ejercicios.stocksnma.utils.validations.UserValidationState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -44,8 +43,8 @@ class UserDetailsViewModel @Inject constructor(
     private val emailNotChanged = MutableStateFlow("")
     private val phoneNotChanged = MutableStateFlow("")
 
-    private val _storeOptions = MutableStateFlow<List<Store>>(emptyList())
-    val storeOptions: StateFlow<List<Store>> = _storeOptions.asStateFlow()
+    private val _storeOptions = MutableStateFlow<List<StoreSelection>>(emptyList())
+    val storeOptions: StateFlow<List<StoreSelection>> = _storeOptions.asStateFlow()
 
     private val _validationState = MutableStateFlow(UserValidationState())
     val validationState: StateFlow<UserValidationState> = _validationState
@@ -100,14 +99,14 @@ class UserDetailsViewModel @Inject constructor(
                 // Comprobación de duplicados
                 if (emailNotChanged.value != newEmail) {
                     if (api.checkEmail(newEmail).body() == true) {
-                        _validationState.value = _validationState.value.copy(emailError = "El email ya existe")
+                        _validationState.value = _validationState.value.copy(emailErrorMessage = "El email ya existe")
                         return@launch
                     }
                 }
 
                 if (phoneNotChanged.value != newPhone) {
                     if (api.checkPhone(newPhone).body() == true) {
-                        _validationState.value = _validationState.value.copy(phoneError = "El teléfono ya existe")
+                        _validationState.value = _validationState.value.copy(phoneErrorMessage = "El teléfono ya existe")
                         return@launch
                     }
                 }
@@ -173,11 +172,11 @@ class UserDetailsViewModel @Inject constructor(
 
     private fun validateInput(user: User = _userEditable.value): Boolean {
         _validationState.value = UserValidationState(
-            nameError = validateName(user.name),
-            emailError = validateEmail(user.email),
-            phoneError = validatePhone(user.phone),
-            emailOrPhoneError = validateEmailOrPhone(user.email, user.phone),
-            roleError = validateRole(user.role)
+            nameErrorMessage = validateName(user.name),
+            emailErrorMessage = validateEmail(user.email),
+            phoneErrorMessage = validatePhone(user.phone),
+            contactInformationErrorMessage = validateEmailOrPhone(user.email, user.phone),
+            roleErrorMessage = validateRole(user.role)
         )
 
         return listOf(
@@ -254,7 +253,7 @@ class UserDetailsViewModel @Inject constructor(
     private fun loadStoresList() {
         viewModelScope.launch {
             try {
-                val response = api.getStoresSummary()
+                val response = api.getStoresForSelection()
                 if (response.isSuccessful) {
                     val stores = response.body() ?: emptyList()
                     _storeOptions.value = stores

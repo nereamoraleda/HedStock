@@ -12,7 +12,7 @@ import es.cursos.android.ejercicios.stocksnma.domain.model.Product
 import es.cursos.android.ejercicios.stocksnma.data.repository.product.ProductRepository
 import es.cursos.android.ejercicios.stocksnma.data.repository.supplier.SupplierRepository
 import es.cursos.android.ejercicios.stocksnma.ui.state.DetailsUiState
-import es.cursos.android.ejercicios.stocksnma.utils.ProductValidationState
+import es.cursos.android.ejercicios.stocksnma.utils.validations.ProductValidationState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -129,29 +129,29 @@ class ProductDetailsViewModel @Inject constructor(
     private suspend fun validateFields(product: Product = _tempProduct.value): Boolean {
 
         val errors = ProductValidationState(
-            nameError = validateName(product.name, _productName.value),
+            nameErrorMessage = validateName(product.name, _productName.value),
             //supplierError = if (product.supplierId.isBlank()) "Debe seleccionar un proveedor" else null,
             //categoryError = if (product.category.isBlank()) "Debe seleccionar una categoría" else null,
-            barcodeError = if (product.barcode.isNotBlank()) { validateBarcode(product.barcode) } else null,
-            costPriceError = validatePrice(product.costPrice),
-            priceError = validatePrice(product.price),
-            stockError = validateStock(product.stock),
-            minStockError = validateMinStock(product.minStock),
-            maxStockError = if (product.maxStock.isNotBlank()) { validateMaxStock(product.stock, product.minStock, product.maxStock) } else null,
+            barcodeErrorMessage = if (product.barcode.isNotBlank()) { validateBarcode(product.barcode) } else null,
+            costPriceErrorMessage = validatePrice(product.costPrice),
+            sellingPriceErrorMessage = validatePrice(product.price),
+            stockErrorMessage = validateStock(product.stock),
+            minStockErrorMessage = validateMinStock(product.minStock),
+            maxStockErrorMessage = if (product.maxStock.isNotBlank()) { validateMaxStock(product.stock, product.minStock, product.maxStock) } else null,
         )
 
         _validationState.value = errors   // Actualizar el estado de validación
 
         return errors.run {
-            nameError == null &&
+            nameErrorMessage == null &&
                     //supplierError == null &&
                     //categoryError == null &&
-                    barcodeError == null &&
-                    costPriceError == null &&
-                    priceError == null &&
-                    stockError == null &&
-                    minStockError == null &&
-                    maxStockError == null
+                    barcodeErrorMessage == null &&
+                    costPriceErrorMessage == null &&
+                    sellingPriceErrorMessage == null &&
+                    stockErrorMessage == null &&
+                    minStockErrorMessage == null &&
+                    maxStockErrorMessage == null
         }
     }
 

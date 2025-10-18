@@ -16,7 +16,7 @@ import es.cursos.android.ejercicios.stocksnma.data.local.entity.SupplierEntity
 import es.cursos.android.ejercicios.stocksnma.domain.model.Product
 import es.cursos.android.ejercicios.stocksnma.ui.components.*
 import es.cursos.android.ejercicios.stocksnma.utils.enums.ProductSections
-import es.cursos.android.ejercicios.stocksnma.utils.ProductValidationState
+import es.cursos.android.ejercicios.stocksnma.utils.validations.ProductValidationState
 
 
 @Composable
@@ -99,7 +99,7 @@ fun ProductCreationScreen(
         },
         bottomBar = {
             ButtonsBottomBar(
-                enabled = viewModel.productUiState.isEntryValid,
+                acceptButtonEnabled = viewModel.productUiState.isEntryValid,
                 onAcceptAction = {
                     viewModel.saveProduct()
                     onProductCreated()
@@ -198,7 +198,7 @@ fun ProductDetailsCard(
                         TextField(
                             value = product.name,
                             onValueChange = { onProductValueChange(product.copy(name = it)) },
-                            isError = validationState.nameError != null,
+                            isError = validationState.nameErrorMessage != null,
                             placeholder = {
                                 Text(
                                     text = stringResource(R.string.product_form_name),
@@ -209,7 +209,7 @@ fun ProductDetailsCard(
                             colors = colorsSimpleTextField(),
                             modifier = Modifier.fillMaxWidth()
                         )
-                        ShowMessageErrorText(validationState.nameError)
+                        ShowMessageErrorText(validationState.nameErrorMessage)
 
                         TextField(
                             value = product.description,
@@ -264,8 +264,8 @@ fun ProductDetailsCard(
                                 val cleanedBarcode = it.filter { char -> char.isDigit() }
                                 onProductValueChange(product.copy(barcode = cleanedBarcode))
                             },
-                            isError = validationState.barcodeError != null,
-                            messageError = validationState.barcodeError
+                            isError = validationState.barcodeErrorMessage != null,
+                            messageError = validationState.barcodeErrorMessage
                         )
                     }
                 }
@@ -276,9 +276,9 @@ fun ProductDetailsCard(
                             title = R.string.product_cost_price,
                             value = product.costPrice,
                             onValueChange = { newCostPrice -> onProductValueChange(product.copy(costPrice = newCostPrice)) },
-                            isError = validationState.costPriceError != null
+                            isError = validationState.costPriceErrorMessage != null
                         )
-                        ShowMessageErrorText(validationState.costPriceError)
+                        ShowMessageErrorText(validationState.costPriceErrorMessage)
 
 
                         Spacer(modifier = Modifier.width(dimensionResource(R.dimen.padding_16dp)))
@@ -288,9 +288,9 @@ fun ProductDetailsCard(
                             title = R.string.product_sold_price,
                             value = product.price,
                             onValueChange = { newPrice -> onProductValueChange(product.copy(price = newPrice)) },
-                            isError = validationState.priceError != null
+                            isError = validationState.sellingPriceErrorMessage != null
                         )
-                        ShowMessageErrorText(validationState.priceError)
+                        ShowMessageErrorText(validationState.sellingPriceErrorMessage)
                     }
                 }
 
@@ -308,9 +308,9 @@ fun ProductDetailsCard(
                                 val cleanedStock = it.filter { char -> char.isDigit() }
                                 onProductValueChange(product.copy(stock = cleanedStock))
                             },
-                            isError = validationState.stockError != null,
+                            isError = validationState.stockErrorMessage != null,
                         )
-                        ShowMessageErrorText(validationState.stockError)
+                        ShowMessageErrorText(validationState.stockErrorMessage)
 
 
                         CustomRowAndTextFieldStocks(
@@ -320,9 +320,9 @@ fun ProductDetailsCard(
                                 val cleanedStock = it.filter { char -> char.isDigit() }
                                 onProductValueChange(product.copy(minStock = cleanedStock))
                             },
-                            isError = validationState.minStockError != null,
+                            isError = validationState.minStockErrorMessage != null,
                         )
-                        ShowMessageErrorText(validationState.minStockError)
+                        ShowMessageErrorText(validationState.minStockErrorMessage)
 
 
                         CustomRowAndTextFieldStocks(
@@ -332,9 +332,9 @@ fun ProductDetailsCard(
                                 val cleanedStock = it.filter { char -> char.isDigit() }
                                 onProductValueChange(product.copy(maxStock = cleanedStock))
                             },
-                            isError = validationState.maxStockError != null,
+                            isError = validationState.maxStockErrorMessage != null,
                         )
-                        ShowMessageErrorText(validationState.maxStockError)
+                        ShowMessageErrorText(validationState.maxStockErrorMessage)
                     }
                 }
             }

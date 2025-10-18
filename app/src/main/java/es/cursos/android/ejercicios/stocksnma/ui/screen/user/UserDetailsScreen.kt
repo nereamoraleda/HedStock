@@ -34,6 +34,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import es.cursos.android.ejercicios.stocksnma.R
 import es.cursos.android.ejercicios.stocksnma.domain.model.Store
+import es.cursos.android.ejercicios.stocksnma.domain.model.StoreSelection
 import es.cursos.android.ejercicios.stocksnma.domain.model.User
 import es.cursos.android.ejercicios.stocksnma.ui.components.ConfirmationDialog
 import es.cursos.android.ejercicios.stocksnma.ui.components.ButtonsBottomBar
@@ -51,14 +52,14 @@ import es.cursos.android.ejercicios.stocksnma.ui.components.VerticalScrollableCo
 import es.cursos.android.ejercicios.stocksnma.ui.components.supportingErrorText
 import es.cursos.android.ejercicios.stocksnma.ui.state.DetailsUiState
 import es.cursos.android.ejercicios.stocksnma.utils.enums.UserRoles.Companion.getRoles
-import es.cursos.android.ejercicios.stocksnma.utils.UserValidationState
+import es.cursos.android.ejercicios.stocksnma.utils.validations.UserValidationState
 import kotlinx.coroutines.launch
 
 @Composable
 fun UserDetailsScreen(
     viewModel: UserDetailsViewModel,
     userId: Long,
-    onNavigateBack: () -> Unit
+    navigateBack: () -> Unit
 ) {
     // -------------------- VARIABLES -------------------- //
     val state by viewModel.uiState.collectAsState()                    // Estado de la UI (Loading, Success...)
@@ -85,7 +86,7 @@ fun UserDetailsScreen(
         topBar = {
             GeneralTopAppBar(
                 title = stringResource(R.string.user_details_title),
-                navigationButton = { NavigateBackButton(onNavigateBack = onNavigateBack) },
+                navigationButton = { NavigateBackButton(onNavigateBack = navigateBack) },
                 actionButton = {
                     Box(contentAlignment = Alignment.Center) {
 
@@ -158,11 +159,11 @@ fun UserDetailsScreen(
                 ButtonsBottomBar(
                     onAcceptAction = {
                         viewModel.saveUserUpdates { success ->
-                            if (success) onNavigateBack()
+                            if (success) navigateBack()
                         }
                     },
                     onCancelAction = { viewModel.resetUiState() },
-                    enabled = (state as DetailsUiState.Success).isEntryValid,
+                    acceptButtonEnabled = (state as DetailsUiState.Success).isEntryValid,
                 )
             }
         },
@@ -199,7 +200,7 @@ fun UserDetailsScreen(
             onConfirmAction = {
                 viewModel.deleteUser()
                 showConfirmationDialog = false
-                onNavigateBack()
+                navigateBack()
             },
             confirmButtonText = stringResource(id = R.string.button_delete),
         )
@@ -212,7 +213,7 @@ fun UserDetailsBodyScreen(
     user: User,
     onFieldChange: (String, Any) -> Unit,
     validationState: UserValidationState,
-    storeOptions: List<Store>
+    storeOptions: List<StoreSelection>
 ) {
     // -------------------- VARIABLES -------------------- //
     var expandedRoleMenu by remember { mutableStateOf(false) }   // Menu desplegable de roles
@@ -233,8 +234,8 @@ fun UserDetailsBodyScreen(
                     value = user.name,
                     onValueChange = { value -> onFieldChange("name", value) },
                     label = stringResource(id = R.string.user_name),
-                    supportingText = supportingErrorText(validationState.nameError),
-                    isError = validationState.nameError != null,
+                    supportingText = supportingErrorText(validationState.nameErrorMessage),
+                    isError = validationState.nameErrorMessage != null,
                 )
 
                 // Campo de texto para el nombre de usuario (no editable)
@@ -250,8 +251,8 @@ fun UserDetailsBodyScreen(
                     value = user.email,
                     onValueChange = { onFieldChange("email", it) },
                     label = stringResource(id = R.string.user_email),
-                    supportingText = supportingErrorText(validationState.emailOrPhoneError, validationState.emailError),
-                    isError = (validationState.emailOrPhoneError != null) || (validationState.emailError != null),
+                    supportingText = supportingErrorText(validationState.contactInformationErrorMessage, validationState.emailErrorMessage),
+                    isError = (validationState.contactInformationErrorMessage != null) || (validationState.emailErrorMessage != null),
                     keyboardType = KeyboardType.Email
                 )
 
@@ -260,8 +261,8 @@ fun UserDetailsBodyScreen(
                     value = user.phone,
                     onValueChange = { onFieldChange("phone", it) },
                     label = stringResource(id = R.string.user_phone),
-                    supportingText = supportingErrorText(validationState.emailOrPhoneError, validationState.phoneError),
-                    isError = (validationState.emailOrPhoneError != null) || (validationState.phoneError != null),
+                    supportingText = supportingErrorText(validationState.contactInformationErrorMessage, validationState.phoneErrorMessage),
+                    isError = (validationState.contactInformationErrorMessage != null) || (validationState.phoneErrorMessage != null),
                     keyboardType = KeyboardType.Phone
                 )
 
@@ -271,8 +272,8 @@ fun UserDetailsBodyScreen(
                     onExpandedChange = { expandedRoleMenu = it },
                     valueSelected = user.role,
                     label = stringResource(id = R.string.user_role),
-                    supportingText = supportingErrorText(validationState.roleError),
-                    isError = validationState.roleError != null
+                    supportingText = supportingErrorText(validationState.roleErrorMessage),
+                    isError = validationState.roleErrorMessage != null
                 ) {
                     getRoles().forEachIndexed { index, roleName ->
                         DropdownMenuItem(

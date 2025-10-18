@@ -29,13 +29,13 @@ const val SHOW_SINGULAR_STRING = 1
  *
  * @param onAcceptAction - Acción al pulsar el botón Aceptar
  * @param onCancelAction - Acción al pulsar el botón Cancelar
- * @param enabled - Botón Aceptar habilitado o no
+ * @param acceptButtonEnabled - Botón Aceptar habilitado o no
  */
 @Composable
 fun ButtonsBottomBar(
     onAcceptAction: () -> Unit,
     onCancelAction: () -> Unit,
-    enabled: Boolean,
+    acceptButtonEnabled: Boolean,
     modifier: Modifier = Modifier
 ) {
     BottomAppBar(
@@ -56,7 +56,7 @@ fun ButtonsBottomBar(
 
             ButtonAccept(
                 action = { onAcceptAction() },
-                enabled = enabled,
+                enabled = acceptButtonEnabled,
                 modifier = Modifier.weight(1f)
             )
         }

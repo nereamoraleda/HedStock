@@ -49,14 +49,7 @@ fun CustomSegmentedButton(
                     )
                 },
                 icon = {},
-                colors = SegmentedButtonDefaults.colors(
-                    activeContentColor = MaterialTheme.colorScheme.secondary,
-                    activeContainerColor = MaterialTheme.colorScheme.surface,
-                    activeBorderColor = MaterialTheme.colorScheme.primary,
-                    inactiveContentColor = MaterialTheme.colorScheme.surface,
-                    inactiveContainerColor = MaterialTheme.colorScheme.secondary,
-                    inactiveBorderColor = Color.Transparent
-                ),
+                colors = segmentedButtonColors(),
                 modifier = Modifier
                     .padding(horizontal = 4.dp)
                     .weight(1f)
@@ -64,3 +57,15 @@ fun CustomSegmentedButton(
         }
     }
 }
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun segmentedButtonColors() = SegmentedButtonDefaults.colors(
+    activeContentColor = MaterialTheme.colorScheme.secondary,
+    activeContainerColor = MaterialTheme.colorScheme.surface,
+    activeBorderColor = MaterialTheme.colorScheme.primary,
+    inactiveContentColor = MaterialTheme.colorScheme.surface,
+    inactiveContainerColor = MaterialTheme.colorScheme.secondary,
+    inactiveBorderColor = Color.Transparent
+)

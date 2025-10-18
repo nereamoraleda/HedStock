@@ -1,7 +1,9 @@
 package es.cursos.android.ejercicios.stocksnma.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -24,7 +26,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import es.cursos.android.ejercicios.stocksnma.R
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,13 +75,20 @@ fun GeneralSearchBar(
         },
         colors = SearchBarDefaults.colors(dividerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)),
         windowInsets = if (active) WindowInsets.systemBars else WindowInsets(top = 0),
-        content = { content() },
         modifier =
-        if (active) Modifier.fillMaxSize()
+        if (active)  Modifier.fillMaxSize()
         else Modifier
             .fillMaxWidth()
-            .padding(dimensionResource(R.dimen.padding_16dp))
-    )
+            .padding(dimensionResource(R.dimen.padding_16dp)),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+        ) {
+            content()
+        }
+    }
 }
 
 
@@ -129,13 +137,8 @@ fun CustomSearchBarHistory(
 
 
 @Composable
-fun CustomSearchNotFound(notFoundText: Int = R.string.search_no_results) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxSize()
-    ) {
+fun SearchNotFoundContent(notFoundText: Int = R.string.search_no_results) {
+    CenteredContent {
         Text(text = stringResource(notFoundText))
-        //Text(text = "No se ha encontrado ningún producto")
     }
 }

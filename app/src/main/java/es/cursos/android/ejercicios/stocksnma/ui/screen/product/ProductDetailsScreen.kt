@@ -57,7 +57,7 @@ import es.cursos.android.ejercicios.stocksnma.ui.components.ShowMessageErrorText
 import es.cursos.android.ejercicios.stocksnma.ui.components.colorsSimpleTextField
 import es.cursos.android.ejercicios.stocksnma.ui.state.DetailsUiState
 import es.cursos.android.ejercicios.stocksnma.utils.enums.ProductSections
-import es.cursos.android.ejercicios.stocksnma.utils.ProductValidationState
+import es.cursos.android.ejercicios.stocksnma.utils.validations.ProductValidationState
 
 
 @Composable
@@ -217,7 +217,7 @@ fun ProductDetailsBodyScreen(
         bottomBar = {
             if (isEditing) {
                 ButtonsBottomBar(
-                    enabled = stateProduct.isEntryValid,
+                    acceptButtonEnabled = stateProduct.isEntryValid,
                     onAcceptAction = {
                         Log.d(
                             "UpdateDebug", "Product: $tempProduct"
@@ -391,7 +391,7 @@ fun EncabezadoCard(
         TextField(
             value = tempProduct.name,
             onValueChange = { onValueChange("name", it) },
-            isError = validacionState.nameError != null,
+            isError = validacionState.nameErrorMessage != null,
             enabled = isEditing,
             placeholder = {
                 Text(
@@ -403,7 +403,7 @@ fun EncabezadoCard(
             colors = colorsSimpleTextField(),
             modifier = Modifier.fillMaxWidth()
         )
-        ShowMessageErrorText(validacionState.nameError, modifier = Modifier.padding(horizontal = dimensionResource(R.dimen.padding_16dp)))
+        ShowMessageErrorText(validacionState.nameErrorMessage, modifier = Modifier.padding(horizontal = dimensionResource(R.dimen.padding_16dp)))
 
         TextField(
             value = tempProduct.description,
@@ -437,8 +437,8 @@ fun GeneralInfoSection(
         onSupplierSelected = { onValueChange("supplierId", it) },
         supplierOptions = suppliersList,
         enabled = isEditing,
-        isError = validacionState.supplierError != null,
-        messageError = validacionState.supplierError
+        isError = validacionState.supplierErrorMessage != null,
+        messageError = validacionState.supplierErrorMessage
     )
 
 
@@ -467,8 +467,8 @@ fun GeneralInfoSection(
         onValueChange = { onValueChange("barcode", it) },
         label = R.string.product_barcode,
         enabled = isEditing,
-        isError = validacionState.barcodeError != null,
-        messageError = validacionState.barcodeError,
+        isError = validacionState.barcodeErrorMessage != null,
+        messageError = validacionState.barcodeErrorMessage,
     )
 }
 
@@ -484,30 +484,30 @@ fun InventorySection(
         title = R.string.product_stock,
         value = tempProduct.stock,
         onValueChange = { onValueChange("stock", it) },
-        isError = validationState.stockError != null,
+        isError = validationState.stockErrorMessage != null,
         enabled = isEditing
     )
-    ShowMessageErrorText(validationState.stockError, isEditing)
+    ShowMessageErrorText(validationState.stockErrorMessage, isEditing)
 
 
     CustomRowAndTextFieldStocks(
         title = R.string.product_min_stock,
         value = tempProduct.minStock,
         onValueChange = { onValueChange("minStock", it) },
-        isError = validationState.minStockError != null,
+        isError = validationState.minStockErrorMessage != null,
         enabled = isEditing
     )
-    ShowMessageErrorText(validationState.minStockError, isEditing)
+    ShowMessageErrorText(validationState.minStockErrorMessage, isEditing)
 
 
     CustomRowAndTextFieldStocks(
         title = R.string.product_max_stock,
         value = tempProduct.maxStock,
         onValueChange = { onValueChange("maxStock", it) },
-        isError = validationState.maxStockError != null,
+        isError = validationState.maxStockErrorMessage != null,
         enabled = isEditing
     )
-    ShowMessageErrorText(validationState.maxStockError, isEditing)
+    ShowMessageErrorText(validationState.maxStockErrorMessage, isEditing)
 }
 
 
@@ -527,18 +527,18 @@ fun PricesSection(
             title = R.string.product_cost_price,
             value = tempProduct.costPrice,
             onValueChange = { onValueChange("costPrice", it) },
-            isError = validationState.costPriceError != null,
+            isError = validationState.costPriceErrorMessage != null,
             enabled = isEditing
         )
-        ShowMessageErrorText(validationState.costPriceError, isEditing)
+        ShowMessageErrorText(validationState.costPriceErrorMessage, isEditing)
 
         CustomRowAndTextFieldPrices(
             title = R.string.product_sold_price,
             value = tempProduct.price,
             onValueChange = { onValueChange("price", it) },
-            isError = validationState.priceError != null,
+            isError = validationState.sellingPriceErrorMessage != null,
             enabled = isEditing
         )
-        ShowMessageErrorText(validationState.priceError, isEditing)
+        ShowMessageErrorText(validationState.sellingPriceErrorMessage, isEditing)
     }
 }

@@ -14,7 +14,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -22,6 +21,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import es.cursos.android.ejercicios.stocksnma.R
 import es.cursos.android.ejercicios.stocksnma.domain.model.Store
+import es.cursos.android.ejercicios.stocksnma.domain.model.StoreSelection
 import es.cursos.android.ejercicios.stocksnma.domain.model.User
 import es.cursos.android.ejercicios.stocksnma.ui.components.ButtonsBottomBar
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralCard
@@ -33,12 +33,12 @@ import es.cursos.android.ejercicios.stocksnma.ui.components.NavigateBackButton
 import es.cursos.android.ejercicios.stocksnma.ui.components.VerticalScrollableColumn
 import es.cursos.android.ejercicios.stocksnma.ui.components.supportingErrorText
 import es.cursos.android.ejercicios.stocksnma.utils.enums.UserRoles.Companion.getRoles
-import es.cursos.android.ejercicios.stocksnma.utils.UserValidationState
+import es.cursos.android.ejercicios.stocksnma.utils.validations.UserValidationState
 
 @Composable
 fun UserCreationScreen(
     viewModel: UserCreationViewModel,
-    onNavigateBack: () -> Unit
+    navigateBack: () -> Unit
 ) {
     // -------------------- VARIABLES -------------------- //
     val user = viewModel.userUiState.item  // Datos del usuario a crear
@@ -54,7 +54,7 @@ fun UserCreationScreen(
                 title = stringResource(R.string.user_create_title),
                 navigationButton = {
                     NavigateBackButton(onNavigateBack = {
-                        onNavigateBack()
+                        navigateBack()
                         viewModel.resetUiState()
                     })
                 },
@@ -64,7 +64,7 @@ fun UserCreationScreen(
             ButtonsBottomBar(
                 onAcceptAction = { viewModel.saveNewUser() },
                 onCancelAction = { viewModel.resetUiState() },
-                enabled = viewModel.userUiState.isEntryValid
+                acceptButtonEnabled = viewModel.userUiState.isEntryValid
             )
         }
     ) { innerPadding ->
@@ -89,7 +89,7 @@ fun UserCreationBodyScreen(
     user: User,
     onValueChange: (User) -> Unit,
     validationState: UserValidationState,
-    storeOptions: List<Store>,
+    storeOptions: List<StoreSelection>,
     modifier: Modifier = Modifier
 ) {
     // -------------------- VARIABLES -------------------- //
@@ -113,8 +113,8 @@ fun UserCreationBodyScreen(
                     value = user.name,
                     onValueChange = { onValueChange(user.copy(name = it)) },
                     label = stringResource(id = R.string.user_name),
-                    supportingText = supportingErrorText(validationState.nameError),
-                    isError = validationState.nameError != null,
+                    supportingText = supportingErrorText(validationState.nameErrorMessage),
+                    isError = validationState.nameErrorMessage != null,
                 )
 
                 // Campo de texto para el nombre de usuario (único)
@@ -122,8 +122,8 @@ fun UserCreationBodyScreen(
                     value = user.username,
                     onValueChange = { onValueChange(user.copy(username = it)) },
                     label = stringResource(id = R.string.user_username),
-                    supportingText = supportingErrorText(validationState.usernameError),
-                    isError = validationState.usernameError != null
+                    supportingText = supportingErrorText(validationState.usernameErrorMessage),
+                    isError = validationState.usernameErrorMessage != null
                 )
 
                 // Campo de texto para el email (único)
@@ -131,8 +131,8 @@ fun UserCreationBodyScreen(
                     value = user.email,
                     onValueChange = { onValueChange(user.copy(email = it)) },
                     label = stringResource(id = R.string.user_email),
-                    supportingText = supportingErrorText(validationState.emailOrPhoneError, validationState.emailError),
-                    isError = (validationState.emailOrPhoneError != null) || (validationState.emailError != null),
+                    supportingText = supportingErrorText(validationState.contactInformationErrorMessage, validationState.emailErrorMessage),
+                    isError = (validationState.contactInformationErrorMessage != null) || (validationState.emailErrorMessage != null),
                     keyboardType = KeyboardType.Email
                 )
 
@@ -141,8 +141,8 @@ fun UserCreationBodyScreen(
                     value = user.phone,
                     onValueChange = { onValueChange(user.copy(phone = it)) },
                     label = stringResource(id = R.string.user_phone),
-                    supportingText = supportingErrorText(validationState.emailOrPhoneError, validationState.phoneError),
-                    isError = (validationState.emailOrPhoneError != null) || (validationState.phoneError != null),
+                    supportingText = supportingErrorText(validationState.contactInformationErrorMessage, validationState.phoneErrorMessage),
+                    isError = (validationState.contactInformationErrorMessage != null) || (validationState.phoneErrorMessage != null),
                     keyboardType = KeyboardType.Phone
                 )
 
@@ -152,8 +152,8 @@ fun UserCreationBodyScreen(
                     onExpandedChange = { expandedRoleMenu = it },
                     valueSelected = user.role,
                     label = stringResource(id = R.string.user_role),
-                    supportingText = supportingErrorText(validationState.roleError),
-                    isError = validationState.roleError != null
+                    supportingText = supportingErrorText(validationState.roleErrorMessage),
+                    isError = validationState.roleErrorMessage != null
                 ) {
                     getRoles().forEachIndexed { index, roleName ->
                         DropdownMenuItem(

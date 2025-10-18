@@ -53,7 +53,7 @@ fun SupplierCreationScreen(
 
         bottomBar = {
             ButtonsBottomBar(
-                enabled = viewModel.supplierUiState.isEntryValid,
+                acceptButtonEnabled = viewModel.supplierUiState.isEntryValid,
                 onAcceptAction = {
                     coroutineScope.launch {
                         viewModel.saveSupplier()

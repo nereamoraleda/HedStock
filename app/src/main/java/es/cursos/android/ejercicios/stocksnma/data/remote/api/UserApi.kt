@@ -1,13 +1,11 @@
 package es.cursos.android.ejercicios.stocksnma.data.remote.api
 
-import es.cursos.android.ejercicios.stocksnma.data.remote.dto.ChangePasswordRequest
 import es.cursos.android.ejercicios.stocksnma.data.remote.dto.UserDto
-import es.cursos.android.ejercicios.stocksnma.domain.model.Store
+import es.cursos.android.ejercicios.stocksnma.domain.model.StoreSelection
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
-import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
@@ -49,9 +47,9 @@ interface UserApi {
     *  .body() -> Cuerpo de la respuesta
     */
 
-    // Endpoint para obtener todas las tiendas (ID y nombre)
-    @GET("api/stores/summary")
-    suspend fun getStoresSummary() : Response<List<Store>>
+    // Endpoint para obtener todas las tiendas activas (ID y nombre)
+    @GET("api/stores/selection")
+    suspend fun getStoresForSelection() : Response<List<StoreSelection>> /*TODO - Modificar a StoreSelectinDto */
 
 
 

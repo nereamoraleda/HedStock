@@ -31,17 +31,16 @@ import es.cursos.android.ejercicios.stocksnma.R
 import es.cursos.android.ejercicios.stocksnma.data.local.entity.relations.ProductWithSupplierAndCategory
 import es.cursos.android.ejercicios.stocksnma.ui.components.ChildCheckBox
 import es.cursos.android.ejercicios.stocksnma.ui.components.CustomSearchBarHistory
-import es.cursos.android.ejercicios.stocksnma.ui.components.CustomSearchNotFound
+import es.cursos.android.ejercicios.stocksnma.ui.components.SearchNotFoundContent
+import es.cursos.android.ejercicios.stocksnma.ui.components.ErrorContent
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralSearchBar
+import es.cursos.android.ejercicios.stocksnma.ui.components.LoadingContent
 import es.cursos.android.ejercicios.stocksnma.ui.components.NothingCreateScreen
 import es.cursos.android.ejercicios.stocksnma.ui.components.ParentCheckBox
-import es.cursos.android.ejercicios.stocksnma.ui.screen.home.HomeErrorScreen
-import es.cursos.android.ejercicios.stocksnma.ui.screen.home.HomeLoadingScreen
 import es.cursos.android.ejercicios.stocksnma.ui.screen.home.ProductHomeUiState
 import es.cursos.android.ejercicios.stocksnma.ui.screen.home.ProductSearchTable
 import es.cursos.android.ejercicios.stocksnma.ui.screen.home.ProductTableBody
 import es.cursos.android.ejercicios.stocksnma.ui.screen.home.ProductTableHeader
-
 
 @Composable
 fun ProductSectionScreen(navigateToProductDetails: (String) -> Unit) {
@@ -49,14 +48,8 @@ fun ProductSectionScreen(navigateToProductDetails: (String) -> Unit) {
     val state by viewModel.uiState.collectAsState()
 
     when (val uiState = state) {
-        is ProductHomeUiState.Loading -> {
-            HomeLoadingScreen()
-        }
-
-        is ProductHomeUiState.Error -> {
-            HomeErrorScreen(messageError = uiState.messageError)
-        }
-
+        is ProductHomeUiState.Loading -> { LoadingContent() }
+        is ProductHomeUiState.Error -> { ErrorContent(messageError = uiState.messageError) }
         is ProductHomeUiState.Success -> {
             ProductSectionBodyScreen(
                 products = uiState.products,
@@ -125,7 +118,7 @@ fun ProductSectionBodyScreen(
                             onClearHistory = { viewModel.resetProductSearchHistory() }
                         )
                     } else if (searchResults.isEmpty()) {
-                        CustomSearchNotFound()
+                        SearchNotFoundContent()
                     } else {
                         ProductSearchTable(
                             products = searchResults,

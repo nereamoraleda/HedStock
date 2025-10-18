@@ -32,10 +32,10 @@ fun CustomCard(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
 
 
 @Composable
-fun GeneralCard(content: @Composable () -> Unit) {
+fun GeneralCard(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     Card(
         elevation = CardDefaults.cardElevation(16.dp),
-        modifier = Modifier.padding(16.dp),
+        modifier = modifier.padding(16.dp),
         content = { content() }
     )
 }

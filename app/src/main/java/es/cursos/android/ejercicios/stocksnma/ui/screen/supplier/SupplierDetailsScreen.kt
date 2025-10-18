@@ -45,7 +45,7 @@ import es.cursos.android.ejercicios.stocksnma.ui.components.NavigateBackButton
 import es.cursos.android.ejercicios.stocksnma.ui.components.ShowMessageErrorText
 import es.cursos.android.ejercicios.stocksnma.ui.components.campoColores
 import es.cursos.android.ejercicios.stocksnma.ui.state.DetailsUiState
-import es.cursos.android.ejercicios.stocksnma.utils.SupplierValidationState
+import es.cursos.android.ejercicios.stocksnma.utils.validations.SupplierValidationState
 
 
 @Composable
@@ -107,7 +107,7 @@ fun SupplierDetailsScreen(
                 bottomBar = {
                     if (isEditing) {
                         ButtonsBottomBar(
-                            enabled = true,
+                            acceptButtonEnabled = true,
                             onAcceptAction = {
                                 Log.d("UpdateDebug", "Supplier: $tempSupplier")
 
@@ -194,7 +194,7 @@ fun SupplierDetailsBody(
                     modifier = Modifier.fillMaxWidth()
                     //color = MaterialTheme.colorScheme.primary
                 )
-                ShowMessageErrorText(validationState.nameError)
+                ShowMessageErrorText(validationState.nameErrorMessage)
             }
 
                 Column(
@@ -220,7 +220,7 @@ fun SupplierDetailsBody(
                         colors = campoColores(),
                         //supportingText = { Text("Especifica $label") }
                     )
-                    ShowMessageErrorText(validationState.phoneError)
+                    ShowMessageErrorText(validationState.phoneErrorMessage)
 
                     OutlinedTextField(
                         value = tempSupplier.email,
@@ -242,7 +242,7 @@ fun SupplierDetailsBody(
                         colors = campoColores(),
                         //supportingText = { Text("Especifica $label") }
                     )
-                    ShowMessageErrorText(validationState.emailError)
+                    ShowMessageErrorText(validationState.emailErrorMessage)
                 }
 
         }
