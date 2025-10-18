@@ -113,6 +113,7 @@ fun BodyNavDrawer(
                     R.string.discount_title -> selectedItem == HomeSections.DISCOUNTS
                     R.string.supplier_title -> selectedItem == HomeSections.SUPPLIERS
                     R.string.user_title -> selectedItem == HomeSections.USERS
+                    R.string.store_title -> selectedItem == HomeSections.STORES
                     R.string.settings_title -> selectedItem == HomeSections.SETTINGS
                     R.string.about_title -> selectedItem == HomeSections.ABOUT
                     else -> false

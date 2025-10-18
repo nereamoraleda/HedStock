@@ -1,9 +1,9 @@
 package es.cursos.android.ejercicios.stocksnma.ui.screen.home
 
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.updateTransition
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
@@ -20,19 +19,18 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
@@ -47,6 +45,7 @@ import com.journeyapps.barcodescanner.ScanOptions
 import es.cursos.android.ejercicios.stocksnma.R
 import es.cursos.android.ejercicios.stocksnma.ui.components.AboutAppDialog
 import es.cursos.android.ejercicios.stocksnma.ui.components.AppNavigationDrawer
+import es.cursos.android.ejercicios.stocksnma.ui.components.CenteredContent
 import es.cursos.android.ejercicios.stocksnma.ui.components.ConfirmationDialog
 import es.cursos.android.ejercicios.stocksnma.ui.components.CustomFAB
 import es.cursos.android.ejercicios.stocksnma.ui.components.CustomFABChild
@@ -57,6 +56,8 @@ import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralIconButton
 import es.cursos.android.ejercicios.stocksnma.ui.components.HomeTopAppBar
 import es.cursos.android.ejercicios.stocksnma.ui.screen.home.products.ProductSectionScreen
 import es.cursos.android.ejercicios.stocksnma.ui.screen.home.products.ProductSectionViewModel
+import es.cursos.android.ejercicios.stocksnma.ui.screen.home.stores.StoreSectionHomeScreen
+import es.cursos.android.ejercicios.stocksnma.ui.screen.home.stores.StoreSectionHomeViewModel
 import es.cursos.android.ejercicios.stocksnma.ui.screen.home.suppliers.SupplierSectionScreen
 import es.cursos.android.ejercicios.stocksnma.ui.screen.home.suppliers.SupplierSectionViewModel
 import es.cursos.android.ejercicios.stocksnma.ui.screen.home.users.UserSectionScreen
@@ -64,6 +65,7 @@ import es.cursos.android.ejercicios.stocksnma.ui.screen.home.users.UserSectionVi
 import es.cursos.android.ejercicios.stocksnma.utils.PortraitCaptureActivity
 import es.cursos.android.ejercicios.stocksnma.utils.enums.HomeSections
 import es.cursos.android.ejercicios.stocksnma.utils.enums.ProductSortOptions
+import es.cursos.android.ejercicios.stocksnma.utils.enums.StoreSortOptions
 import es.cursos.android.ejercicios.stocksnma.utils.enums.SupplierSortOptions
 import es.cursos.android.ejercicios.stocksnma.utils.enums.UserGroupOptions
 import es.cursos.android.ejercicios.stocksnma.utils.enums.UserSortOptions
@@ -77,11 +79,13 @@ fun HomeScreen(
     viewModel: HomeViewModel,
     navigateToSettings: () -> Unit,
     navigateToProductCreation: (String?) -> Unit,
-    navigateToSupplierCreation: () -> Unit,
     navigateToProductDetails: (String) -> Unit,
+    navigateToSupplierCreation: () -> Unit,
     navigateToSupplierDetails: (String) -> Unit,
     navigateToUserCreation: () -> Unit,
     navigateToUserDetails: (Long) -> Unit,
+    navigateToStoreCreation: () -> Unit,
+    navigateToStoreDetails: (Long) -> Unit
 ) {
 
     // --- VARIABLES ---
@@ -90,10 +94,20 @@ fun HomeScreen(
     val productViewModel: ProductSectionViewModel = hiltViewModel()
     val supplierViewModel: SupplierSectionViewModel = hiltViewModel()
     val userViewModel: UserSectionViewModel = hiltViewModel()
+    val storeViewModel: StoreSectionHomeViewModel = hiltViewModel()
 
     val isSearchingProducts by productViewModel.isSearching.collectAsState()
     val isSearchingSuppliers by supplierViewModel.isSearching.collectAsState()
     val isSearchingUsers by userViewModel.isSearching.collectAsState()
+    val isSearchingStores by storeViewModel.isSearching.collectAsState()
+
+
+    LaunchedEffect(Unit) {
+        storeViewModel.isSearching.collect {
+            Log.d("DEGUB", "isSearchingStores: $it")
+        }
+    }
+
 
     //val state by viewModel.homeUiState.collectAsState()                          // Estado de la pantalla (Loading, Success, Error)
     val navigateSettings by viewModel.navigateSettings.collectAsState()          // Navegación a la pantalla de configuración
@@ -112,14 +126,14 @@ fun HomeScreen(
 
     // Variables - Navigation Drawer
     val navDrawerOptions by viewModel.listOfNavDrawerItems.collectAsState()  // Lista de elementos del Navigation Drawer
-    val selectedHomeSection by viewModel.selectedHomeSection.collectAsState()             // Índice del elemento seleccionado
+    val selectedHomeSection by viewModel.selectedHomeSection.collectAsState()    // Índice del elemento seleccionado
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)     // Estado del Navigation Drawer
     val scope = rememberCoroutineScope()
 
 
     // Variables - Búsqueda en Search Bar
     //val isSearching by viewModel.isSearching.collectAsState()                     // Si estamos en búsqueda o no
-    val searchQuery by viewModel.searchQuery.collectAsState()                     // Consulta de búsqueda
+    //val searchQuery by viewModel.searchQuery.collectAsState()                     // Consulta de búsqueda
     // Historial de búsquedas
     // Historial de búsquedas
     // Lista de resultados de búsqueda de productos
@@ -164,6 +178,7 @@ fun HomeScreen(
     val productSortOption by productViewModel.productSortOption.collectAsState()          // Ordenación de productos
     val supplierSortOption by supplierViewModel.supplierSortOption.collectAsState()        // Ordenación de proveedores
     val userSortOption by userViewModel.userFilter.collectAsState()
+    val storeSortOption by storeViewModel.storeSortBy.collectAsState()
 
     val productSortMenuItems = listOf(
         DropDownMenuItem(
@@ -232,6 +247,31 @@ fun HomeScreen(
             title = R.string.group_by_store,
             selected = userSortOption.groupOption == UserGroupOptions.STORE,
             action = { userViewModel.setUserGroupOption(UserGroupOptions.STORE) }
+        )
+    )
+    val storeSortMenuItems = listOf(
+        DropDownMenuItem(
+            title = R.string.order_by_name_asc,
+            selected = storeSortOption == StoreSortOptions.NAME_ASC,
+            action = { storeViewModel.setStoreSortOption(StoreSortOptions.NAME_ASC) }
+        ),
+
+        DropDownMenuItem(
+            title = R.string.order_by_name_desc,
+            selected = storeSortOption == StoreSortOptions.NAME_DESC,
+            action = { storeViewModel.setStoreSortOption(StoreSortOptions.NAME_DESC) }
+        ),
+
+        DropDownMenuItem(
+            title = R.string.sort_by_date_oldest,
+            selected = storeSortOption == StoreSortOptions.DATE_OLDEST,
+            action = { storeViewModel.setStoreSortOption(StoreSortOptions.DATE_OLDEST) }
+        ),
+
+        DropDownMenuItem(
+            title = R.string.sort_by_date_newest,
+            selected = storeSortOption == StoreSortOptions.DATE_NEWEST,
+            action = { storeViewModel.setStoreSortOption(StoreSortOptions.DATE_NEWEST) }
         )
     )
 
@@ -350,7 +390,41 @@ fun HomeScreen(
         viewModel.toggleNavigateSettings(false)
     }
 
-    val isSearching = isSearchingProducts || isSearchingSuppliers || isSearchingUsers
+
+    /* En el Viewmodel de Home para quitar de aquí
+    TODO - Quitarlo si no se usa en ninguna otra parte de aquí
+     *@HiltViewModel
+class HomeViewModel @Inject constructor(
+    productViewModel: ProductSectionViewModel,
+    supplierViewModel: SupplierSectionViewModel,
+    userViewModel: UserSectionViewModel,
+    storeViewModel: StoreSectionHomeViewModel
+) : ViewModel() {
+
+    val isSearching = combine(
+        productViewModel.isSearching,
+        supplierViewModel.isSearching,
+        userViewModel.isSearching,
+        storeViewModel.isSearching
+    ) { product, supplier, user, store ->
+        product || supplier || user || store
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
+}
+val isSearching by homeViewModel.isSearching.collectAsState()
+*/
+
+    // Añadir también la visibilidad en el TopBar
+    val isSearching by remember(
+        isSearchingProducts,
+        isSearchingSuppliers,
+        isSearchingUsers,
+        isSearchingStores
+    ) {
+        derivedStateOf {
+            isSearchingProducts || isSearchingSuppliers || isSearchingUsers || isSearchingStores
+        }
+    }
+
 
     fun toggleDrawer() {
         scope.launch {
@@ -444,6 +518,23 @@ fun HomeScreen(
                                     isMenuExpanded = isMenuExpanded,
                                     onClickIconButton = { isMenuExpanded = !isMenuExpanded },
                                     onDismissRequest = { isMenuExpanded = false }
+                                )
+                            },
+                            modifier = Modifier.alpha(alpha)
+                        )
+                    }
+                    HomeSections.STORES -> {
+                        HomeTopAppBar(
+                            section = selectedHomeSection,
+                            isSearching = isSearchingStores,
+                            onNavClick = { toggleDrawer() },
+                            actionButton = {
+                                FilterDropDownMenu(
+                                    isMenuExpanded = isMenuExpanded,
+                                    filterOptions = storeSortMenuItems,
+                                    onClickIconButton = { isMenuExpanded = !isMenuExpanded },
+                                    onDismissRequest = { isMenuExpanded = false },
+                                    itemSelected = storeSortOption.name
                                 )
                             },
                             modifier = Modifier.alpha(alpha)
@@ -560,6 +651,25 @@ fun HomeScreen(
                             }
                         }
                     }
+                    HomeSections.STORES -> {
+                        FABContainer(
+                            isVisible = true,
+                            isExpanded = isButtonsAddVisible,
+                            onDismiss = { isButtonsAddVisible = false }
+                        ) {
+                            FloatingActionButton(
+                                onClick = { navigateToStoreCreation() },
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                shape = CircleShape,
+                                elevation = FloatingActionButtonDefaults.elevation(8.dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_store_add),
+                                    contentDescription = null
+                                )
+                            }
+                        }
+                    }
                     else -> {}
                 }
             },
@@ -578,7 +688,7 @@ fun HomeScreen(
 //          }
 //      }
 
-            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+            //snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
             modifier = Modifier.fillMaxSize()
 
         ) { innerPadding ->
@@ -604,13 +714,12 @@ fun HomeScreen(
                     HomeSections.USERS -> {
                         //val userViewModel: UserViewModel = hiltViewModel()
                         //val uiState by userViewModel.usersUiState.collectAsState()
-                        UserSectionScreen {
-
-                            navigateToUserDetails(it)
-                        }
+                        UserSectionScreen { navigateToUserDetails(it) }
                     }
 
-                    else -> Text("Sección en construcción")
+                    HomeSections.STORES -> { StoreSectionHomeScreen { navigateToStoreDetails(it) } }
+
+                    else -> CenteredContent { Text("Sección en construcción...") }
                 }
 
 //                        GeneralSearchBar(
@@ -629,7 +738,6 @@ fun HomeScreen(
 //                            },
 //                            cleanQuery = { viewModel.onSearchQueryDelete() }
 //                        ) {
-
 //                        Box(
 //                            modifier = Modifier
 //                                .fillMaxSize()
@@ -638,67 +746,12 @@ fun HomeScreen(
 //                            // Maneja la búsqueda en función de la opción seleccionada
 //                            when (selectedHomeSection) {
 //                                HomeSection.PRODUCTS -> {}
-//                                HomeSection.SUPPLIERS -> {}
 //                                else -> {}
 //                            }
 //                        }
 //                    }
-//
-
-//
 //                    Spacer(modifier = Modifier.padding(dimensionResource(R.dimen.padding_small)))
-//
-//
-//                    // Maneja la lista mostrada en función de la opción seleccionada
-//                    when (selectedHomeSection) {
-//                        HomeSection.PRODUCTS -> {}
-//                        HomeSection.SUPPLIERS -> {}
-//
-//                        HomeSection.USERS -> {
-////                                SwipeRefresh(
-////                                    state = rememberSwipeRefreshState(isRefreshing = false),
-////                                    onRefresh = { viewModel.refreshUsers() }
-////                                ) {
-////                                    UserSectionHomeBodyScreen(
-////                                        users = users,
-////                                        navigateToUserDetails = navigateToUserDetails
-////                                    )
-////                                }
-////                                Log.i("HOME SCREEN - USERS", "Users: $users")
-//                            }
-////
-//                           else -> {
-//                               Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-//                                    Text(text = "Próximamente...")
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//      } }
             }
         }
-    }
-}
-
-
-@Composable
-fun HomeLoadingScreen(modifier: Modifier = Modifier) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier.fillMaxSize()
-    ) {
-        CircularProgressIndicator()
-    }
-}
-
-
-@Composable
-fun HomeErrorScreen(messageError: String, modifier: Modifier = Modifier) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier.fillMaxSize()
-    ) {
-        Text(text = messageError)
     }
 }
