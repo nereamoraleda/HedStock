@@ -32,12 +32,14 @@ import es.cursos.android.ejercicios.stocksnma.ui.components.ButtonsBottomBar
 import es.cursos.android.ejercicios.stocksnma.ui.components.CardColumn
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralCard
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralOutlinedTextField
+import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralSegmentedButton
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralTopAppBar
 import es.cursos.android.ejercicios.stocksnma.ui.components.NavigateBackButton
 import es.cursos.android.ejercicios.stocksnma.ui.components.VerticalScrollableColumn
 import es.cursos.android.ejercicios.stocksnma.ui.components.coloresTextFields
 import es.cursos.android.ejercicios.stocksnma.ui.components.colorsSimpleTextField
 import es.cursos.android.ejercicios.stocksnma.ui.components.segmentedButtonColors
+import es.cursos.android.ejercicios.stocksnma.utils.enums.StoreSections
 
 @Composable
 fun StoreCreationScreen(
@@ -73,43 +75,23 @@ fun StoreCreationScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StoreCreationBodyScreen() {
-    /*TODO - Modificar manejo del Segmented Button */
-    var sectionSelected by remember { mutableStateOf("Contacto") }
+    var sectionSelected by remember { mutableStateOf(StoreSections.CONTACT) }
 
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        SingleChoiceSegmentedButtonRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(dimensionResource(R.dimen.padding_16dp))
-                .clip(RoundedCornerShape(50.dp))
-                .background(MaterialTheme.colorScheme.secondary)
-        ) {
-            SegmentedButton(
-                label = { Text("Contacto") },
-                onClick = { sectionSelected = "Contacto" },
-                selected = sectionSelected == "Contacto",
-                icon = {},
-                shape = RoundedCornerShape(50.dp),
-                colors = segmentedButtonColors(),
-                modifier = Modifier
-                    .padding(horizontal = 4.dp)
-                    .weight(1f)
-            )
-
-            SegmentedButton(
-                label = { Text("Dirección") },
-                onClick = { sectionSelected = "Dirección" },
-                selected = sectionSelected == "Dirección",
-                icon = {},
-                shape = RoundedCornerShape(50.dp),
-                colors = segmentedButtonColors(),
-                modifier = Modifier
-                    .padding(horizontal = 4.dp)
-                    .weight(1f)
-            )
-        }
+        // -------------------- SEGMENTED BUTTON -------------------- //
+        GeneralSegmentedButton(
+            selectedSection = sectionSelected,
+            onSectionChange = { sectionSelected = it },
+            sections = StoreSections.entries,
+            label = {
+                when (it) {
+                    StoreSections.CONTACT -> stringResource(R.string.store_section_contact)
+                    StoreSections.ADDRESS -> stringResource(R.string.store_section_address)
+                }
+            }
+        )
 
         VerticalScrollableColumn {
             GeneralCard {
@@ -139,7 +121,20 @@ fun StoreCreationBodyScreen() {
                         .padding(dimensionResource(R.dimen.padding_16dp))
                 ) {
                     when (sectionSelected) {
-                        "Dirección" -> {
+                        StoreSections.CONTACT -> {
+                        GeneralOutlinedTextField(
+                            value = "Email",
+                            onValueChange = { },
+                            label = "Email",
+                        )
+
+                        GeneralOutlinedTextField(
+                            value = "Teléfono",
+                            onValueChange = { },
+                            label = "Teléfono",
+                        )
+                    }
+                        StoreSections.ADDRESS -> {
                             GeneralOutlinedTextField(
                                 value = "Dirección",
                                 onValueChange = { },
@@ -162,20 +157,6 @@ fun StoreCreationBodyScreen() {
                                 value = "C.P",
                                 onValueChange = { },
                                 label = "C.P",
-                            )
-                        }
-
-                        else -> {
-                            GeneralOutlinedTextField(
-                                value = "Email",
-                                onValueChange = { },
-                                label = "Email",
-                            )
-
-                            GeneralOutlinedTextField(
-                                value = "Teléfono",
-                                onValueChange = { },
-                                label = "Teléfono",
                             )
                         }
                     }

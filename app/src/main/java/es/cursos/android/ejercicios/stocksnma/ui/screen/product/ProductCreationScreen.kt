@@ -18,7 +18,6 @@ import es.cursos.android.ejercicios.stocksnma.ui.components.*
 import es.cursos.android.ejercicios.stocksnma.utils.enums.ProductSections
 import es.cursos.android.ejercicios.stocksnma.utils.validations.ProductValidationState
 
-
 @Composable
 fun ProductCreationScreen(
     viewModel: ProductCreationViewModel,
@@ -121,13 +120,19 @@ fun ProductCreationScreen(
                 .verticalScroll(rememberScrollState())
 
         ) {
-            CustomSegmentedButton(
-                selectedProductSection = activeProductSection,
-                onProductSectionChange = { activeProductSection = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(dimensionResource(R.dimen.padding_16dp))
+            GeneralSegmentedButton(
+                selectedSection = activeProductSection,
+                onSectionChange = { activeProductSection = it },
+                sections = ProductSections.entries,
+                label = {
+                    when (it) {
+                        ProductSections.INFO -> stringResource(R.string.product_section_info)
+                        ProductSections.PRICE -> stringResource(R.string.product_section_price)
+                        ProductSections.STOCK -> stringResource(R.string.product_section_stock)
+                    }
+                }
             )
+
 
             ProductDetailsCard(
                 productUiState = viewModel.productUiState,

@@ -52,6 +52,7 @@ import es.cursos.android.ejercicios.stocksnma.ui.components.CustomSegmentedButto
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralTopAppBar
 import es.cursos.android.ejercicios.stocksnma.ui.components.DetailsCard
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralIconButton
+import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralSegmentedButton
 import es.cursos.android.ejercicios.stocksnma.ui.components.NavigateBackButton
 import es.cursos.android.ejercicios.stocksnma.ui.components.ShowMessageErrorText
 import es.cursos.android.ejercicios.stocksnma.ui.components.colorsSimpleTextField
@@ -257,15 +258,19 @@ fun ProductDetailsBodyScreen(
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
         ) {
-            CustomSegmentedButton(
-                selectedProductSection = activeProductSection,
-                onProductSectionChange = { activeProductSection = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(dimensionResource(R.dimen.padding_16dp))
-                    .clip(RoundedCornerShape(50.dp))
-                    .background(MaterialTheme.colorScheme.primary)
+            GeneralSegmentedButton(
+                selectedSection = activeProductSection,
+                onSectionChange = { activeProductSection = it },
+                sections = ProductSections.entries.toList(),
+                label = {
+                    when (it) {
+                        ProductSections.INFO -> stringResource(R.string.product_section_info)
+                        ProductSections.PRICE -> stringResource(R.string.product_section_price)
+                        ProductSections.STOCK -> stringResource(R.string.product_section_stock)
+                    }
+                }
             )
+
 
             ProductInfoCard(
                 viewModel,
