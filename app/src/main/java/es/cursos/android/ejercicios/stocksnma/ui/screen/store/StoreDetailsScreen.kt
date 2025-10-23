@@ -4,15 +4,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -24,22 +22,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import es.cursos.android.ejercicios.stocksnma.R
-import es.cursos.android.ejercicios.stocksnma.domain.model.Store
+import es.cursos.android.ejercicios.stocksnma.domain.model.store.Store
+import es.cursos.android.ejercicios.stocksnma.ui.components.ButtonsBottomBar
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralCard
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralOutlinedTextField
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralSegmentedButton
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralTopAppBar
 import es.cursos.android.ejercicios.stocksnma.ui.components.NavigateBackButton
+import es.cursos.android.ejercicios.stocksnma.ui.components.ShowMessageErrorText
 import es.cursos.android.ejercicios.stocksnma.ui.components.VerticalScrollableColumn
 import es.cursos.android.ejercicios.stocksnma.ui.components.colorsSimpleTextField
-import es.cursos.android.ejercicios.stocksnma.ui.components.segmentedButtonColors
+import es.cursos.android.ejercicios.stocksnma.ui.components.supportingErrorText
 import es.cursos.android.ejercicios.stocksnma.utils.enums.StoreSections
+import es.cursos.android.ejercicios.stocksnma.utils.validations.StoreValidationForm
 
 @Composable
 fun StoreDetailsScreen(
@@ -47,10 +47,13 @@ fun StoreDetailsScreen(
     navigateBack: () -> Unit
 ) {
     val viewModel: StoreDetailsViewModel = hiltViewModel()
-    val store by viewModel.store.collectAsState()
+    val store by viewModel.editableStore.collectAsState()
+    val validationState by viewModel.validationState.collectAsState()
+    val isFormValid by viewModel.isFormValid.collectAsState()
+    val canEdit by viewModel.hasPermission.collectAsState()
 
     LaunchedEffect(storeId) {
-        viewModel.getDataStore(storeId)
+        viewModel.getStoreDetails(storeId)
     }
 
     Scaffold(
@@ -59,7 +62,19 @@ fun StoreDetailsScreen(
                 title = stringResource(R.string.store_details_title),
                 navigationButton = { NavigateBackButton(onNavigateBack = { navigateBack() } ) }
             )
+        },
+        bottomBar = {
+            if (canEdit) {
+                ButtonsBottomBar(
+                    acceptButtonEnabled = isFormValid,
+                    onAcceptAction = { viewModel.saveChanges { success ->
+                        if (success) navigateBack()
+                    } },
+                    onCancelAction = { viewModel.resetUi() }
+                )
+            }
         }
+
     ) { innerPadding ->
         Box(
             contentAlignment = Alignment.Center,
@@ -67,16 +82,25 @@ fun StoreDetailsScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            StoreDetailsBodyScreen(store)
+            StoreDetailsBodyScreen(
+                store,
+                onFieldChange = viewModel::onFieldChange,
+                onCheckedChange = viewModel::onFieldChange,
+                validacionState = validationState,
+                canEdit = canEdit
+            )
         }
     }
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StoreDetailsBodyScreen(
-    store: Store
+    store: Store,
+    onFieldChange: (StoreFields, String) -> Unit,
+    onCheckedChange: (StoreFields, Boolean) -> Unit,
+    validacionState: StoreValidationForm,
+    canEdit: Boolean
 ) {
     var sectionSelected by remember { mutableStateOf(StoreSections.CONTACT) }
 
@@ -105,15 +129,25 @@ fun StoreDetailsBodyScreen(
                 ) {
                     TextField(
                         value = store.name,
-                        onValueChange = { },
+                        onValueChange = { onFieldChange(StoreFields.NAME, it) },
+                        readOnly = !canEdit,
                         placeholder = {
                             Text(
-                                text = stringResource(R.string.store_name),
+                                stringResource(R.string.store_name),
                                 style = MaterialTheme.typography.titleLarge
                             )
                         },
+                        //supportingText = supportingErrorText(validacionState.nameMessageError),
+                        isError = validacionState.nameMessageError != null,
+                        textStyle = MaterialTheme.typography.titleLarge,
                         colors = colorsSimpleTextField(),
                         modifier = Modifier.fillMaxWidth()
+                    )
+                    ShowMessageErrorText(
+                        validacionState.nameMessageError,
+                        modifier = Modifier
+                            .padding(horizontal = dimensionResource(R.dimen.padding_16dp))
+                            .padding(bottom = dimensionResource(R.dimen.padding_16dp))
                     )
                 }
 
@@ -127,41 +161,79 @@ fun StoreDetailsBodyScreen(
                         StoreSections.ADDRESS -> {
                             GeneralOutlinedTextField(
                                 value = store.address,
-                                onValueChange = { },
+                                onValueChange = { onFieldChange(StoreFields.ADDRESS, it) },
+                                readOnly = !canEdit,
                                 label = stringResource(R.string.store_address),
+                                //supportingText = supportingErrorText(validacionState.addressErrorMessage),
+                                //isError = validacionState.nameMessageError != null
                             )
 
                             GeneralOutlinedTextField(
                                 value = store.city,
-                                onValueChange = { },
+                                onValueChange = { onFieldChange(StoreFields.CITY, it) },
+                                readOnly = !canEdit,
                                 label = stringResource(R.string.store_city),
+                                //supportingText = supportingErrorText(validacionState.cityErrorMessage),
+                                //isError = validacionState.cityErrorMessage != null
                             )
 
                             GeneralOutlinedTextField(
                                 value = store.country,
-                                onValueChange = { },
+                                onValueChange = { onFieldChange(StoreFields.COUNTRY, it) },
+                                readOnly = !canEdit,
                                 label = stringResource(R.string.store_country),
+                                //supportingText = supportingErrorText(validacionState.countryErrorMessage),
+                                //isError = validationState.countryErrorMessage != null
                             )
 
                             GeneralOutlinedTextField(
                                 value = store.postalCode,
-                                onValueChange = { },
+                                onValueChange = { onFieldChange(StoreFields.POSTAL_CODE, it) },
+                                readOnly = !canEdit,
                                 label = stringResource(R.string.store_postal_code),
+                                //supportingText = supportingErrorText(validacionState.postalCodeErrorMessage),
+                                //isError = validacionState.postalCodeErrorMessage != null
                             )
                         }
                         StoreSections.CONTACT -> {
                             GeneralOutlinedTextField(
                                 value = store.email,
-                                onValueChange = { },
+                                onValueChange = { onFieldChange(StoreFields.EMAIL, it) },
+                                readOnly = !canEdit,
                                 label = stringResource(R.string.store_email),
+                                supportingText = supportingErrorText(validacionState.emailMessageError),
+                                isError = validacionState.emailMessageError != null || validacionState.contactInformationErrorMessage != null
                             )
 
                             GeneralOutlinedTextField(
                                 value = store.phone,
-                                onValueChange = { },
+                                onValueChange = { onFieldChange(StoreFields.PHONE, it) },
+                                readOnly = !canEdit,
                                 label = stringResource(R.string.store_phone),
+                                supportingText = supportingErrorText(validacionState.phoneMessageError),
+                                isError = validacionState.phoneMessageError != null || validacionState.contactInformationErrorMessage != null
                             )
+
+                            ShowMessageErrorText(validacionState.contactInformationErrorMessage)
                         }
+                    }
+
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(text = stringResource(R.string.user_active))
+                        Switch(
+                            checked = store.isActive,
+                            onCheckedChange = {
+                                onCheckedChange(
+                                    StoreFields.IS_ACTIVE,
+                                    !store.isActive
+                                )
+                            },
+                            enabled = canEdit
+                        )
                     }
                 }
             }

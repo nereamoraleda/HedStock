@@ -266,7 +266,10 @@ fun CustomRowAndTextFieldPrices(
 @Composable
 fun ShowMessageErrorText(message: String? = null, isEditing: Boolean = true, modifier: Modifier = Modifier) {
     if (message != null && isEditing) {
-        Text(text = message, color = MaterialTheme.colorScheme.error,
+        Text(
+            text = message,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.error,
             modifier = modifier
         )
     }
