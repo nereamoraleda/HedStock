@@ -22,18 +22,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import es.cursos.android.ejercicios.stocksnma.R
-import es.cursos.android.ejercicios.stocksnma.domain.model.StoreGeneralView
+import es.cursos.android.ejercicios.stocksnma.data.mapper.orDefault
+import es.cursos.android.ejercicios.stocksnma.domain.model.store.StoreGeneralView
 import es.cursos.android.ejercicios.stocksnma.ui.components.CustomSearchBarHistory
-import es.cursos.android.ejercicios.stocksnma.ui.components.SearchNotFoundContent
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralHorizontalDividerIfLast
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralSearchBar
 import es.cursos.android.ejercicios.stocksnma.ui.components.NothingCreateScreen
+import es.cursos.android.ejercicios.stocksnma.ui.components.SearchNotFoundContent
 
 @Composable
 fun StoreSectionHomeScreen(navigateToStoreDetails: (Long) -> Unit) {
@@ -62,9 +64,9 @@ fun StoreSectionHomeScreen(navigateToStoreDetails: (Long) -> Unit) {
             active = isSearching,
             onActiveChange = { viewModel.toggleSearch() },
             cleanQuery = { viewModel.clearSearchQuery() },
-            placeholderText = "Buscar tienda" /*TODO - Añadir StringResource*/
+            placeholderText = stringResource(R.string.search_store)
         ) {
-            if ( (searchQuery.isEmpty()) && (searchHistory.isNotEmpty()) ) {
+            if ((searchQuery.isEmpty()) && (searchHistory.isNotEmpty())) {
                 CustomSearchBarHistory(
                     searchHistory = searchHistory,
                     onClickSearch = { recentSearch ->
@@ -73,9 +75,9 @@ fun StoreSectionHomeScreen(navigateToStoreDetails: (Long) -> Unit) {
                     },
                     onClearHistory = { viewModel.resetSearchHistory() }
                 )
-            }
-            else if (searchResults.isEmpty()) { SearchNotFoundContent() }
-            else {
+            } else if (searchResults.isEmpty()) {
+                SearchNotFoundContent()
+            } else {
                 LazyColumn {
                     items(searchResults) { storeFound ->
                         StoreRow(
@@ -93,18 +95,17 @@ fun StoreSectionHomeScreen(navigateToStoreDetails: (Long) -> Unit) {
         }
 
 
-
-        // -------------------- LISTADO DE TIENDAS -------------------- //
-        if (storesList.isEmpty()) NothingCreateScreen(nothingCreateText = "No hay tiendas") /* TODO - Añadir StringResource */
-        else {
-            SwipeRefresh(
-                state = rememberSwipeRefreshState(isRefreshing = isRefreshing),
-                onRefresh = {
-                    isRefreshing = true
-                    viewModel.refreshStores()
-                    isRefreshing = false
-                }
-            ) {
+        // -------------------- LISTADO DE TIENDAS -------------------- /
+        SwipeRefresh(
+            state = rememberSwipeRefreshState(isRefreshing = isRefreshing),
+            onRefresh = {
+                isRefreshing = true
+                viewModel.refreshStores()
+                isRefreshing = false
+            }
+        ) {
+            if (storesList.isEmpty()) NothingCreateScreen(nothingCreateText = stringResource(R.string.no_stores))
+            else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize()
                 ) {
@@ -144,8 +145,14 @@ fun StoreRow(
         Column {
             Text(text = store.name, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.padding(2.dp))
-            Text(text = store.city, style = MaterialTheme.typography.bodyMedium)
-            Text(text = store.email, style = MaterialTheme.typography.bodySmall)
+            Text(
+                text = store.city.orDefault(stringResource(R.string.store_city_not_def)),
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Text(
+                text = store.email.orDefault(stringResource(R.string.store_email_not_def)),
+                style = MaterialTheme.typography.bodySmall
+            )
         }
     }
 }
