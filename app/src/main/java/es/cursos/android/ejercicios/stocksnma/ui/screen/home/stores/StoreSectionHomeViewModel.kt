@@ -3,12 +3,11 @@ package es.cursos.android.ejercicios.stocksnma.ui.screen.home.stores
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import es.cursos.android.ejercicios.stocksnma.data.local.datastore.AppDataStore
 import es.cursos.android.ejercicios.stocksnma.data.mapper.toStoreGeneralView
 import es.cursos.android.ejercicios.stocksnma.data.remote.api.StoreApi
-import es.cursos.android.ejercicios.stocksnma.domain.model.StoreGeneralView
+import es.cursos.android.ejercicios.stocksnma.domain.model.store.StoreGeneralView
 import es.cursos.android.ejercicios.stocksnma.utils.enums.StoreSortOptions
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

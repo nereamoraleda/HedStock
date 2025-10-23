@@ -9,7 +9,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import es.cursos.android.ejercicios.stocksnma.data.mapper.toUser
 import es.cursos.android.ejercicios.stocksnma.data.mapper.toUserDto
 import es.cursos.android.ejercicios.stocksnma.data.remote.api.UserApi
-import es.cursos.android.ejercicios.stocksnma.domain.model.StoreSelection
+import es.cursos.android.ejercicios.stocksnma.domain.model.store.StoreSelection
 import es.cursos.android.ejercicios.stocksnma.domain.model.User
 import es.cursos.android.ejercicios.stocksnma.ui.state.DetailsUiState
 import es.cursos.android.ejercicios.stocksnma.utils.validations.UserValidationState

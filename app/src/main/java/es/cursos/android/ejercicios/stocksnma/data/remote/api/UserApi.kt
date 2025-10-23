@@ -1,7 +1,7 @@
 package es.cursos.android.ejercicios.stocksnma.data.remote.api
 
 import es.cursos.android.ejercicios.stocksnma.data.remote.dto.UserDto
-import es.cursos.android.ejercicios.stocksnma.domain.model.StoreSelection
+import es.cursos.android.ejercicios.stocksnma.domain.model.store.StoreSelection
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
