@@ -1,13 +1,15 @@
 package es.cursos.android.ejercicios.stocksnma.data.mapper
 
-import es.cursos.android.ejercicios.stocksnma.data.remote.dto.StoreDto
-import es.cursos.android.ejercicios.stocksnma.data.remote.dto.StoreGeneralViewDto
-import es.cursos.android.ejercicios.stocksnma.data.remote.dto.StoreSelectionDto
-import es.cursos.android.ejercicios.stocksnma.domain.model.Store
-import es.cursos.android.ejercicios.stocksnma.domain.model.StoreGeneralView
-import es.cursos.android.ejercicios.stocksnma.domain.model.StoreSelection
+import es.cursos.android.ejercicios.stocksnma.data.remote.dto.store.StoreGeneralViewDto
+import es.cursos.android.ejercicios.stocksnma.data.remote.dto.store.StoreSelectionDto
+import es.cursos.android.ejercicios.stocksnma.data.remote.dto.store.StoreRequestDto
+import es.cursos.android.ejercicios.stocksnma.data.remote.dto.store.StoreResponseDto
+import es.cursos.android.ejercicios.stocksnma.domain.model.store.Store
+import es.cursos.android.ejercicios.stocksnma.domain.model.store.StoreGeneralView
+import es.cursos.android.ejercicios.stocksnma.domain.model.store.StoreSelection
 
-fun StoreDto.toStore(): Store = Store(
+// StoreResponseDto (Backend) -> Store (Ui) - Obtener datos de una tienda (No hace falta al revés)
+fun StoreResponseDto.toStore(): Store = Store(
     id = id,
     name = name,
     email = email ?: "",
@@ -16,13 +18,13 @@ fun StoreDto.toStore(): Store = Store(
     city = city ?: "",
     country = country ?: "",
     postalCode = postalCode ?: "",
-    isActive = isActive ?: true,
-    createdAt = createdAt
+    isActive = isActive
+    //createdAt = createdAt
 )
 
 
-fun Store.toStoreDto(): StoreDto = StoreDto(
-    id = id,
+// Store (Ui) -> StoreRequest (Backend) - Para crear/modificar tienda
+fun Store.toStoreRequest(): StoreRequestDto = StoreRequestDto(
     name = name,
     email = email,
     phone = phone,
@@ -30,21 +32,23 @@ fun Store.toStoreDto(): StoreDto = StoreDto(
     city = city,
     country = country,
     postalCode = postalCode,
-    isActive = isActive,
-    createdAt = createdAt
+    isActive = isActive
 )
 
 
+// StoreGeneralViewDto (Backend) -> StoreGeneralView (Ui) - No hace falta al revés
 fun StoreGeneralViewDto.toStoreGeneralView(): StoreGeneralView = StoreGeneralView(
     id = id,
     name = name,
-    email = email ?: "Email no disponible",
-    city = city ?: "Ciudad no disponible"
+    email = email,
+    city = city
 )
 
 
+// StoreSelectionDto (Backend) -> StoreSelection (Ui) - No hace falta al revés
 fun StoreSelectionDto.toStoreSelection(): StoreSelection = StoreSelection(
     id = id,
     name = name
-    //isActive = isActive
 )
+
+fun String?.orDefault(default: String) = this ?: default
