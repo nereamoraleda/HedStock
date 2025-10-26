@@ -37,6 +37,7 @@ import es.cursos.android.ejercicios.stocksnma.ui.components.ShowMessageErrorText
 import es.cursos.android.ejercicios.stocksnma.ui.components.VerticalScrollableColumn
 import es.cursos.android.ejercicios.stocksnma.ui.components.supportingErrorText
 import es.cursos.android.ejercicios.stocksnma.utils.enums.StoreSections
+import es.cursos.android.ejercicios.stocksnma.utils.validations.StoreFieldsLenghts
 import es.cursos.android.ejercicios.stocksnma.utils.validations.StoreValidationForm
 
 @Composable
@@ -115,7 +116,10 @@ fun StoreCreationBodyScreen(
                 ) {
                     GeneralTextFieldTitle(
                         value = store.name,
-                        onValueChange = { onValueChange(StoreFields.NAME, it) },
+                        onValueChange = {
+                            if (it.length <= StoreFieldsLenghts.STORE_NAME_MAX)
+                            onValueChange(StoreFields.NAME, it)
+                        },
                         label = stringResource(R.string.store_name),
                     )
                     ShowMessageErrorText(validations.nameMessageError)
@@ -131,36 +135,30 @@ fun StoreCreationBodyScreen(
                         StoreSections.CONTACT -> {
                         GeneralOutlinedTextField(
                             value = store.email,
-                            onValueChange = { if (it.length <= 100) onValueChange(StoreFields.EMAIL, it) },
+                            onValueChange = {
+                                if (it.length <= StoreFieldsLenghts.STORE_EMAIL_MAX)
+                                onValueChange(StoreFields.EMAIL, it)
+                            },
                             label = stringResource(R.string.store_email),
                             keyboardType = KeyboardType.Email,
-                            supportingText = {
-                                if (validations.emailMessageError != null || validations.contactInformationErrorMessage != null) {
-                                    supportingErrorText(validations.emailMessageError)
-                                } else {
-                                    Text(
-                                        text = "${store.email.length}/100",
-                                        textAlign = TextAlign.End,
-                                        modifier = Modifier.fillMaxWidth()
-                                    )
-                                }
-                            },
-                            isError = validations.emailMessageError != null
+                            supportingText = supportingErrorText(validations.emailMessageError),
+                            isError = validations.emailMessageError != null || validations.contactInformationErrorMessage != null
                         )
 
                         GeneralOutlinedTextField(
                             value = store.phone,
                             onValueChange = {
                                 val phonePattern = Regex("^[0-9+ ]*$")
-                                if (it.matches(phonePattern) && it.length <= 20) {
+                                if (it.matches(phonePattern) && it.length <= StoreFieldsLenghts.STORE_PHONE_MAX) {
                                     onValueChange(StoreFields.PHONE, it)
                                 }
                             },
                             label = stringResource(R.string.store_phone),
                             keyboardType = KeyboardType.Phone,
-                            supportingText = {
+                            supportingText = supportingErrorText(validations.phoneMessageError),
+                            /*{
                                 if (validations.phoneMessageError != null || validations.contactInformationErrorMessage != null) {
-                                    //supportingErrorText(validations.phoneMessageError)
+                                    //
                                     validations.phoneMessageError?.let {
                                         Text(
                                             text = it,
@@ -175,7 +173,7 @@ fun StoreCreationBodyScreen(
                                         modifier = Modifier.fillMaxWidth()
                                     )
                                 }
-                            },
+                            }*/
                             isError = validations.phoneMessageError != null || validations.contactInformationErrorMessage != null
                         )
                         ShowMessageErrorText(validations.contactInformationErrorMessage)
@@ -189,29 +187,29 @@ fun StoreCreationBodyScreen(
 
                             GeneralOutlinedTextField(
                                 value = store.city,
-                                onValueChange = { onValueChange(StoreFields.CITY, it) },
+                                onValueChange = {
+                                    if (it.length <= StoreFieldsLenghts.STORE_CITY_MAX)
+                                    onValueChange(StoreFields.CITY, it)
+                                },
                                 label = stringResource(R.string.store_city),
                             )
 
                             GeneralOutlinedTextField(
                                 value = store.country,
-                                onValueChange = { onValueChange(StoreFields.COUNTRY, it) },
+                                onValueChange = {
+                                    if (it.length <= StoreFieldsLenghts.STORE_COUNTRY_MAX)
+                                    onValueChange(StoreFields.COUNTRY, it)
+                                },
                                 label = stringResource(R.string.store_country),
                             )
 
                             GeneralOutlinedTextField(
                                 value = store.postalCode,
                                 onValueChange = {
-                                    if (it.length <= 20) onValueChange(StoreFields.POSTAL_CODE, it)
+                                    if (it.length <= StoreFieldsLenghts.STORE_CODE_MAX)
+                                    onValueChange(StoreFields.POSTAL_CODE, it)
                                 },
-                                label = stringResource(R.string.store_postal_code),
-                                supportingText = {
-                                    Text(
-                                        text = "${store.postalCode.length}/20",
-                                        textAlign = TextAlign.End,
-                                        modifier = Modifier.fillMaxWidth()
-                                    )
-                                }
+                                label = stringResource(R.string.store_postal_code)
                             )
                         }
                     }

@@ -12,7 +12,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -32,13 +31,14 @@ import es.cursos.android.ejercicios.stocksnma.ui.components.ButtonsBottomBar
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralCard
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralOutlinedTextField
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralSegmentedButton
+import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralTextFieldTitle
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralTopAppBar
 import es.cursos.android.ejercicios.stocksnma.ui.components.NavigateBackButton
 import es.cursos.android.ejercicios.stocksnma.ui.components.ShowMessageErrorText
 import es.cursos.android.ejercicios.stocksnma.ui.components.VerticalScrollableColumn
-import es.cursos.android.ejercicios.stocksnma.ui.components.colorsSimpleTextField
 import es.cursos.android.ejercicios.stocksnma.ui.components.supportingErrorText
 import es.cursos.android.ejercicios.stocksnma.utils.enums.StoreSections
+import es.cursos.android.ejercicios.stocksnma.utils.validations.StoreFieldsLenghts
 import es.cursos.android.ejercicios.stocksnma.utils.validations.StoreValidationForm
 
 @Composable
@@ -50,21 +50,52 @@ fun StoreDetailsScreen(
     val store by viewModel.editableStore.collectAsState()
     val validationState by viewModel.validationState.collectAsState()
     val isFormValid by viewModel.isFormValid.collectAsState()
-    val canEdit by viewModel.hasPermission.collectAsState()
+    val hasPermission by viewModel.hasPermission.collectAsState()
+
+    //var showDialogConfirmation by remember { mutableStateOf(false) }
 
     LaunchedEffect(storeId) {
         viewModel.getStoreDetails(storeId)
     }
 
+    // -------------------- DIALOGS -------------------- //
+/*    if (showDialogConfirmation) {
+        ConfirmationDialog(
+            title = stringResource(R.string.store_delete_title),
+            message = stringResource(R.string.store_delete_message, store.name),
+            confirmButtonText = stringResource(R.string.button_delete),
+            onConfirmAction = {
+                viewModel.deleteStore()
+                navigateBack()
+            },
+            onDismissRequest = { showDialogConfirmation = false }
+        )
+       }
+ */
+
+
+
+    // -------------------- UI -------------------- //
     Scaffold(
         topBar = {
             GeneralTopAppBar(
                 title = stringResource(R.string.store_details_title),
-                navigationButton = { NavigateBackButton(onNavigateBack = { navigateBack() } ) }
+                navigationButton = { NavigateBackButton(onNavigateBack = { navigateBack() } ) },
+                /*
+                actionButton = {
+                    if (hasPermission) {
+                        GeneralIconButton(
+                            onClick = { showDialogConfirmation = true },
+                            icon = R.drawable.ic_delete_forever
+                        )
+                    }
+                }
+                 */
+
             )
         },
         bottomBar = {
-            if (canEdit) {
+            if (hasPermission) {
                 ButtonsBottomBar(
                     acceptButtonEnabled = isFormValid,
                     onAcceptAction = { viewModel.saveChanges { success ->
@@ -87,7 +118,7 @@ fun StoreDetailsScreen(
                 onFieldChange = viewModel::onFieldChange,
                 onCheckedChange = viewModel::onFieldChange,
                 validacionState = validationState,
-                canEdit = canEdit
+                hasPermission = hasPermission
             )
         }
     }
@@ -100,7 +131,7 @@ fun StoreDetailsBodyScreen(
     onFieldChange: (StoreFields, String) -> Unit,
     onCheckedChange: (StoreFields, Boolean) -> Unit,
     validacionState: StoreValidationForm,
-    canEdit: Boolean
+    hasPermission: Boolean
 ) {
     var sectionSelected by remember { mutableStateOf(StoreSections.CONTACT) }
 
@@ -127,28 +158,17 @@ fun StoreDetailsBodyScreen(
                         .fillMaxWidth()
                         .background(color = MaterialTheme.colorScheme.secondary)
                 ) {
-                    TextField(
+                    GeneralTextFieldTitle(
                         value = store.name,
-                        onValueChange = { onFieldChange(StoreFields.NAME, it) },
-                        readOnly = !canEdit,
-                        placeholder = {
-                            Text(
-                                stringResource(R.string.store_name),
-                                style = MaterialTheme.typography.titleLarge
-                            )
+                        onValueChange = {
+                            if (it.length <= StoreFieldsLenghts.STORE_NAME_MAX)
+                            onFieldChange(StoreFields.NAME, it)
                         },
-                        //supportingText = supportingErrorText(validacionState.nameMessageError),
-                        isError = validacionState.nameMessageError != null,
-                        textStyle = MaterialTheme.typography.titleLarge,
-                        colors = colorsSimpleTextField(),
-                        modifier = Modifier.fillMaxWidth()
+                        label = stringResource(R.string.store_name),
+                        readOnly = !hasPermission,
+                        isError = validacionState.nameMessageError != null
                     )
-                    ShowMessageErrorText(
-                        validacionState.nameMessageError,
-                        modifier = Modifier
-                            .padding(horizontal = dimensionResource(R.dimen.padding_16dp))
-                            .padding(bottom = dimensionResource(R.dimen.padding_16dp))
-                    )
+                    ShowMessageErrorText(validacionState.nameMessageError)
                 }
 
                 Column(
@@ -158,63 +178,71 @@ fun StoreDetailsBodyScreen(
                         .padding(dimensionResource(R.dimen.padding_16dp))
                 ) {
                     when (sectionSelected) {
+                        StoreSections.CONTACT -> {
+                        GeneralOutlinedTextField(
+                            value = store.email,
+                            onValueChange = {
+                                if (it.length <= StoreFieldsLenghts.STORE_EMAIL_MAX)
+                                onFieldChange(StoreFields.EMAIL, it)
+                            },
+                            readOnly = !hasPermission,
+                            label = stringResource(R.string.store_email),
+                            supportingText = supportingErrorText(validacionState.emailMessageError),
+                            isError = validacionState.emailMessageError != null || validacionState.contactInformationErrorMessage != null
+                        )
+
+                        GeneralOutlinedTextField(
+                            value = store.phone,
+                            onValueChange = {
+                                val phonePattern = Regex("^[0-9+ ]*$")
+                                if (it.matches(phonePattern) && it.length <= StoreFieldsLenghts.STORE_PHONE_MAX) {
+                                    onFieldChange(StoreFields.PHONE, it)
+                                }
+                            },
+                            readOnly = !hasPermission,
+                            label = stringResource(R.string.store_phone),
+                            supportingText = supportingErrorText(validacionState.phoneMessageError),
+                            isError = validacionState.phoneMessageError != null || validacionState.contactInformationErrorMessage != null
+                        )
+                        ShowMessageErrorText(validacionState.contactInformationErrorMessage)
+                    }
                         StoreSections.ADDRESS -> {
                             GeneralOutlinedTextField(
                                 value = store.address,
                                 onValueChange = { onFieldChange(StoreFields.ADDRESS, it) },
-                                readOnly = !canEdit,
+                                readOnly = !hasPermission,
                                 label = stringResource(R.string.store_address),
-                                //supportingText = supportingErrorText(validacionState.addressErrorMessage),
-                                //isError = validacionState.nameMessageError != null
                             )
 
                             GeneralOutlinedTextField(
                                 value = store.city,
-                                onValueChange = { onFieldChange(StoreFields.CITY, it) },
-                                readOnly = !canEdit,
+                                onValueChange = {
+                                    if (it.length <= StoreFieldsLenghts.STORE_CITY_MAX)
+                                    onFieldChange(StoreFields.CITY, it)
+                                },
+                                readOnly = !hasPermission,
                                 label = stringResource(R.string.store_city),
-                                //supportingText = supportingErrorText(validacionState.cityErrorMessage),
-                                //isError = validacionState.cityErrorMessage != null
                             )
 
                             GeneralOutlinedTextField(
                                 value = store.country,
-                                onValueChange = { onFieldChange(StoreFields.COUNTRY, it) },
-                                readOnly = !canEdit,
+                                onValueChange = {
+                                    if (it.length <= StoreFieldsLenghts.STORE_COUNTRY_MAX)
+                                    onFieldChange(StoreFields.COUNTRY, it)
+                                },
+                                readOnly = !hasPermission,
                                 label = stringResource(R.string.store_country),
-                                //supportingText = supportingErrorText(validacionState.countryErrorMessage),
-                                //isError = validationState.countryErrorMessage != null
                             )
 
                             GeneralOutlinedTextField(
                                 value = store.postalCode,
-                                onValueChange = { onFieldChange(StoreFields.POSTAL_CODE, it) },
-                                readOnly = !canEdit,
+                                onValueChange = {
+                                    if (it.length <= StoreFieldsLenghts.STORE_CODE_MAX)
+                                    onFieldChange(StoreFields.POSTAL_CODE, it)
+                                },
+                                readOnly = !hasPermission,
                                 label = stringResource(R.string.store_postal_code),
-                                //supportingText = supportingErrorText(validacionState.postalCodeErrorMessage),
-                                //isError = validacionState.postalCodeErrorMessage != null
                             )
-                        }
-                        StoreSections.CONTACT -> {
-                            GeneralOutlinedTextField(
-                                value = store.email,
-                                onValueChange = { onFieldChange(StoreFields.EMAIL, it) },
-                                readOnly = !canEdit,
-                                label = stringResource(R.string.store_email),
-                                supportingText = supportingErrorText(validacionState.emailMessageError),
-                                isError = validacionState.emailMessageError != null || validacionState.contactInformationErrorMessage != null
-                            )
-
-                            GeneralOutlinedTextField(
-                                value = store.phone,
-                                onValueChange = { onFieldChange(StoreFields.PHONE, it) },
-                                readOnly = !canEdit,
-                                label = stringResource(R.string.store_phone),
-                                supportingText = supportingErrorText(validacionState.phoneMessageError),
-                                isError = validacionState.phoneMessageError != null || validacionState.contactInformationErrorMessage != null
-                            )
-
-                            ShowMessageErrorText(validacionState.contactInformationErrorMessage)
                         }
                     }
 
@@ -232,7 +260,7 @@ fun StoreDetailsBodyScreen(
                                     !store.isActive
                                 )
                             },
-                            enabled = canEdit
+                            enabled = hasPermission
                         )
                     }
                 }
