@@ -5,7 +5,9 @@ import es.cursos.android.ejercicios.stocksnma.data.remote.dto.store.StoreRequest
 import es.cursos.android.ejercicios.stocksnma.data.remote.dto.store.StoreResponseDto
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -14,6 +16,13 @@ interface StoreApi {
 
     // -------------------- CRUD -------------------- //
 
+    // Endpoint para crear una nueva tienda
+    @POST("api/stores")
+    suspend fun createStore(
+        @Body store: StoreRequestDto
+    ): Response<StoreRequestDto>
+
+
     // Endpoint para modificar una tienda (mediante el ID)
     @PUT("api/stores/{id}")
     suspend fun updateStore(
@@ -21,12 +30,18 @@ interface StoreApi {
         @Body store: StoreRequestDto
     ): Response<StoreRequestDto>
 
+
+    // Endpoint para eliminar una tienda (mediante el ID)
+    @DELETE("api/stores/{id}")
+    suspend fun deleteStore(@Path("id") id: Long)
+
+
     // Endpoint para obtener un listado de tiendas para la Vista General (Campos básicos, filtrados y ordenados)
     @GET("api/stores/all")
     suspend fun getStores(
         @Query("sortBy") sortBy: String = "name",
         @Query("direction") direction: String = "asc",
-        @Query("active") active: Boolean? = null
+        //@Query("isActive") active: Boolean? = null
     ): Response<List<StoreGeneralViewDto>>
 
 
