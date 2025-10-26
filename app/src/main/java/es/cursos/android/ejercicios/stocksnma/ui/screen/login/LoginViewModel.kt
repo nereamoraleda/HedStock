@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import es.cursos.android.ejercicios.stocksnma.data.local.datastore.AppDataStore
 import es.cursos.android.ejercicios.stocksnma.data.remote.api.AuthApi
 import es.cursos.android.ejercicios.stocksnma.data.remote.dto.ChangePasswordRequest
 import es.cursos.android.ejercicios.stocksnma.data.remote.dto.LoginRequest
@@ -17,6 +18,7 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val api: AuthApi,
+    private val dataStore: AppDataStore,
     private val sessionManager: SessionManager,
 ) : ViewModel() {
     private val _loginState = MutableStateFlow<LoginUiState>(LoginUiState.Idle)
@@ -85,6 +87,7 @@ class LoginViewModel @Inject constructor(
 
     fun login(username: String, password: String) {
         viewModelScope.launch {
+            sessionManager.clearSession()
             //if (!validateForm(username, password)) {
             try {
                 //_loginState.value = LoginUiState.Loading
@@ -103,11 +106,8 @@ class LoginViewModel @Inject constructor(
                             Log.d("LoginViewModel", "Password must be changed")
 
                         } else {
+                            sessionManager.saveSession(authResponse.token, _userRole.value)
                             _loginState.value = LoginUiState.Success(authResponse)
-                            sessionManager.saveSession(
-                                authResponse.token,
-                                _userRole.value
-                            )
                         }
                         //Log.d("LoginViewModel", "Login successful")
                     }

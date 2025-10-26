@@ -26,12 +26,12 @@ fun StoreResponseDto.toStore(): Store = Store(
 // Store (Ui) -> StoreRequest (Backend) - Para crear/modificar tienda
 fun Store.toStoreRequest(): StoreRequestDto = StoreRequestDto(
     name = name,
-    email = email,
-    phone = phone,
-    address = address,
-    city = city,
-    country = country,
-    postalCode = postalCode,
+    email = email.ifBlank { null },
+    phone = phone.ifBlank { null },
+    address = address.ifBlank { null },
+    city = city.ifBlank { null },
+    country = country.ifBlank { null },
+    postalCode = postalCode.ifBlank { null },
     isActive = isActive
 )
 
@@ -41,7 +41,8 @@ fun StoreGeneralViewDto.toStoreGeneralView(): StoreGeneralView = StoreGeneralVie
     id = id,
     name = name,
     email = email,
-    city = city
+    city = city,
+    isActive = isActive
 )
 
 

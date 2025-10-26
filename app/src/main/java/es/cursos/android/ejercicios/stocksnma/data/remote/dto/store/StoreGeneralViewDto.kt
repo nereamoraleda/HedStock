@@ -11,5 +11,6 @@ data class StoreGeneralViewDto(
     val id: Long, /* TODO - Modificar? Debería siempre ser recibido */
     val name: String,
     val email: String?,
-    val city: String?
+    val city: String?,
+    val isActive: Boolean
 )

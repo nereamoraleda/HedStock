@@ -4,10 +4,7 @@ import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import es.cursos.android.ejercicios.stocksnma.utils.enums.ProductSortOptions
-import es.cursos.android.ejercicios.stocksnma.utils.enums.SupplierSortOptions
 import es.cursos.android.ejercicios.stocksnma.utils.enums.UserRoles
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
