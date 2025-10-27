@@ -51,6 +51,11 @@ dependencies {
     // DataStore (Preferencias)
     implementation(libs.androidx.datastore.preferences)
 
+    // Retrofit
+    implementation(libs.squareup.retrofit2)
+    implementation(libs.squareup.retrofit2.converter.scalars)
+    implementation(libs.squareup.retrofit2.converter.gson)
+
     // Room (Base de datos)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
@@ -61,6 +66,17 @@ dependencies {
     implementation(libs.androidx.hilt.navigation.compose)
     kapt(libs.hilt.android.compiler)
     //implementation (libs.dagger.hilt.android.v248)
+
+    // SwipeRefresh
+    implementation(libs.accompanist.swiperefresh)
+
+    // Barcode Scanner
+    implementation(libs.zxing.android.embedded.v430)
+    implementation(libs.core)
+
+
+    // SplashScreen
+    implementation(libs.androidx.core.splashscreen)
 
     // Gifs
     implementation(libs.accompanist.drawablepainter)

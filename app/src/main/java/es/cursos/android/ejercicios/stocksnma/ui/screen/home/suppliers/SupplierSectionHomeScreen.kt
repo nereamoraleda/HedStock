@@ -41,7 +41,6 @@ import es.cursos.android.ejercicios.stocksnma.ui.screen.home.HomeErrorScreen
 import es.cursos.android.ejercicios.stocksnma.ui.screen.home.HomeLoadingScreen
 import es.cursos.android.ejercicios.stocksnma.ui.screen.home.SupplierHomeUiState
 import es.cursos.android.ejercicios.stocksnma.ui.screen.home.SupplierSearchTable
-import es.cursos.android.ejercicios.stocksnma.ui.screen.home.products.ProductSectionBodyScreen
 
 
 @Composable
@@ -137,7 +136,7 @@ fun SupplierSectionBodyScreen(
                             },
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(dimensionResource(R.dimen.padding_medium))
+                                .padding(dimensionResource(R.dimen.padding_16dp))
                                 .horizontalScroll(rememberScrollState())  // Scroll horizontal para toda la tabla
                         )
                     }

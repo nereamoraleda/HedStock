@@ -38,10 +38,10 @@ import es.cursos.android.ejercicios.stocksnma.R
 import es.cursos.android.ejercicios.stocksnma.data.local.entity.SupplierEntity
 import es.cursos.android.ejercicios.stocksnma.domain.model.Supplier
 import es.cursos.android.ejercicios.stocksnma.ui.components.ConfirmationDialog
-import es.cursos.android.ejercicios.stocksnma.ui.components.CustomBottomAppBar
+import es.cursos.android.ejercicios.stocksnma.ui.components.ButtonsBottomBar
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralTopAppBar
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralIconButton
-import es.cursos.android.ejercicios.stocksnma.ui.components.IconButtonGoBack
+import es.cursos.android.ejercicios.stocksnma.ui.components.NavigateBackButton
 import es.cursos.android.ejercicios.stocksnma.ui.components.ShowMessageErrorText
 import es.cursos.android.ejercicios.stocksnma.ui.components.campoColores
 import es.cursos.android.ejercicios.stocksnma.ui.state.DetailsUiState
@@ -87,7 +87,7 @@ fun SupplierDetailsScreen(
                 topBar = {
                     GeneralTopAppBar(
                         title = stringResource(R.string.supplier_details_title),
-                        navigationButton = { IconButtonGoBack(navigateBack) },
+                        navigationButton = { NavigateBackButton(navigateBack) },
                         actionButton = {
                             GeneralIconButton(
                                 icon = R.drawable.ic_edit,
@@ -106,7 +106,7 @@ fun SupplierDetailsScreen(
 
                 bottomBar = {
                     if (isEditing) {
-                        CustomBottomAppBar(
+                        ButtonsBottomBar(
                             enabled = true,
                             onAcceptAction = {
                                 Log.d("UpdateDebug", "Supplier: $tempSupplier")
@@ -146,7 +146,7 @@ fun SupplierDetailsScreen(
                         isEditing = isEditing,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(dimensionResource(R.dimen.padding_medium))
+                            .padding(dimensionResource(R.dimen.padding_16dp))
                     )
                 }
             }
@@ -255,10 +255,10 @@ fun SupplierDetailsCard(
     supplier: SupplierEntity,
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_small)),
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_8dp)),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(dimensionResource(R.dimen.padding_medium))
+            .padding(dimensionResource(R.dimen.padding_16dp))
     ) {
         BasicTextField(
             value = supplier.name,
@@ -274,7 +274,7 @@ fun SupplierDetailsCard(
 //            modifier = Modifier.fillMaxWidth(),
 //            readOnly = true
 //        )
-        Spacer(modifier = Modifier.padding(dimensionResource(R.dimen.padding_very_small)))
+        Spacer(modifier = Modifier.padding(dimensionResource(R.dimen.padding_4dp)))
         TextField(
             value = supplier.contactName ?: "No especificado",
             onValueChange = {},

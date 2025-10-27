@@ -3,7 +3,7 @@ package es.cursos.android.ejercicios.stocksnma.ui.screen.splash
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import es.cursos.android.ejercicios.stocksnma.data.session.SessionManager
+import es.cursos.android.ejercicios.stocksnma.ui.screen.login.SessionManager
 import es.cursos.android.ejercicios.stocksnma.ui.navigation.Home
 import es.cursos.android.ejercicios.stocksnma.ui.navigation.Login
 import kotlinx.coroutines.flow.MutableStateFlow

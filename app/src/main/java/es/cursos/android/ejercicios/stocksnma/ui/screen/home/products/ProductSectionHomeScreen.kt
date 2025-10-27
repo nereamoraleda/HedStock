@@ -157,7 +157,7 @@ fun ProductSectionBodyScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(MaterialTheme.colorScheme.surface)
-                        .padding(end = dimensionResource(R.dimen.padding_medium))
+                        .padding(end = dimensionResource(R.dimen.padding_16dp))
                 ) {
 
                     // Parent CheckBox
@@ -198,7 +198,7 @@ fun ProductSectionBodyScreen(
                                         MaterialTheme.colorScheme.surfaceVariant
                                     else Color.Transparent
                                 )
-                                .padding(end = dimensionResource(R.dimen.padding_medium))
+                                .padding(end = dimensionResource(R.dimen.padding_16dp))
 
                         ) {
                             ChildCheckBox(

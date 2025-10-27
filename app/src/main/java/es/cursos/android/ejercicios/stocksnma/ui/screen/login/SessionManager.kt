@@ -1,6 +1,6 @@
-package es.cursos.android.ejercicios.stocksnma.data.session
+package es.cursos.android.ejercicios.stocksnma.ui.screen.login
 
-import es.cursos.android.ejercicios.stocksnma.data.datastore.AppDataStore
+import es.cursos.android.ejercicios.stocksnma.data.local.AppDataStore
 import es.cursos.android.ejercicios.stocksnma.utils.enums.UserRoles
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

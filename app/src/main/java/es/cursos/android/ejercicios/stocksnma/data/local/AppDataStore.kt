@@ -1,4 +1,4 @@
-package es.cursos.android.ejercicios.stocksnma.data.datastore
+package es.cursos.android.ejercicios.stocksnma.data.local
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit
@@ -12,9 +12,8 @@ import es.cursos.android.ejercicios.stocksnma.utils.enums.UserRoles
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-private val Context.dataStore by preferencesDataStore(name = "hedstock_preferences")
-
 class AppDataStore(private val context: Context) {
+    private val Context.dataStore by preferencesDataStore(name = "hedstock_preferences")
 
     // ---------- CLAVES DE LAS PREFERENCIAS ----------
     companion object {
@@ -26,7 +25,8 @@ class AppDataStore(private val context: Context) {
 
         // Claves de los historiales de búsqueda
         private val PRODUCT_SEARCH_HISTORY_KEY = stringSetPreferencesKey("products_search_history")
-        private val SUPPLIER_SEARCH_HISTORY_KEY = stringSetPreferencesKey("suppliers_search_history")
+        private val SUPPLIER_SEARCH_HISTORY_KEY =
+            stringSetPreferencesKey("suppliers_search_history")
         private val USER_SEARCH_HISTORY_KEY = stringSetPreferencesKey("users_search_history")
 
         // Claves de las preferencias de ordenación
@@ -53,7 +53,7 @@ class AppDataStore(private val context: Context) {
     val productSearchHistory: Flow<List<String>> = context.dataStore.data.map { preferences ->
         (preferences[PRODUCT_SEARCH_HISTORY_KEY]?.toList() ?: emptyList())
     }
-    
+
     val supplierSearchHistory: Flow<List<String>> = context.dataStore.data.map { preferences ->
         (preferences[SUPPLIER_SEARCH_HISTORY_KEY]?.toList() ?: emptyList())
     }

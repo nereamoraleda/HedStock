@@ -94,11 +94,11 @@ fun ProductCreationScreen(
         topBar = {
             GeneralTopAppBar(
                 title = stringResource(R.string.product_create_title),
-                navigationButton = { IconButtonGoBack(navigateBack); viewModel.cleanUiState() }
+                navigationButton = { NavigateBackButton(navigateBack); viewModel.cleanUiState() }
             )
         },
         bottomBar = {
-            CustomBottomAppBar(
+            ButtonsBottomBar(
                 enabled = viewModel.productUiState.isEntryValid,
                 onAcceptAction = {
                     viewModel.saveProduct()
@@ -126,7 +126,7 @@ fun ProductCreationScreen(
                 onProductSectionChange = { activeProductSection = it },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(dimensionResource(R.dimen.padding_medium))
+                    .padding(dimensionResource(R.dimen.padding_16dp))
             )
 
             ProductDetailsCard(
@@ -178,7 +178,7 @@ fun ProductDetailsCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(dimensionResource(R.dimen.padding_medium)),
+            .padding(dimensionResource(R.dimen.padding_16dp)),
     ) {
         Card(
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
@@ -281,7 +281,7 @@ fun ProductDetailsCard(
                         ShowMessageErrorText(validationState.costPriceError)
 
 
-                        Spacer(modifier = Modifier.width(dimensionResource(R.dimen.padding_medium)))
+                        Spacer(modifier = Modifier.width(dimensionResource(R.dimen.padding_16dp)))
 
 
                         CustomRowAndTextFieldPrices(
@@ -348,6 +348,6 @@ fun ErrorMessageStockText(errorMessage: String) {
         text = errorMessage,
         color = MaterialTheme.colorScheme.error,
         style = MaterialTheme.typography.bodySmall,
-        modifier = Modifier.padding(vertical = dimensionResource(R.dimen.padding_small))
+        modifier = Modifier.padding(vertical = dimensionResource(R.dimen.padding_8dp))
     )
 }

@@ -11,7 +11,6 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,6 +27,39 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import es.cursos.android.ejercicios.stocksnma.R
 import es.cursos.android.ejercicios.stocksnma.utils.getCurrencySymbol
+
+@Composable
+fun GeneralOutlinedTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    leadingIcon: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null,
+    supportingText: @Composable (() -> Unit)? = null,
+    isError: Boolean = false,
+    enabled: Boolean = true,
+    readOnly: Boolean = false,
+    singleLine: Boolean = true,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    modifier: Modifier = Modifier
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = { onValueChange(it) },
+        label = { Text(text = label) },
+        leadingIcon = leadingIcon,
+        trailingIcon = trailingIcon,
+        supportingText = supportingText,
+        isError = isError,
+        enabled = enabled,
+        readOnly = readOnly,
+        singleLine = singleLine,
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+        colors = coloresOutlinedTextField(),
+        //colors = colorsSimpleTextField(),
+        modifier = modifier.fillMaxWidth()
+    )
+}
 
 
 @Composable
@@ -238,6 +270,12 @@ fun ShowMessageErrorText(message: String? = null, isEditing: Boolean = true, mod
             modifier = modifier
         )
     }
+}
+
+@Composable
+fun supportingErrorText(vararg errors: String?): (@Composable (() -> Unit))? {
+    val error = errors.firstOrNull { it != null }
+    return error?.let { { Text(text = it) } }
 }
 
 

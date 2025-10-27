@@ -1,9 +1,5 @@
 package es.cursos.android.ejercicios.stocksnma.ui.screen.user
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,23 +7,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ElevatedButton
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,62 +23,73 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import es.cursos.android.ejercicios.stocksnma.R
 import es.cursos.android.ejercicios.stocksnma.domain.model.Store
 import es.cursos.android.ejercicios.stocksnma.domain.model.User
 import es.cursos.android.ejercicios.stocksnma.ui.components.ConfirmationDialog
-import es.cursos.android.ejercicios.stocksnma.ui.components.CustomBottomAppBar
+import es.cursos.android.ejercicios.stocksnma.ui.components.ButtonsBottomBar
+import es.cursos.android.ejercicios.stocksnma.ui.components.ErrorContent
+import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralCard
+import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralExposedDropDownBox
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralTopAppBar
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralHorizontalDivider
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralIconButton
+import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralOutlinedTextField
+import es.cursos.android.ejercicios.stocksnma.ui.components.LoadingContent
+import es.cursos.android.ejercicios.stocksnma.ui.components.NavigateBackButton
+import es.cursos.android.ejercicios.stocksnma.ui.components.NotFoundContent
+import es.cursos.android.ejercicios.stocksnma.ui.components.VerticalScrollableColumn
+import es.cursos.android.ejercicios.stocksnma.ui.components.supportingErrorText
 import es.cursos.android.ejercicios.stocksnma.ui.state.DetailsUiState
 import es.cursos.android.ejercicios.stocksnma.utils.enums.UserRoles.Companion.getRoles
 import es.cursos.android.ejercicios.stocksnma.utils.UserValidationState
-import androidx.compose.material3.OutlinedTextField as OutlinedTextField
+import kotlinx.coroutines.launch
 
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserDetailsScreen(
     viewModel: UserDetailsViewModel,
     userId: Long,
-    navigateBack: () -> Unit
+    onNavigateBack: () -> Unit
 ) {
+    // -------------------- VARIABLES -------------------- //
+    val state by viewModel.uiState.collectAsState()                    // Estado de la UI (Loading, Success...)
+    val user by viewModel.userEditable.collectAsState()                // Datos del usuario
+    val validationState by viewModel.validationState.collectAsState()  // Estado de validación de campos
+    val storeOptions by viewModel.storeOptions.collectAsState()        // Listado de tiendas disponibles
+    val resetResult by viewModel.resetResult.collectAsState()          // Resultado del reseteo de contraseña (True/False)
+
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    var showConfirmationDialog by remember { mutableStateOf(false) }  // Confirmación de eliminación de usuario
+    var isMenuExpanded by remember { mutableStateOf(false) }          // Menu desplegable de opciones del usuario
+
+
+    // Cargar datos del usuario
     LaunchedEffect(userId) {
         viewModel.loadUserDetails(userId)
     }
 
-    val state by viewModel.uiState.collectAsState()
-    val user by viewModel.userEditable.collectAsState()
-    val validationState by viewModel.validationState.collectAsState()
-    val storeOptions by viewModel.storeOptions.collectAsState()
 
-    var showConfirmationDialog by remember { mutableStateOf(false) }
-    var showChangeCredentialsDialog by remember { mutableStateOf(false) }
-    var isMenuExpanded by remember { mutableStateOf(false) }
-
+    // -------------------- UI -------------------- //
     Scaffold(
         topBar = {
             GeneralTopAppBar(
                 title = stringResource(R.string.user_details_title),
-                navigationButton = {
-                    GeneralIconButton(
-                        icon = R.drawable.ic_arrow_back,
-                        onClick = navigateBack
-                    )
-                },
+                navigationButton = { NavigateBackButton(onNavigateBack = onNavigateBack) },
                 actionButton = {
                     Box(contentAlignment = Alignment.Center) {
+
+                        // Abrir menú desplegable
                         GeneralIconButton(
                             onClick = { isMenuExpanded = true },
                             icon = R.drawable.ic_menu_filter,
@@ -101,13 +99,21 @@ fun UserDetailsScreen(
                             expanded = isMenuExpanded,
                             onDismissRequest = { isMenuExpanded = false },
                         ) {
+
+                            // Opción de reseteo de contraseña
                             DropdownMenuItem(
-                                onClick = { viewModel.resetPassword() },
+                                onClick = {
+                                    viewModel.resetPassword()
+                                    scope.launch {
+                                        if (resetResult) snackbarHostState.showSnackbar("Contraseña del usuario \"${user.username}\" reseteada")
+                                        else snackbarHostState.showSnackbar("Error al resetear la contraseña")
+                                    }
+                                },
                                 text = {
                                     Text(
-                                        text = "Cambiar credenciales",//stringResource(),
+                                        text = stringResource(id = R.string.reset_password),
                                         style = MaterialTheme.typography.bodyLarge,
-                                        modifier = Modifier.padding(vertical = dimensionResource(R.dimen.padding_small))
+                                        modifier = Modifier.padding(vertical = dimensionResource(R.dimen.padding_8dp))
                                     )
                                 },
                                 trailingIcon = {
@@ -120,13 +126,14 @@ fun UserDetailsScreen(
 
                             GeneralHorizontalDivider()
 
+                            // Opción de eliminación de usuario
                             DropdownMenuItem(
                                 onClick = { showConfirmationDialog = true },
                                 text = {
                                     Text(
-                                        text = "Eliminar usuario",//stringResource(),
+                                        text = stringResource(id = R.string.delete_user),
                                         style = MaterialTheme.typography.bodyLarge,
-                                        modifier = Modifier.padding(vertical = dimensionResource(R.dimen.padding_small))
+                                        modifier = Modifier.padding(vertical = dimensionResource(R.dimen.padding_8dp))
                                     )
                                 },
                                 trailingIcon = {
@@ -146,35 +153,32 @@ fun UserDetailsScreen(
                 }
             )
         },
-
         bottomBar = {
-            val uiState = state
-            if (uiState is DetailsUiState.Success) {
-                CustomBottomAppBar(
-                    enabled = uiState.isEntryValid,
+            if (state is DetailsUiState.Success) {
+                ButtonsBottomBar(
                     onAcceptAction = {
                         viewModel.saveUserUpdates { success ->
-                            if (success) navigateBack()
+                            if (success) onNavigateBack()
                         }
                     },
-                    onCancelAction = { viewModel.resetUiState() }
+                    onCancelAction = { viewModel.resetUiState() },
+                    enabled = (state as DetailsUiState.Success).isEntryValid,
                 )
             }
-        }
-
+        },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { innerPadding ->
         Box(
-            contentAlignment = Alignment.Center,
             modifier = Modifier
-                .padding(innerPadding)
                 .fillMaxSize()
+                .padding(innerPadding)
         ) {
-            when (val uiState = state) {
-                is DetailsUiState.Loading -> { CircularProgressIndicator(modifier = Modifier.size(50.dp)) }
-                is DetailsUiState.NotFound -> { Text("Producto no encontrado") }
-                is DetailsUiState.Error -> { Text("Error: ${uiState.messageError}") }
+            when (state) {
+                is DetailsUiState.Loading -> { LoadingContent() }
+                is DetailsUiState.NotFound -> { NotFoundContent(stringResource(R.string.user_not_found)) }
+                is DetailsUiState.Error -> { ErrorContent(stringResource(R.string.message_error, (state as DetailsUiState.Error).messageError)) }
                 is DetailsUiState.Success -> {
-                    UserDetailsBody(
+                    UserDetailsBodyScreen(
                         user = user,
                         onFieldChange = viewModel::updateUserEditable,
                         validationState = validationState,
@@ -185,221 +189,144 @@ fun UserDetailsScreen(
         }
     }
 
+    // Dialog - Confirmación de eliminación de usuario
+    /*TODO - Cambiar apariencia del diálogo*/
     if (showConfirmationDialog) {
         ConfirmationDialog(
-            title = "Eliminar usuario",
-            message = "¿Está seguro de eliminar este usuario?, la acción no se puede deshacer",
+            title = stringResource(id = R.string.user_delete_title),
+            message = stringResource(id = R.string.user_delete_message, user.username),
             onDismissRequest = { showConfirmationDialog = false },
             onConfirmAction = {
                 viewModel.deleteUser()
                 showConfirmationDialog = false
-                navigateBack()
+                onNavigateBack()
             },
-            confirmButtonText = "Aceptar",
+            confirmButtonText = stringResource(id = R.string.button_delete),
         )
-    }
-
-    if (showChangeCredentialsDialog) {
-        Dialog(
-            onDismissRequest = { showChangeCredentialsDialog = false }
-        ) {
-            Card() {
-                Text(text = "Cambiar credenciales")
-                OutlinedTextField(value = "", onValueChange = {})
-                OutlinedTextField(value = "", onValueChange = {})
-            }
-        }
     }
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserDetailsBody(
+fun UserDetailsBodyScreen(
     user: User,
     onFieldChange: (String, Any) -> Unit,
     validationState: UserValidationState,
     storeOptions: List<Store>
 ) {
+    // -------------------- VARIABLES -------------------- //
+    var expandedRoleMenu by remember { mutableStateOf(false) }   // Menu desplegable de roles
+    var expandedStoreMenu by remember { mutableStateOf(false) }  // Menu desplegable de tiendas
 
-    // Variables - Menú desplegable
-    var expandedRoleMenu by remember { mutableStateOf(false) }
-    var expandedStoreMenu by remember { mutableStateOf(false) }
+    VerticalScrollableColumn {
+        GeneralCard {
+            // Cabecera de la tarjeta de detalles de usuario
+            UserFormHeader()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            //.padding(innerPadding)
-            .verticalScroll(rememberScrollState())
-    ) {
-        Card(
-            elevation = CardDefaults.cardElevation(16.dp),
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.secondary)
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.img_user_no_photo),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(150.dp)
-                        .border(4.dp, MaterialTheme.colorScheme.primary, CircleShape)
-                        .padding(4.dp)
-                        .clip(CircleShape)
-                        .clickable { /*TODO*/ }
-                )
-
-                ElevatedButton(
-                    onClick = { /*TODO*/ },
-                    enabled = false
-                ) {
-                    Text(text = stringResource(id = R.string.user_add_photo))
-                }
-            }
-
-
+            // Cuerpo de la tarjeta de detalles de usuario
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_16dp))
             ) {
-                OutlinedTextField(
+                // Campo de texto para el nombre (Nombre y apellidos)
+                GeneralOutlinedTextField(
                     value = user.name,
-                    onValueChange = { onFieldChange("name", it) },
-                    label = { Text(text = stringResource(id = R.string.user_name)) },
+                    onValueChange = { value -> onFieldChange("name", value) },
+                    label = stringResource(id = R.string.user_name),
                     supportingText = supportingErrorText(validationState.nameError),
                     isError = validationState.nameError != null,
-                    modifier = Modifier.fillMaxWidth()
                 )
 
-                OutlinedTextField(
+                // Campo de texto para el nombre de usuario (no editable)
+                GeneralOutlinedTextField(
                     value = user.username,
                     onValueChange = {  },
-                    label = { Text(text = stringResource(id = R.string.user_username)) },
-                    enabled = false,
-                    modifier = Modifier.fillMaxWidth()
+                    label = stringResource(id = R.string.user_username),
+                    enabled = false
                 )
 
-                OutlinedTextField(
+                // Campo de texto para el email
+                GeneralOutlinedTextField(
                     value = user.email,
                     onValueChange = { onFieldChange("email", it) },
-                    label = { Text(text = stringResource(id = R.string.user_email)) },
-                    supportingText = supportingErrorText(
-                        validationState.emailOrPhoneError,
-                        validationState.emailError
-                    ),
+                    label = stringResource(id = R.string.user_email),
+                    supportingText = supportingErrorText(validationState.emailOrPhoneError, validationState.emailError),
                     isError = (validationState.emailOrPhoneError != null) || (validationState.emailError != null),
-                    modifier = Modifier.fillMaxWidth()
+                    keyboardType = KeyboardType.Email
                 )
 
-                OutlinedTextField(
+                // Campo de texto para el teléfono
+                GeneralOutlinedTextField(
                     value = user.phone,
                     onValueChange = { onFieldChange("phone", it) },
-                    label = { Text(text = stringResource(id = R.string.user_phone)) },
-                    supportingText = supportingErrorText(
-                        validationState.emailOrPhoneError,
-                        validationState.phoneError
-                    ),
+                    label = stringResource(id = R.string.user_phone),
+                    supportingText = supportingErrorText(validationState.emailOrPhoneError, validationState.phoneError),
                     isError = (validationState.emailOrPhoneError != null) || (validationState.phoneError != null),
-                    modifier = Modifier.fillMaxWidth()
+                    keyboardType = KeyboardType.Phone
                 )
 
-                ExposedDropdownMenuBox(
-                    expanded = expandedRoleMenu,
-                    onExpandedChange = { expandedRoleMenu = !expandedRoleMenu }
+                // Campo de texto para el rol (seleccionable)
+                GeneralExposedDropDownBox(
+                    expandedMenu = expandedRoleMenu,
+                    onExpandedChange = { expandedRoleMenu = it },
+                    valueSelected = user.role,
+                    label = stringResource(id = R.string.user_role),
+                    supportingText = supportingErrorText(validationState.roleError),
+                    isError = validationState.roleError != null
                 ) {
-                    OutlinedTextField(
-                        value = user.role,
-                        onValueChange = {},
-                        label = { Text(text = stringResource(id = R.string.user_role)) },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedRoleMenu) },
-                        supportingText = supportingErrorText(validationState.roleError),
-                        isError = validationState.roleError != null,
-                        readOnly = true,
-                        modifier = Modifier
-                            .menuAnchor()
-                            .fillMaxWidth()
-                    )
-
-                    ExposedDropdownMenu(
-                        expanded = expandedRoleMenu,
-                        onDismissRequest = { expandedRoleMenu = false }
-                    ) {
-                        getRoles().forEachIndexed { index, roleName ->
-                            DropdownMenuItem(
-                                text = { Text(text = roleName.name) },
-                                onClick = {
-                                    onFieldChange("role", roleName.name)
-                                    expandedRoleMenu = false
-                                }
-                            )
-                            if (index != getRoles().lastIndex) GeneralHorizontalDivider()
-                        }
+                    getRoles().forEachIndexed { index, roleName ->
+                        DropdownMenuItem(
+                            text = { Text(text = roleName.name) },
+                            onClick = {
+                                onFieldChange("role", roleName.name)
+                                expandedRoleMenu = false
+                            }
+                        )
+                        if (index != getRoles().lastIndex) GeneralHorizontalDivider()
                     }
                 }
 
-                ExposedDropdownMenuBox(
-                    expanded = expandedStoreMenu,
-                    onExpandedChange = { expandedStoreMenu = !expandedStoreMenu }
+                // Campo de texto para la tienda (seleccionable)
+                GeneralExposedDropDownBox(
+                    expandedMenu = expandedStoreMenu,
+                    onExpandedChange = { expandedStoreMenu = it },
+                    valueSelected = user.storeName ?: "",
+                    label = stringResource(id = R.string.user_store)
                 ) {
-                    OutlinedTextField(
-                        value = user.storeName ?: "",
-                        onValueChange = {},
-                        label = { Text(text = stringResource(id = R.string.user_store)) },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedRoleMenu) },
-                        //supportingText = {},
-                        isError = false,
-                        readOnly = true,
-                        modifier = Modifier
-                            .menuAnchor()
-                            .fillMaxWidth()
-                    )
+                    when {
+                        storeOptions.isEmpty() -> {
+                            DropdownMenuItem(
+                                text = { Text(text = stringResource(R.string.no_stores_available)) },
+                                onClick = { expandedStoreMenu = false }
+                            )
+                        }
+                        else -> {
+                            DropdownMenuItem(
+                                text = { Text(text = stringResource(R.string.no_store)) },
+                                onClick = {
+                                    onFieldChange("storeId", "")
+                                    expandedStoreMenu = false
+                                }
+                            )
 
-                    ExposedDropdownMenu(
-                        expanded = expandedStoreMenu,
-                        onDismissRequest = { expandedStoreMenu = false }
-                    ) {
-                        when {
-                            storeOptions.isEmpty() -> {
-                                DropdownMenuItem(
-                                    text = { Text(text = stringResource(R.string.no_stores_available)) },
-                                    onClick = { expandedStoreMenu = false }
-                                )
-                            }
+                            GeneralHorizontalDivider()
 
-                            else -> {
+                            storeOptions.forEachIndexed { index, store ->
                                 DropdownMenuItem(
-                                    text = { Text(text = stringResource(R.string.no_store)) },
+                                    text = { Text(text = store.name) },
                                     onClick = {
-                                        onFieldChange("storeId", "")
+                                        onFieldChange("storeId", store.id)
+                                        onFieldChange("storeName", store.name)
                                         expandedStoreMenu = false
                                     }
                                 )
-
-                                GeneralHorizontalDivider()
-
-                                storeOptions.forEachIndexed { index, store ->
-                                    DropdownMenuItem(
-                                        text = { Text(text = store.name) },
-                                        onClick = {
-                                            onFieldChange("storeId", store.id)
-                                            onFieldChange("storeName", store.name)
-                                            expandedStoreMenu = false
-                                        }
-                                    )
-                                    if (index != storeOptions.lastIndex) GeneralHorizontalDivider()
-                                }
+                                if (index != storeOptions.lastIndex) GeneralHorizontalDivider()
                             }
                         }
                     }
                 }
 
+                // Switch para activar/desactivar el usuario
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,

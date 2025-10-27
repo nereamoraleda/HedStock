@@ -1,9 +1,12 @@
 [versions]
 accompanistDrawablepainter = "0.35.0-alpha"
+accompanistSwiperefresh = "0.28.0"
 agp = "8.8.0"
 animationGraphicsAndroid = "1.6.3"
 coilGif = "2.6.0"
 composeBomVersion = "2025.01.01"
+core = "3.4.1"
+coreSplashscreen = "1.0.1"
 datastorePreferences = "1.1.4"
 googleHiltAndroidVersion = "2.48"
 hiltAndroid = "2.51.1"
@@ -22,18 +25,24 @@ navigationCompose = "2.8.0"
 kotlinxSerialization = "1.6.3"
 roomRuntime = "2.6.1"
 animationGraphicsAndroidVersion = "1.7.7"
+retrofit2 = "2.9.0"
+zxingAndroidEmbedded = "6.2.0"
+zxingAndroidEmbeddedVersion = "4.3.0"
 
 [libraries]
 accompanist-drawablepainter = { module = "com.google.accompanist:accompanist-drawablepainter", version.ref = "accompanistDrawablepainter" }
+accompanist-swiperefresh = { module = "com.google.accompanist:accompanist-swiperefresh", version.ref = "accompanistSwiperefresh" }
 androidx-animation-graphics-android = { module = "androidx.compose.animation:animation.graphics.android", version.ref = "animationGraphicsAndroid" }
 androidx-compose-bom-v20250101 = { module = "androidx.compose:compose-bom", version.ref = "composeBomVersion" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRuntime" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
 coil-gif = { module = "io.coil-kt:coil-gif", version.ref = "coilGif" }
+core = { module = "com.google.zxing:core", version.ref = "core" }
 dagger-hilt-android-v248 = { module = "com.google.dagger:hilt-android", version.ref = "googleHiltAndroidVersion" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroid" }
@@ -55,6 +64,11 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose"}
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization"}
 animation-graphics-android = { group = "androidx.compose.animation", name = "animation-graphics-android", version.ref = "animationGraphicsAndroidVersion" }
+squareup-retrofit2 = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit2" }
+squareup-retrofit2-converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit2" }
+squareup-retrofit2-converter-scalars = { module = "com.squareup.retrofit2:converter-scalars", version.ref = "retrofit2" }
+zxing-android-embedded = { module = "com.journeyapps:zxing-android-embedded", version.ref = "zxingAndroidEmbedded" }
+zxing-android-embedded-v430 = { module = "com.journeyapps:zxing-android-embedded", version.ref = "zxingAndroidEmbeddedVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
