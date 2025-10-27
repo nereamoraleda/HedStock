@@ -33,7 +33,6 @@ import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralTopAppBar
 import es.cursos.android.ejercicios.stocksnma.ui.components.NavigateBackButton
 import kotlinx.coroutines.launch
 
-
 @Composable
 fun SupplierCreationScreen(
     viewModel: SupplierCreationViewModel,

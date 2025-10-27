@@ -47,7 +47,6 @@ import es.cursos.android.ejercicios.stocksnma.ui.components.campoColores
 import es.cursos.android.ejercicios.stocksnma.ui.state.DetailsUiState
 import es.cursos.android.ejercicios.stocksnma.utils.validations.SupplierValidationState
 
-
 @Composable
 fun SupplierDetailsScreen(
     viewModel: SupplierDetailsViewModel,
