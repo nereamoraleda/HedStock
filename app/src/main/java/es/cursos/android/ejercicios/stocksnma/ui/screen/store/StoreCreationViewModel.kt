@@ -2,12 +2,16 @@ package es.cursos.android.ejercicios.stocksnma.ui.screen.store
 
 import android.util.Log
 import android.util.Patterns
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import es.cursos.android.ejercicios.stocksnma.data.mapper.toStoreRequest
 import es.cursos.android.ejercicios.stocksnma.data.remote.api.StoreApi
 import es.cursos.android.ejercicios.stocksnma.domain.model.store.Store
+import es.cursos.android.ejercicios.stocksnma.ui.state.CreationUiState
 import es.cursos.android.ejercicios.stocksnma.utils.validations.StoreValidationForm
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,24 +25,27 @@ class StoreCreationViewModel @Inject constructor(
     private val api: StoreApi
 ): ViewModel() {
 
+    // -------------------- STATE UI -------------------- //
+    var uiState by mutableStateOf(CreationUiState(Store()))
+        private set
+
+
+    // -------------------- DATOS DE LA TIENDA -------------------- //
     private val _newStore = MutableStateFlow(Store())
     val newStore: StateFlow<Store> = _newStore.asStateFlow()
 
     private val _validations = MutableStateFlow(StoreValidationForm())
     val validations: StateFlow<StoreValidationForm> = _validations.asStateFlow()
 
-    private val _isFormValid = MutableStateFlow(false)
-    val isFormValid: StateFlow<Boolean> = _isFormValid.asStateFlow()
-
 
 
     // -------------------- FUNCIONES DE CREACIÓN -------------------- //
     fun createStore() {
-        if (validateStoreForm()) {
+        if (validateStoreForm()) {  // Si la validación del formulario es exitosa
             viewModelScope.launch {
                 try {
-                    val storeRequest = _newStore.value.toStoreRequest()
-                    val response = api.createStore(storeRequest)
+                    val storeRequest = _newStore.value.toStoreRequest()  // Convertir el objeto Store (obtenido del formulario CREATION) a StoreRequest
+                    val response = api.createStore(storeRequest)         // Crear la tienda en la API
 
                     if (response.isSuccessful) {
                         Log.i("STORE-CREATION", "Tienda creada: ${response.body()}")
@@ -75,19 +82,7 @@ class StoreCreationViewModel @Inject constructor(
             }
         }
 
-        _isFormValid.value = validateStoreForm()
-    }
-
-
-    fun onFieldChange(field: StoreFields, value: Boolean) {
-        _newStore.update {
-            when (field) {
-                StoreFields.IS_ACTIVE -> it.copy(isActive = value)
-                else -> it
-            }
-        }
-
-        _isFormValid.value = validateStoreForm()
+        uiState = uiState.copy(isEntryValid = validateStoreForm())
     }
 
 

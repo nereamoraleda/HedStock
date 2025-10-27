@@ -28,15 +28,18 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import es.cursos.android.ejercicios.stocksnma.R
 import es.cursos.android.ejercicios.stocksnma.domain.model.store.Store
 import es.cursos.android.ejercicios.stocksnma.ui.components.ButtonsBottomBar
+import es.cursos.android.ejercicios.stocksnma.ui.components.ErrorContent
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralCard
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralOutlinedTextField
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralSegmentedButton
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralTextFieldTitle
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralTopAppBar
+import es.cursos.android.ejercicios.stocksnma.ui.components.LoadingContent
 import es.cursos.android.ejercicios.stocksnma.ui.components.NavigateBackButton
 import es.cursos.android.ejercicios.stocksnma.ui.components.ShowMessageErrorText
 import es.cursos.android.ejercicios.stocksnma.ui.components.VerticalScrollableColumn
 import es.cursos.android.ejercicios.stocksnma.ui.components.supportingErrorText
+import es.cursos.android.ejercicios.stocksnma.ui.state.DetailsUiState
 import es.cursos.android.ejercicios.stocksnma.utils.enums.StoreSections
 import es.cursos.android.ejercicios.stocksnma.utils.validations.StoreFieldsLenghts
 import es.cursos.android.ejercicios.stocksnma.utils.validations.StoreValidationForm
@@ -47,16 +50,18 @@ fun StoreDetailsScreen(
     navigateBack: () -> Unit
 ) {
     val viewModel: StoreDetailsViewModel = hiltViewModel()
+    val uiState by viewModel.uiState.collectAsState()
     val store by viewModel.editableStore.collectAsState()
     val validationState by viewModel.validationState.collectAsState()
-    val isFormValid by viewModel.isFormValid.collectAsState()
     val hasPermission by viewModel.hasPermission.collectAsState()
 
     //var showDialogConfirmation by remember { mutableStateOf(false) }
 
+
     LaunchedEffect(storeId) {
         viewModel.getStoreDetails(storeId)
     }
+
 
     // -------------------- DIALOGS -------------------- //
 /*    if (showDialogConfirmation) {
@@ -95,9 +100,9 @@ fun StoreDetailsScreen(
             )
         },
         bottomBar = {
-            if (hasPermission) {
+            if (uiState is DetailsUiState.Success && hasPermission) {
                 ButtonsBottomBar(
-                    acceptButtonEnabled = isFormValid,
+                    acceptButtonEnabled = (uiState as DetailsUiState.Success).isEntryValid,
                     onAcceptAction = { viewModel.saveChanges { success ->
                         if (success) navigateBack()
                     } },
@@ -113,13 +118,19 @@ fun StoreDetailsScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            StoreDetailsBodyScreen(
-                store,
-                onFieldChange = viewModel::onFieldChange,
-                onCheckedChange = viewModel::onFieldChange,
-                validacionState = validationState,
-                hasPermission = hasPermission
-            )
+            when (uiState) {
+                is DetailsUiState.Loading -> { LoadingContent() }
+                is DetailsUiState.Error, DetailsUiState.NotFound -> { ErrorContent((uiState as DetailsUiState.Error).messageError) }
+                is DetailsUiState.Success -> {
+                    StoreDetailsBodyScreen(
+                        store,
+                        onFieldChange = viewModel::onFieldChange,
+                        onCheckedChange = viewModel::onFieldChange,
+                        validacionState = validationState,
+                        hasPermission = hasPermission
+                    )
+                }
+            }
         }
     }
 }

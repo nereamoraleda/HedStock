@@ -1,5 +1,6 @@
 package es.cursos.android.ejercicios.stocksnma.ui.screen.store
 
+import android.annotation.SuppressLint
 import android.util.Log
 import android.util.Patterns
 import androidx.lifecycle.ViewModel
@@ -10,6 +11,7 @@ import es.cursos.android.ejercicios.stocksnma.data.mapper.toStore
 import es.cursos.android.ejercicios.stocksnma.data.mapper.toStoreRequest
 import es.cursos.android.ejercicios.stocksnma.data.remote.api.StoreApi
 import es.cursos.android.ejercicios.stocksnma.domain.model.store.Store
+import es.cursos.android.ejercicios.stocksnma.ui.state.DetailsUiState
 import es.cursos.android.ejercicios.stocksnma.utils.enums.UserRoles
 import es.cursos.android.ejercicios.stocksnma.utils.validations.StoreValidationForm
 import kotlinx.coroutines.flow.Flow
@@ -29,21 +31,25 @@ class StoreDetailsViewModel @Inject constructor(
     dataStore: AppDataStore
 ): ViewModel() {
 
+    // -------------------- STATE UI -------------------- //
+    private val _uiState = MutableStateFlow<DetailsUiState<Store>>(DetailsUiState.Loading)
+    val uiState: StateFlow<DetailsUiState<Store>> = _uiState.asStateFlow()
+
+
+
     // -------------------- DATOS DE LA TIENDA -------------------- //
     private val _currentStore = MutableStateFlow(Store())
 
     private val _editableStore = MutableStateFlow(Store())
     val editableStore: StateFlow<Store> = _editableStore.asStateFlow()
 
+    private val _validationState = MutableStateFlow(StoreValidationForm())
+    val validationState: StateFlow<StoreValidationForm> = _validationState.asStateFlow()
+
     private val currentName = MutableStateFlow("")
     private val currentEmail = MutableStateFlow("")
     private val currentPhone = MutableStateFlow("")
 
-    private val _validationState = MutableStateFlow(StoreValidationForm())
-    val validationState: StateFlow<StoreValidationForm> = _validationState.asStateFlow()
-
-    private val _isFormValid = MutableStateFlow(false)
-    val isFormValid: StateFlow<Boolean> = _isFormValid.asStateFlow()
 
 
     // -------------------- ROL DEL USUARIO -------------------- //
@@ -58,6 +64,7 @@ class StoreDetailsViewModel @Inject constructor(
         )
 
 
+
     // -------------------- FUNCIONES -------------------- //
     fun getStoreDetails(id: Long) {
         viewModelScope.launch {
@@ -65,6 +72,11 @@ class StoreDetailsViewModel @Inject constructor(
                 val response = storeApi.getStoreById(id)
                 if (response.isSuccessful) {
                     val storeResponse = response.body()?.toStore() ?: Store()
+                    _uiState.value = DetailsUiState.Success(
+                        item = storeResponse,
+                        isEntryValid = true
+                    )
+
                     _currentStore.value = storeResponse
                     _editableStore.value = storeResponse.copy()
 
@@ -73,19 +85,24 @@ class StoreDetailsViewModel @Inject constructor(
                     currentPhone.value = _currentStore.value.phone
 
                     Log.i("DETAILS-STORE-GET-DATA", "Tienda: ${_currentStore.value}")
+
+                } else {
+                    _uiState.value = DetailsUiState.Error(response.message())
+
                 }
             } catch (e: Exception) {
+                _uiState.value = DetailsUiState.Error(e.message ?: "Error desconocido")
                 Log.e("DETAILS-STORE-GET-DATA", "Error: ${e.message}")
             }
         }
     }
 
 
+    @SuppressLint("SuspiciousIndentation")
     fun saveChanges(onResult: (Boolean) -> Unit) {
         if (!validateStoreForm()) return
             viewModelScope.launch {
                 try {
-
                     val updateName = _editableStore.value.name
                     if (currentName.value != updateName) {
                         if (storeApi.checkName(updateName).body() == true) {
@@ -144,8 +161,15 @@ class StoreDetailsViewModel @Inject constructor(
             }
         }
 
-        _isFormValid.value = validateStoreForm()
+        _uiState.update { currentState ->
+            if (currentState is DetailsUiState.Success) {
+                currentState.copy(isEntryValid = validateStoreForm(_editableStore.value))
+            } else {
+                currentState
+            }
+        }
     }
+
 
     fun onFieldChange(field: StoreFields, value: Boolean) {
         _editableStore.update {
@@ -155,7 +179,13 @@ class StoreDetailsViewModel @Inject constructor(
             }
         }
 
-        _isFormValid.value = validateStoreForm()
+        _uiState.update { currentState ->
+            if (currentState is DetailsUiState.Success) {
+                currentState.copy(isEntryValid = validateStoreForm(_editableStore.value))
+            } else {
+                currentState
+            }
+        }
     }
 
 
@@ -164,6 +194,16 @@ class StoreDetailsViewModel @Inject constructor(
         _validationState.value = StoreValidationForm()
     }
 
+
+//    fun deleteStore() {
+//        viewModelScope.launch {
+//            try {
+//                storeApi.deleteStore(_editableStore.value.id!!)
+//            } catch (e: Exception) {
+//                Log.e("DETAILS-STORE-DELETE", "Error: ${e.message}")
+//            }
+//        }
+//    }
 
 
     private fun validateStoreForm(store: Store = _editableStore.value): Boolean {
@@ -206,11 +246,3 @@ class StoreDetailsViewModel @Inject constructor(
         return null
     }
 }
-
-
-//data class StoreUiState(
-//    val currentStore: Store? = null,
-//    val editableStore: Store = Store(),
-//    val isEditing: Boolean = false,
-//    val isValid: Boolean = false
-//)

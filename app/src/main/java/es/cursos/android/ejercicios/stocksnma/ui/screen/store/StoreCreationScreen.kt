@@ -48,7 +48,6 @@ fun StoreCreationScreen(
 
     val store by viewModel.newStore.collectAsState()
     val validations by viewModel.validations.collectAsState()
-    val isFormValid by viewModel.isFormValid.collectAsState()
 
 
     Scaffold(
@@ -62,7 +61,7 @@ fun StoreCreationScreen(
             ButtonsBottomBar(
                 onAcceptAction = { viewModel.createStore() },
                 onCancelAction = { viewModel.resetUi() },
-                acceptButtonEnabled = isFormValid
+                acceptButtonEnabled = viewModel.uiState.isEntryValid
             )
         }
 
