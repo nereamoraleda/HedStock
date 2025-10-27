@@ -6,6 +6,7 @@ enum class HomeSections {
     DISCOUNTS,
     SUPPLIERS,
     USERS,
+    STORES,
     SETTINGS,
     ABOUT
 }

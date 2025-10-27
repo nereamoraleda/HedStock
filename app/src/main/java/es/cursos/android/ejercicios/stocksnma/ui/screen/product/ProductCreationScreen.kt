@@ -16,8 +16,7 @@ import es.cursos.android.ejercicios.stocksnma.data.local.entity.SupplierEntity
 import es.cursos.android.ejercicios.stocksnma.domain.model.Product
 import es.cursos.android.ejercicios.stocksnma.ui.components.*
 import es.cursos.android.ejercicios.stocksnma.utils.enums.ProductSections
-import es.cursos.android.ejercicios.stocksnma.utils.ProductValidationState
-
+import es.cursos.android.ejercicios.stocksnma.utils.validations.ProductValidationState
 
 @Composable
 fun ProductCreationScreen(
@@ -94,12 +93,12 @@ fun ProductCreationScreen(
         topBar = {
             GeneralTopAppBar(
                 title = stringResource(R.string.product_create_title),
-                navigationButton = { IconButtonGoBack(navigateBack); viewModel.cleanUiState() }
+                navigationButton = { NavigateBackButton(navigateBack); viewModel.cleanUiState() }
             )
         },
         bottomBar = {
-            CustomBottomAppBar(
-                enabled = viewModel.productUiState.isEntryValid,
+            ButtonsBottomBar(
+                acceptButtonEnabled = viewModel.productUiState.isEntryValid,
                 onAcceptAction = {
                     viewModel.saveProduct()
                     onProductCreated()
@@ -121,13 +120,19 @@ fun ProductCreationScreen(
                 .verticalScroll(rememberScrollState())
 
         ) {
-            CustomSegmentedButton(
-                selectedProductSection = activeProductSection,
-                onProductSectionChange = { activeProductSection = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(dimensionResource(R.dimen.padding_medium))
+            GeneralSegmentedButton(
+                selectedSection = activeProductSection,
+                onSectionChange = { activeProductSection = it },
+                sections = ProductSections.entries,
+                label = {
+                    when (it) {
+                        ProductSections.INFO -> stringResource(R.string.product_section_info)
+                        ProductSections.PRICE -> stringResource(R.string.product_section_price)
+                        ProductSections.STOCK -> stringResource(R.string.product_section_stock)
+                    }
+                }
             )
+
 
             ProductDetailsCard(
                 productUiState = viewModel.productUiState,
@@ -178,7 +183,7 @@ fun ProductDetailsCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(dimensionResource(R.dimen.padding_medium)),
+            .padding(dimensionResource(R.dimen.padding_16dp)),
     ) {
         Card(
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
@@ -198,7 +203,7 @@ fun ProductDetailsCard(
                         TextField(
                             value = product.name,
                             onValueChange = { onProductValueChange(product.copy(name = it)) },
-                            isError = validationState.nameError != null,
+                            isError = validationState.nameErrorMessage != null,
                             placeholder = {
                                 Text(
                                     text = stringResource(R.string.product_form_name),
@@ -209,7 +214,7 @@ fun ProductDetailsCard(
                             colors = colorsSimpleTextField(),
                             modifier = Modifier.fillMaxWidth()
                         )
-                        ShowMessageErrorText(validationState.nameError)
+                        ShowMessageErrorText(validationState.nameErrorMessage)
 
                         TextField(
                             value = product.description,
@@ -264,8 +269,8 @@ fun ProductDetailsCard(
                                 val cleanedBarcode = it.filter { char -> char.isDigit() }
                                 onProductValueChange(product.copy(barcode = cleanedBarcode))
                             },
-                            isError = validationState.barcodeError != null,
-                            messageError = validationState.barcodeError
+                            isError = validationState.barcodeErrorMessage != null,
+                            messageError = validationState.barcodeErrorMessage
                         )
                     }
                 }
@@ -276,21 +281,21 @@ fun ProductDetailsCard(
                             title = R.string.product_cost_price,
                             value = product.costPrice,
                             onValueChange = { newCostPrice -> onProductValueChange(product.copy(costPrice = newCostPrice)) },
-                            isError = validationState.costPriceError != null
+                            isError = validationState.costPriceErrorMessage != null
                         )
-                        ShowMessageErrorText(validationState.costPriceError)
+                        ShowMessageErrorText(validationState.costPriceErrorMessage)
 
 
-                        Spacer(modifier = Modifier.width(dimensionResource(R.dimen.padding_medium)))
+                        Spacer(modifier = Modifier.width(dimensionResource(R.dimen.padding_16dp)))
 
 
                         CustomRowAndTextFieldPrices(
                             title = R.string.product_sold_price,
                             value = product.price,
                             onValueChange = { newPrice -> onProductValueChange(product.copy(price = newPrice)) },
-                            isError = validationState.priceError != null
+                            isError = validationState.sellingPriceErrorMessage != null
                         )
-                        ShowMessageErrorText(validationState.priceError)
+                        ShowMessageErrorText(validationState.sellingPriceErrorMessage)
                     }
                 }
 
@@ -308,9 +313,9 @@ fun ProductDetailsCard(
                                 val cleanedStock = it.filter { char -> char.isDigit() }
                                 onProductValueChange(product.copy(stock = cleanedStock))
                             },
-                            isError = validationState.stockError != null,
+                            isError = validationState.stockErrorMessage != null,
                         )
-                        ShowMessageErrorText(validationState.stockError)
+                        ShowMessageErrorText(validationState.stockErrorMessage)
 
 
                         CustomRowAndTextFieldStocks(
@@ -320,9 +325,9 @@ fun ProductDetailsCard(
                                 val cleanedStock = it.filter { char -> char.isDigit() }
                                 onProductValueChange(product.copy(minStock = cleanedStock))
                             },
-                            isError = validationState.minStockError != null,
+                            isError = validationState.minStockErrorMessage != null,
                         )
-                        ShowMessageErrorText(validationState.minStockError)
+                        ShowMessageErrorText(validationState.minStockErrorMessage)
 
 
                         CustomRowAndTextFieldStocks(
@@ -332,9 +337,9 @@ fun ProductDetailsCard(
                                 val cleanedStock = it.filter { char -> char.isDigit() }
                                 onProductValueChange(product.copy(maxStock = cleanedStock))
                             },
-                            isError = validationState.maxStockError != null,
+                            isError = validationState.maxStockErrorMessage != null,
                         )
-                        ShowMessageErrorText(validationState.maxStockError)
+                        ShowMessageErrorText(validationState.maxStockErrorMessage)
                     }
                 }
             }
@@ -348,6 +353,6 @@ fun ErrorMessageStockText(errorMessage: String) {
         text = errorMessage,
         color = MaterialTheme.colorScheme.error,
         style = MaterialTheme.typography.bodySmall,
-        modifier = Modifier.padding(vertical = dimensionResource(R.dimen.padding_small))
+        modifier = Modifier.padding(vertical = dimensionResource(R.dimen.padding_8dp))
     )
 }

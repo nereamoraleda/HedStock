@@ -1,6 +1,6 @@
 package es.cursos.android.ejercicios.stocksnma.ui.screen.login
 
-import es.cursos.android.ejercicios.stocksnma.data.remote.LoginResponse
+import es.cursos.android.ejercicios.stocksnma.data.remote.dto.LoginResponse
 
 sealed class LoginUiState {
     data object Idle : LoginUiState()

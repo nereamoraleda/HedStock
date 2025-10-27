@@ -1,10 +1,8 @@
 package es.cursos.android.ejercicios.stocksnma.ui.screen.home
 
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.updateTransition
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -13,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
@@ -21,19 +18,17 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
@@ -48,16 +43,21 @@ import com.journeyapps.barcodescanner.ScanOptions
 import es.cursos.android.ejercicios.stocksnma.R
 import es.cursos.android.ejercicios.stocksnma.ui.components.AboutAppDialog
 import es.cursos.android.ejercicios.stocksnma.ui.components.AppNavigationDrawer
+import es.cursos.android.ejercicios.stocksnma.ui.components.CenteredContent
 import es.cursos.android.ejercicios.stocksnma.ui.components.ConfirmationDialog
 import es.cursos.android.ejercicios.stocksnma.ui.components.CustomFAB
 import es.cursos.android.ejercicios.stocksnma.ui.components.CustomFABChild
 import es.cursos.android.ejercicios.stocksnma.ui.components.DobleDropDownMenu
+import es.cursos.android.ejercicios.stocksnma.ui.components.ErrorContent
 import es.cursos.android.ejercicios.stocksnma.ui.components.FABContainer
 import es.cursos.android.ejercicios.stocksnma.ui.components.FilterDropDownMenu
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralIconButton
 import es.cursos.android.ejercicios.stocksnma.ui.components.HomeTopAppBar
+import es.cursos.android.ejercicios.stocksnma.ui.components.LoadingContent
 import es.cursos.android.ejercicios.stocksnma.ui.screen.home.products.ProductSectionScreen
 import es.cursos.android.ejercicios.stocksnma.ui.screen.home.products.ProductSectionViewModel
+import es.cursos.android.ejercicios.stocksnma.ui.screen.home.stores.StoreSectionHomeScreen
+import es.cursos.android.ejercicios.stocksnma.ui.screen.home.stores.StoreSectionHomeViewModel
 import es.cursos.android.ejercicios.stocksnma.ui.screen.home.suppliers.SupplierSectionScreen
 import es.cursos.android.ejercicios.stocksnma.ui.screen.home.suppliers.SupplierSectionViewModel
 import es.cursos.android.ejercicios.stocksnma.ui.screen.home.users.UserSectionScreen
@@ -65,11 +65,12 @@ import es.cursos.android.ejercicios.stocksnma.ui.screen.home.users.UserSectionVi
 import es.cursos.android.ejercicios.stocksnma.utils.PortraitCaptureActivity
 import es.cursos.android.ejercicios.stocksnma.utils.enums.HomeSections
 import es.cursos.android.ejercicios.stocksnma.utils.enums.ProductSortOptions
+import es.cursos.android.ejercicios.stocksnma.utils.enums.StoreSortOptions
 import es.cursos.android.ejercicios.stocksnma.utils.enums.SupplierSortOptions
 import es.cursos.android.ejercicios.stocksnma.utils.enums.UserGroupOptions
 import es.cursos.android.ejercicios.stocksnma.utils.enums.UserSortOptions
-import es.cursos.android.ejercicios.stocksnma.utils.item.DropDownMenuItem
-import es.cursos.android.ejercicios.stocksnma.utils.item.FABItem
+import es.cursos.android.ejercicios.stocksnma.utils.items.DropDownMenuItem
+import es.cursos.android.ejercicios.stocksnma.utils.items.FABItem
 import kotlinx.coroutines.launch
 
 
@@ -78,58 +79,60 @@ fun HomeScreen(
     viewModel: HomeViewModel,
     navigateToSettings: () -> Unit,
     navigateToProductCreation: (String?) -> Unit,
-    navigateToSupplierCreation: () -> Unit,
     navigateToProductDetails: (String) -> Unit,
+    navigateToSupplierCreation: () -> Unit,
     navigateToSupplierDetails: (String) -> Unit,
     navigateToUserCreation: () -> Unit,
     navigateToUserDetails: (Long) -> Unit,
+    navigateToStoreCreation: () -> Unit,
+    navigateToStoreDetails: (Long) -> Unit
 ) {
 
     // --- VARIABLES ---
     val context = LocalContext.current // Para Logs
 
+    val homeState by viewModel.homeUiState.collectAsState()               // Estado de la pantalla (Loading, Success, Error)
+    //val userRole by viewModel.userRole.collectAsState()
+    val hasPermission by viewModel.hasPermission.collectAsState()
+    val navigateSettings by viewModel.navigateSettings.collectAsState()   // Navegación a la pantalla de configuración
+
+
     val productViewModel: ProductSectionViewModel = hiltViewModel()
     val supplierViewModel: SupplierSectionViewModel = hiltViewModel()
     val userViewModel: UserSectionViewModel = hiltViewModel()
+    val storeViewModel: StoreSectionHomeViewModel = hiltViewModel()
 
     val isSearchingProducts by productViewModel.isSearching.collectAsState()
     val isSearchingSuppliers by supplierViewModel.isSearching.collectAsState()
     val isSearchingUsers by userViewModel.isSearching.collectAsState()
+    val isSearchingStores by storeViewModel.isSearching.collectAsState()
 
-    //val state by viewModel.homeUiState.collectAsState()                          // Estado de la pantalla (Loading, Success, Error)
-    val navigateSettings by viewModel.navigateSettings.collectAsState()          // Navegación a la pantalla de configuración
-    val snackbarHostState = remember { SnackbarHostState() }
-    val userRole by viewModel.userRole.collectAsState()
-    val isRefreshing by viewModel.isRefreshing.collectAsState()
-
-    //Log.i("Nerea", "UserRole: $userRole")
 
     // Variables - Dialog
     val showAboutDialog by viewModel.showAboutDialog.collectAsState()               // Muestra el diálogo "Acerca de" (Elemento del Navigation Drawer)
     var showDialogScanner by remember { mutableStateOf(false) }               // Muestra el diálogo de creacion de producto con el código de barras escaneado
-    var showDeleteProductsConfirmation by remember { mutableStateOf(false) }  // Muestra el diálogo de confirmación de eliminación de productos/proveedores
-    var showDeleteSuppliersConfirmation by remember { mutableStateOf(false) } // Muestra el diálogo de confirmación de eliminación de productos/proveedores
+    // Muestra el diálogo de confirmación de eliminación de productos/proveedores
+    // Muestra el diálogo de confirmación de eliminación de productos/proveedores
     var showNewFunction by remember { mutableStateOf(false) }
 
     // Variables - Navigation Drawer
-    val navDrawerOptions by viewModel.listOfNavDrawerItems.collectAsState()  // Lista de elementos del Navigation Drawer
-    val selectedHomeSection by viewModel.selectedHomeSection.collectAsState()             // Índice del elemento seleccionado
+    val selectedHomeSection by viewModel.selectedHomeSection.collectAsState()    // Índice del elemento seleccionado
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)     // Estado del Navigation Drawer
     val scope = rememberCoroutineScope()
 
 
     // Variables - Búsqueda en Search Bar
-    //val isSearching by viewModel.isSearching.collectAsState()                     // Si estamos en búsqueda o no
-    val searchQuery by viewModel.searchQuery.collectAsState()                     // Consulta de búsqueda
-    //val productSearchHistory by viewModel.productSearchHistory.collectAsState()   // Historial de búsquedas
-    //val supplierSearchHistory by viewModel.supplierSearchHistory.collectAsState() // Historial de búsquedas
-    //val productSearchResults by viewModel.productSearchResults.collectAsState()   // Lista de resultados de búsqueda de productos
-    //val supplierSearchResults by viewModel.supplierSearchResults.collectAsState() // Lista de resultados de búsqueda de proveedores
+    // Si estamos en búsqueda o no
+    // Consulta de búsqueda
+    // Historial de búsquedas
+    // Historial de búsquedas
+    // Lista de resultados de búsqueda de productos
+    // Lista de resultados de búsqueda de proveedores
 
 
     // Variables - CheckBoxes
-    //val selectedProducts by viewModel.selectedProducts.collectAsState()           // Lista de productos seleccionados (solo Ids)
-    //val selectedSuppliers by viewModel.selectedSuppliers.collectAsState()         // Lista de proveedores seleccionados (solo Ids)
+    // Lista de productos seleccionados (solo Ids)
+    // Lista de proveedores seleccionados (solo Ids)
 
 
     // Variables - Floating Action Button
@@ -152,7 +155,7 @@ fun HomeScreen(
             action = { navigateToSupplierCreation() }
         )
     )                                              // Lista de elementos del Floating Action Button
-    var isButtonsAddVisible by remember { mutableStateOf(false) }           // Si se muestran o no los botones de añadir en el Floating Action Button
+    var isButtonsAddVisible by remember { mutableStateOf(false) }       // Si se muestran o no los botones de añadir en el Floating Action Button
 
     val transition = updateTransition(targetState = isButtonsAddVisible, label = "")
     val rotation by transition.animateFloat(label = "") { if (it) 315f else 0f }
@@ -162,9 +165,10 @@ fun HomeScreen(
     // Variables - DropDownMenu
     var isMenuExpanded by remember { mutableStateOf(false) }                // Si se muestra o no el menú desplegable
 
-    val productSortOption by productViewModel.productSortOption.collectAsState()          // Ordenación de productos
-    val supplierSortOption by supplierViewModel.supplierSortOption.collectAsState()        // Ordenación de proveedores
+    val productSortOption by productViewModel.productSortOption.collectAsState()      // Ordenación de productos
+    val supplierSortOption by supplierViewModel.supplierSortOption.collectAsState()   // Ordenación de proveedores
     val userSortOption by userViewModel.userFilter.collectAsState()
+    val storeSortOption by storeViewModel.storeSortBy.collectAsState()
 
     val productSortMenuItems = listOf(
         DropDownMenuItem(
@@ -233,6 +237,31 @@ fun HomeScreen(
             title = R.string.group_by_store,
             selected = userSortOption.groupOption == UserGroupOptions.STORE,
             action = { userViewModel.setUserGroupOption(UserGroupOptions.STORE) }
+        )
+    )
+    val storeSortMenuItems = listOf(
+        DropDownMenuItem(
+            title = R.string.order_by_name_asc,
+            selected = storeSortOption == StoreSortOptions.NAME_ASC,
+            action = { storeViewModel.setStoreSortOption(StoreSortOptions.NAME_ASC) }
+        ),
+
+        DropDownMenuItem(
+            title = R.string.order_by_name_desc,
+            selected = storeSortOption == StoreSortOptions.NAME_DESC,
+            action = { storeViewModel.setStoreSortOption(StoreSortOptions.NAME_DESC) }
+        ),
+
+        DropDownMenuItem(
+            title = R.string.sort_by_date_oldest,
+            selected = storeSortOption == StoreSortOptions.DATE_OLDEST,
+            action = { storeViewModel.setStoreSortOption(StoreSortOptions.DATE_OLDEST) }
+        ),
+
+        DropDownMenuItem(
+            title = R.string.sort_by_date_newest,
+            selected = storeSortOption == StoreSortOptions.DATE_NEWEST,
+            action = { storeViewModel.setStoreSortOption(StoreSortOptions.DATE_NEWEST) }
         )
     )
 
@@ -351,7 +380,41 @@ fun HomeScreen(
         viewModel.toggleNavigateSettings(false)
     }
 
-    val isSearching = isSearchingProducts || isSearchingSuppliers || isSearchingUsers
+
+    /* En el Viewmodel de Home para quitar de aquí
+    TODO - Quitarlo si no se usa en ninguna otra parte de aquí
+     *@HiltViewModel
+class HomeViewModel @Inject constructor(
+    productViewModel: ProductSectionViewModel,
+    supplierViewModel: SupplierSectionViewModel,
+    userViewModel: UserSectionViewModel,
+    storeViewModel: StoreSectionHomeViewModel
+) : ViewModel() {
+
+    val isSearching = combine(
+        productViewModel.isSearching,
+        supplierViewModel.isSearching,
+        userViewModel.isSearching,
+        storeViewModel.isSearching
+    ) { product, supplier, user, store ->
+        product || supplier || user || store
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
+}
+val isSearching by homeViewModel.isSearching.collectAsState()
+*/
+
+    // Añadir también la visibilidad en el TopBar
+    val isSearching by remember(
+        isSearchingProducts,
+        isSearchingSuppliers,
+        isSearchingUsers,
+        isSearchingStores
+    ) {
+        derivedStateOf {
+            isSearchingProducts || isSearchingSuppliers || isSearchingUsers || isSearchingStores
+        }
+    }
+
 
     fun toggleDrawer() {
         scope.launch {
@@ -373,107 +436,128 @@ fun HomeScreen(
     }
 
 // -------------------- UI --------------------
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
-            AppNavigationDrawer(
-                navDrawerOptions,
-                selectedHomeSection,
-                drawerState,
-                scope,
-            )
-        }
-    ) {
-        Scaffold(
-            // Dependiendo de si estamos en búsqueda o no, cambiamos el alcance de la barra de navegación
-            contentWindowInsets = if (isSearching) WindowInsets(0.dp) else WindowInsets.systemBars,
-
-
-            // --- SCAFFOLD - TOP BAR ---
-            topBar = {
-                when (selectedHomeSection) {
-                    HomeSections.PRODUCTS -> {
-                        HomeTopAppBar(
-                            section = selectedHomeSection,
-                            isSearching = isSearchingProducts,
-                            onNavClick = { toggleDrawer() },
-                            actionButton = {
-                                GeneralIconButton(
-                                    onClick = { launchBarcodeScanner() },
-                                    icon = R.drawable.ic_barcode_scanner,
-                                )
-
-                                FilterDropDownMenu(
-                                    isMenuExpanded = isMenuExpanded,
-                                    filterOptions = productSortMenuItems,
-                                    onClickIconButton = { isMenuExpanded = !isMenuExpanded },
-                                    onDismissRequest = { isMenuExpanded = false },
-                                    itemSelected = productSortOption.name
-                                )
-                            },
-                            modifier = Modifier.alpha(alpha)
-                        )
-                    }
-                    HomeSections.SUPPLIERS -> {
-                        HomeTopAppBar(
-                            section = selectedHomeSection,
-                            isSearching = isSearchingSuppliers,
-                            onNavClick = { toggleDrawer() },
-                            actionButton = {
-                                FilterDropDownMenu(
-                                    isMenuExpanded = isMenuExpanded,
-                                    filterOptions = supplierSortMenuItems,
-                                    onClickIconButton = {
-                                        isMenuExpanded = !isMenuExpanded
-                                    },
-                                    onDismissRequest = { isMenuExpanded = false },
-                                    itemSelected = supplierSortOption.name
-                                )
-                            },
-                            modifier = Modifier.alpha(alpha)
-                        )
-                    }
-                    HomeSections.USERS -> {
-                        HomeTopAppBar(
-                            section = selectedHomeSection,
-                            isSearching = isSearchingUsers,
-                            onNavClick = { toggleDrawer() },
-                            actionButton = {
-                                DobleDropDownMenu(
-                                    sortOptions = userSortMenuItems,
-                                    groupOptions = userGroupMenuItems,
-                                    isMenuExpanded = isMenuExpanded,
-                                    onClickIconButton = { isMenuExpanded = !isMenuExpanded },
-                                    onDismissRequest = { isMenuExpanded = false }
-                                )
-                            },
-                            modifier = Modifier.alpha(alpha)
-                        )
-                    }
-                    else -> {
-                        HomeTopAppBar(
-                            section = selectedHomeSection,
-                            isSearching = false,
-                            onNavClick = { toggleDrawer() },
-                            actionButton = {
-                                FilterDropDownMenu(
-                                    isMenuExpanded = isMenuExpanded,
-                                    filterOptions = listOf(),
-                                    onClickIconButton = { isMenuExpanded = !isMenuExpanded },
-                                    onDismissRequest = { isMenuExpanded = false },
-                                    itemSelected = ""
-                                )
-                            },
-                            modifier = Modifier.alpha(alpha)
-                        )
-                    }
+    when (val state = homeState) {
+        is HomeUiState.Loading -> { LoadingContent() }
+        is HomeUiState.Error -> { ErrorContent(state.messageError) }
+        is HomeUiState.Success -> {
+            ModalNavigationDrawer(
+                drawerState = drawerState,
+                drawerContent = {
+                    AppNavigationDrawer(
+                        navItems = state.navDrawerSections,
+                        selectedItem = state.selectedSection,
+                        drawerState,
+                        scope,
+                    )
                 }
-            },
+            ) {
+                Scaffold(
+                    // Dependiendo de si estamos en búsqueda o no, cambiamos el alcance de la barra de navegación
+                    contentWindowInsets = if (isSearching) WindowInsets(0.dp) else WindowInsets.systemBars,
 
-            // --- SCAFFOLD - BOTTOM BAR ---
-            bottomBar = {
-                when (selectedHomeSection) {
-                    HomeSections.PRODUCTS -> {}
+
+                    // --- SCAFFOLD - TOP BAR ---
+                    topBar = {
+                        when (selectedHomeSection) {
+                            HomeSections.PRODUCTS -> {
+                                HomeTopAppBar(
+                                    section = selectedHomeSection,
+                                    isSearching = isSearchingProducts,
+                                    onNavClick = { toggleDrawer() },
+                                    actionButton = {
+                                        GeneralIconButton(
+                                            onClick = { launchBarcodeScanner() },
+                                            icon = R.drawable.ic_barcode_scanner,
+                                        )
+
+                                        FilterDropDownMenu(
+                                            isMenuExpanded = isMenuExpanded,
+                                            filterOptions = productSortMenuItems,
+                                            onClickIconButton = { isMenuExpanded = !isMenuExpanded },
+                                            onDismissRequest = { isMenuExpanded = false },
+                                            itemSelected = productSortOption.name
+                                        )
+                                    },
+                                    modifier = Modifier.alpha(alpha)
+                                )
+                            }
+                            HomeSections.SUPPLIERS -> {
+                                HomeTopAppBar(
+                                    section = selectedHomeSection,
+                                    isSearching = isSearchingSuppliers,
+                                    onNavClick = { toggleDrawer() },
+                                    actionButton = {
+                                        FilterDropDownMenu(
+                                            isMenuExpanded = isMenuExpanded,
+                                            filterOptions = supplierSortMenuItems,
+                                            onClickIconButton = {
+                                                isMenuExpanded = !isMenuExpanded
+                                            },
+                                            onDismissRequest = { isMenuExpanded = false },
+                                            itemSelected = supplierSortOption.name
+                                        )
+                                    },
+                                    modifier = Modifier.alpha(alpha)
+                                )
+                            }
+                            HomeSections.USERS -> {
+                                HomeTopAppBar(
+                                    section = selectedHomeSection,
+                                    isSearching = isSearchingUsers,
+                                    onNavClick = { toggleDrawer() },
+                                    actionButton = {
+                                        DobleDropDownMenu(
+                                            sortOptions = userSortMenuItems,
+                                            groupOptions = userGroupMenuItems,
+                                            isMenuExpanded = isMenuExpanded,
+                                            onClickIconButton = { isMenuExpanded = !isMenuExpanded },
+                                            onDismissRequest = { isMenuExpanded = false }
+                                        )
+                                    },
+                                    modifier = Modifier.alpha(alpha)
+                                )
+                            }
+                            HomeSections.STORES -> {
+                                HomeTopAppBar(
+                                    section = selectedHomeSection,
+                                    isSearching = isSearchingStores,
+                                    onNavClick = { toggleDrawer() },
+                                    actionButton = {
+                                        FilterDropDownMenu(
+                                            isMenuExpanded = isMenuExpanded,
+                                            filterOptions = storeSortMenuItems,
+                                            onClickIconButton = { isMenuExpanded = !isMenuExpanded },
+                                            onDismissRequest = { isMenuExpanded = false },
+                                            itemSelected = storeSortOption.name
+                                        )
+                                    },
+                                    modifier = Modifier.alpha(alpha)
+                                )
+                            }
+                            else -> {
+                                HomeTopAppBar(
+                                    section = selectedHomeSection,
+                                    isSearching = false,
+                                    onNavClick = { toggleDrawer() },
+                                    actionButton = {
+                                        FilterDropDownMenu(
+                                            isMenuExpanded = isMenuExpanded,
+                                            filterOptions = listOf(),
+                                            onClickIconButton = { isMenuExpanded = !isMenuExpanded },
+                                            onDismissRequest = { isMenuExpanded = false },
+                                            itemSelected = ""
+                                        )
+                                    },
+                                    modifier = Modifier.alpha(alpha)
+                                )
+                            }
+                        }
+                    },
+
+                    // --- SCAFFOLD - BOTTOM BAR ---
+                    bottomBar = {
+                        when (selectedHomeSection) {
+                            HomeSections.PRODUCTS -> {}
 //                                HomeBottomBar(
 //                                textCountSingular = R.string.selected_products_singular,
 //                                textCountPlural = R.string.selected_product_plural,
@@ -482,7 +566,7 @@ fun HomeScreen(
 //                                modifier = Modifier.alpha(alpha)
 //                            )
 
-                    HomeSections.SUPPLIERS -> {}
+                            HomeSections.SUPPLIERS -> {}
 //                                HomeBottomBar(
 //                                textCountSingular = R.string.selected_suppliers_singular,
 //                                textCountPlural = R.string.selected_supplier_plural,
@@ -491,215 +575,150 @@ fun HomeScreen(
 //                                modifier = Modifier.alpha(alpha)
 //                            )
 
-                    else -> {}
-                }
-            },
+                            else -> {}
+                        }
+                    },
 
 
-            // --- SCAFFOLD - FLOATING ACTION BUTTON ---
-            floatingActionButton = {
-                when (selectedHomeSection) {
-                    HomeSections.PRODUCTS -> {
-                        FABContainer(
-                            isVisible = !isSearchingProducts,
-                            isExpanded = isButtonsAddVisible,
-                            onDismiss = { isButtonsAddVisible = false }
-                        ) {
-                            fabOptions.forEach { item ->
-                                CustomFABChild(
-                                    fab = item,
+                    // --- SCAFFOLD - FLOATING ACTION BUTTON ---
+                    floatingActionButton = {
+                        when (selectedHomeSection) {
+                            HomeSections.PRODUCTS -> {
+                                FABContainer(
+                                    isVisible = !isSearchingProducts,
                                     isExpanded = isButtonsAddVisible,
-                                    onStateChanged = { isButtonsAddVisible = !isButtonsAddVisible }
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                            }
+                                    onDismiss = { isButtonsAddVisible = false }
+                                ) {
+                                    fabOptions.forEach { item ->
+                                        CustomFABChild(
+                                            fab = item,
+                                            isExpanded = isButtonsAddVisible,
+                                            onStateChanged = { isButtonsAddVisible = !isButtonsAddVisible }
+                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                    }
 
-                            CustomFAB(
-                                action = { isButtonsAddVisible = !isButtonsAddVisible },
-                                modifier = Modifier.rotate(rotation)
-                            )
-                        }
-                    }
-                    HomeSections.SUPPLIERS -> {
-                        FABContainer(
-                            isVisible = !isSearchingSuppliers,
-                            isExpanded = isButtonsAddVisible,
-                            onDismiss = { isButtonsAddVisible = false }
-                        ) {
-                            fabOptions.forEach { item ->
-                                CustomFABChild(
-                                    fab = item,
+                                    CustomFAB(
+                                        action = { isButtonsAddVisible = !isButtonsAddVisible },
+                                        modifier = Modifier.rotate(rotation)
+                                    )
+                                }
+                            }
+                            HomeSections.DISCOUNTS -> { /*
+                                FloatingActionButton(
+                                    onClick = { showNewFunction = true },
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                    shape = CircleShape,
+                                    elevation = FloatingActionButtonDefaults.elevation(8.dp)
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_discount),
+                                        contentDescription = null
+                                    )
+                                }
+                                 */ }
+                            HomeSections.SUPPLIERS -> {
+                                FABContainer(
+                                    isVisible = !isSearchingSuppliers,
                                     isExpanded = isButtonsAddVisible,
-                                    onStateChanged = { isButtonsAddVisible = !isButtonsAddVisible }
-                                )
+                                    onDismiss = { isButtonsAddVisible = false }
+                                ) {
+                                    fabOptions.forEach { item ->
+                                        CustomFABChild(
+                                            fab = item,
+                                            isExpanded = isButtonsAddVisible,
+                                            onStateChanged = { isButtonsAddVisible = !isButtonsAddVisible }
+                                        )
 
-                                Spacer(modifier = Modifier.height(8.dp))
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                    }
+
+                                    CustomFAB(
+                                        action = { isButtonsAddVisible = !isButtonsAddVisible },
+                                        modifier = Modifier.rotate(rotation)
+                                    )
+                                }
+                            }
+                            HomeSections.USERS -> {
+                                FABContainer(
+                                    isVisible = !isSearchingUsers,
+                                    isExpanded = isButtonsAddVisible,
+                                    onDismiss = { isButtonsAddVisible = false }
+                                ) {
+                                    FloatingActionButton(
+                                        onClick = { navigateToUserCreation() },
+                                        containerColor = MaterialTheme.colorScheme.primary,
+                                        shape = CircleShape,
+                                        elevation = FloatingActionButtonDefaults.elevation(8.dp)
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.ic_user_add),
+                                            contentDescription = null
+                                        )
+                                    }
+                                }
+                            }
+                            HomeSections.STORES -> {
+                                if (hasPermission) {
+                                    FABContainer(
+                                        isVisible = true,
+                                        isExpanded = isButtonsAddVisible,
+                                        onDismiss = { isButtonsAddVisible = false }
+                                    ) {
+                                        FloatingActionButton(
+                                            onClick = { navigateToStoreCreation() },
+                                            containerColor = MaterialTheme.colorScheme.primary,
+                                            shape = CircleShape,
+                                            elevation = FloatingActionButtonDefaults.elevation(8.dp)
+                                        ) {
+                                            Icon(
+                                                painter = painterResource(R.drawable.ic_store_add),
+                                                contentDescription = null
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                            else -> {}
+                        }
+                    },
+
+                    //snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+                    modifier = Modifier.fillMaxSize()
+
+                ) { innerPadding ->
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding)
+                            .alpha(if (isButtonsAddVisible) 0.3f else 1f)
+                    ) {
+                        when (selectedHomeSection) {
+                            HomeSections.PRODUCTS -> {
+                                //val productViewModel: ProductViewModel = hiltViewModel()
+                                //val uiState by productViewModel.productsUiState.collectAsState()
+                                ProductSectionScreen { navigateToProductDetails(it) }
                             }
 
-                            CustomFAB(
-                                action = { isButtonsAddVisible = !isButtonsAddVisible },
-                                modifier = Modifier.rotate(rotation)
-                            )
-                        }
-                    }
-                    HomeSections.USERS -> {
-                        FABContainer(
-                            isVisible = !isSearchingUsers,
-                            isExpanded = isButtonsAddVisible,
-                            onDismiss = { isButtonsAddVisible = false }
-                        ) {
-                            FloatingActionButton(
-                                onClick = { navigateToUserCreation() },
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                shape = CircleShape,
-                                elevation = FloatingActionButtonDefaults.elevation(8.dp)
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_user_add),
-                                    contentDescription = null
-                                )
+                            HomeSections.SUPPLIERS -> {
+                                //val supplierViewModel: SupplierViewModel = hiltViewModel()
+                                //val uiState by supplierViewModel.suppliersUiState.collectAsState()
+                                SupplierSectionScreen { navigateToSupplierDetails(it) }
                             }
+
+                            HomeSections.USERS -> {
+                                //val userViewModel: UserViewModel = hiltViewModel()
+                                //val uiState by userViewModel.usersUiState.collectAsState()
+                                UserSectionScreen { navigateToUserDetails(it) }
+                            }
+
+                            HomeSections.STORES -> { StoreSectionHomeScreen { navigateToStoreDetails(it) } }
+
+                            else -> CenteredContent { Text("Sección en construcción...") }
                         }
                     }
-                    else -> {}
                 }
-            },
-
-//      HomeSections.DISCOUNTS -> {
-//          FloatingActionButton(
-//              onClick = { showNewFunction = true },
-//              containerColor = MaterialTheme.colorScheme.primary,
-//              shape = CircleShape,
-//              elevation = FloatingActionButtonDefaults.elevation(8.dp)
-//          ) {
-//              Icon(
-//                  painter = painterResource(R.drawable.ic_discount),
-//                  contentDescription = null
-//              )
-//          }
-//      }
-
-            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-            modifier = Modifier.fillMaxSize()
-
-        ) { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .alpha(if (isButtonsAddVisible) 0.3f else 1f)
-            ) {
-                when (selectedHomeSection) {
-                    HomeSections.PRODUCTS -> {
-                        //val productViewModel: ProductViewModel = hiltViewModel()
-                        //val uiState by productViewModel.productsUiState.collectAsState()
-                        ProductSectionScreen { navigateToProductDetails(it) }
-                    }
-
-                    HomeSections.SUPPLIERS -> {
-                        //val supplierViewModel: SupplierViewModel = hiltViewModel()
-                        //val uiState by supplierViewModel.suppliersUiState.collectAsState()
-                        SupplierSectionScreen { navigateToSupplierDetails(it) }
-                    }
-
-                    HomeSections.USERS -> {
-                        //val userViewModel: UserViewModel = hiltViewModel()
-                        //val uiState by userViewModel.usersUiState.collectAsState()
-                        UserSectionScreen {
-
-                            navigateToUserDetails(it)
-                        }
-                    }
-
-                    else -> Text("Sección en construcción")
-                }
-
-//                        GeneralSearchBar(
-//                            query = searchQuery,
-//                            onQueryChange = {
-//                                viewModel.onSearchQueryChange(it)
-//                                if (selectedHomeSection == HomeSection.PRODUCTS) viewModel.searchProductByName(it)
-//                                else viewModel.searchSupplierByName(it)
-//                            },
-//                            active = isSearching,
-//                            onActiveChange = { viewModel.onToggleSearch() },
-//                            placeholderText = when (selectedHomeSection) {
-//                                HomeSection.PRODUCTS -> R.string.search_product
-//                                HomeSection.SUPPLIERS -> R.string.search_supplier
-//                                else -> R.string.no_available
-//                            },
-//                            cleanQuery = { viewModel.onSearchQueryDelete() }
-//                        ) {
-
-//                        Box(
-//                            modifier = Modifier
-//                                .fillMaxSize()
-//                                .background(MaterialTheme.colorScheme.background)
-//                        ) {
-//                            // Maneja la búsqueda en función de la opción seleccionada
-//                            when (selectedHomeSection) {
-//                                HomeSection.PRODUCTS -> {}
-//                                HomeSection.SUPPLIERS -> {}
-//                                else -> {}
-//                            }
-//                        }
-//                    }
-//
-
-//
-//                    Spacer(modifier = Modifier.padding(dimensionResource(R.dimen.padding_small)))
-//
-//
-//                    // Maneja la lista mostrada en función de la opción seleccionada
-//                    when (selectedHomeSection) {
-//                        HomeSection.PRODUCTS -> {}
-//                        HomeSection.SUPPLIERS -> {}
-//
-//                        HomeSection.USERS -> {
-////                                SwipeRefresh(
-////                                    state = rememberSwipeRefreshState(isRefreshing = false),
-////                                    onRefresh = { viewModel.refreshUsers() }
-////                                ) {
-////                                    UserSectionHomeBodyScreen(
-////                                        users = users,
-////                                        navigateToUserDetails = navigateToUserDetails
-////                                    )
-////                                }
-////                                Log.i("HOME SCREEN - USERS", "Users: $users")
-//                            }
-////
-//                           else -> {
-//                               Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-//                                    Text(text = "Próximamente...")
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//      } }
             }
         }
-    }
-}
-
-
-@Composable
-fun HomeLoadingScreen(modifier: Modifier = Modifier) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier.fillMaxSize()
-    ) {
-        CircularProgressIndicator()
-    }
-}
-
-
-@Composable
-fun HomeErrorScreen(messageError: String, modifier: Modifier = Modifier) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier.fillMaxSize()
-    ) {
-        Text(text = messageError)
     }
 }

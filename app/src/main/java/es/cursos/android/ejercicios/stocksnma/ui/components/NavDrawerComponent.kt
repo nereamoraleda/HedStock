@@ -28,11 +28,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import es.cursos.android.ejercicios.stocksnma.R
-import es.cursos.android.ejercicios.stocksnma.utils.item.NavDrawerItem
+import es.cursos.android.ejercicios.stocksnma.utils.items.NavDrawerItem
 import es.cursos.android.ejercicios.stocksnma.utils.enums.HomeSections
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-
 
 @Composable
 fun AppNavigationDrawer(
@@ -49,7 +48,7 @@ fun AppNavigationDrawer(
         HeaderNavDrawer(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(dimensionResource(R.dimen.padding_medium))
+                .padding(dimensionResource(R.dimen.padding_16dp))
         )
 
         GeneralHorizontalDivider()
@@ -75,7 +74,7 @@ fun HeaderNavDrawer(modifier: Modifier = Modifier) {
         modifier = modifier
     ) {
         Icon(
-            painter = painterResource(R.drawable.ic_logo),
+            painter = painterResource(R.drawable.ic_logo_import),
             modifier = Modifier.size(36.dp),
             contentDescription = null
         )
@@ -102,8 +101,8 @@ fun BodyNavDrawer(
         modifier = Modifier
             .fillMaxHeight()
             .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = dimensionResource(R.dimen.padding_small))
-            .padding(vertical = dimensionResource(R.dimen.padding_medium))
+            .padding(horizontal = dimensionResource(R.dimen.padding_8dp))
+            .padding(vertical = dimensionResource(R.dimen.padding_16dp))
             .verticalScroll(rememberScrollState())
     ) {
         items.forEach { item ->
@@ -114,6 +113,7 @@ fun BodyNavDrawer(
                     R.string.discount_title -> selectedItem == HomeSections.DISCOUNTS
                     R.string.supplier_title -> selectedItem == HomeSections.SUPPLIERS
                     R.string.user_title -> selectedItem == HomeSections.USERS
+                    R.string.store_title -> selectedItem == HomeSections.STORES
                     R.string.settings_title -> selectedItem == HomeSections.SETTINGS
                     R.string.about_title -> selectedItem == HomeSections.ABOUT
                     else -> false

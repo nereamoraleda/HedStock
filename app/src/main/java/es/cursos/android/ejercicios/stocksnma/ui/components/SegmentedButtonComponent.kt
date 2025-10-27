@@ -34,7 +34,7 @@ fun CustomSegmentedButton(
     SingleChoiceSegmentedButtonRow(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(dimensionResource(R.dimen.padding_medium))
+            .padding(dimensionResource(R.dimen.padding_16dp))
             .clip(RoundedCornerShape(50.dp))
             .background(MaterialTheme.colorScheme.secondary)
     ) {
@@ -49,14 +49,7 @@ fun CustomSegmentedButton(
                     )
                 },
                 icon = {},
-                colors = SegmentedButtonDefaults.colors(
-                    activeContentColor = MaterialTheme.colorScheme.secondary,
-                    activeContainerColor = MaterialTheme.colorScheme.surface,
-                    activeBorderColor = MaterialTheme.colorScheme.primary,
-                    inactiveContentColor = MaterialTheme.colorScheme.surface,
-                    inactiveContainerColor = MaterialTheme.colorScheme.secondary,
-                    inactiveBorderColor = Color.Transparent
-                ),
+                colors = segmentedButtonColors(),
                 modifier = Modifier
                     .padding(horizontal = 4.dp)
                     .weight(1f)
@@ -64,3 +57,56 @@ fun CustomSegmentedButton(
         }
     }
 }
+
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun <T> GeneralSegmentedButton(
+    selectedSection: T,
+    onSectionChange: (T) -> Unit,
+    sections: List<T>,
+    label: @Composable (T) -> String,
+    modifier: Modifier = Modifier
+) {
+    SingleChoiceSegmentedButtonRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(dimensionResource(R.dimen.padding_16dp))
+            .clip(RoundedCornerShape(50.dp))
+            .background(MaterialTheme.colorScheme.secondary)
+    ) {
+        sections.forEach { section ->
+            SegmentedButton(
+                selected = section == selectedSection,
+                onClick = { onSectionChange(section) },
+                shape = RoundedCornerShape(50.dp),
+                label = {
+                    Text(
+                        text = label(section),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                icon = {},
+                colors = segmentedButtonColors(),
+                modifier = Modifier
+                    .padding(horizontal = 4.dp)
+                    .weight(1f)
+            )
+        }
+    }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun segmentedButtonColors() = SegmentedButtonDefaults.colors(
+    activeContentColor = MaterialTheme.colorScheme.secondary,
+    activeContainerColor = MaterialTheme.colorScheme.surface,
+    activeBorderColor = MaterialTheme.colorScheme.primary,
+    inactiveContentColor = MaterialTheme.colorScheme.surface,
+    inactiveContainerColor = MaterialTheme.colorScheme.secondary,
+    inactiveBorderColor = Color.Transparent
+)

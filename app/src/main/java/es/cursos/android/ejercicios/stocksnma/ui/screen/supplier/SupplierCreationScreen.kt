@@ -26,11 +26,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import es.cursos.android.ejercicios.stocksnma.R
 import es.cursos.android.ejercicios.stocksnma.domain.model.Supplier
-import es.cursos.android.ejercicios.stocksnma.ui.components.CustomBottomAppBar
+import es.cursos.android.ejercicios.stocksnma.ui.components.ButtonsBottomBar
 import es.cursos.android.ejercicios.stocksnma.ui.components.CustomCard
 import es.cursos.android.ejercicios.stocksnma.ui.components.CustomTextFieldProduct
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralTopAppBar
-import es.cursos.android.ejercicios.stocksnma.ui.components.IconButtonGoBack
+import es.cursos.android.ejercicios.stocksnma.ui.components.NavigateBackButton
 import kotlinx.coroutines.launch
 
 
@@ -47,13 +47,13 @@ fun SupplierCreationScreen(
         topBar = {
             GeneralTopAppBar(
                 title = stringResource(R.string.supplier_create_title),
-                navigationButton = { IconButtonGoBack(navigateBack) }
+                navigationButton = { NavigateBackButton(navigateBack) }
             )
         },
 
         bottomBar = {
-            CustomBottomAppBar(
-                enabled = viewModel.supplierUiState.isEntryValid,
+            ButtonsBottomBar(
+                acceptButtonEnabled = viewModel.supplierUiState.isEntryValid,
                 onAcceptAction = {
                     coroutineScope.launch {
                         viewModel.saveSupplier()
@@ -90,7 +90,7 @@ fun SupplierNewBody(
 
     Column(
         modifier = Modifier
-            .padding(dimensionResource(R.dimen.padding_medium))
+            .padding(dimensionResource(R.dimen.padding_16dp))
             .fillMaxWidth()
     ) {
         CustomCard(modifier = Modifier.fillMaxWidth()) {
@@ -98,7 +98,7 @@ fun SupplierNewBody(
                 supplierUiState = newSupplierViewModel.supplierUiState,
                 onSupplierValueChange = newSupplierViewModel::updateUiState,
                 modifier = Modifier
-                    .padding(dimensionResource(R.dimen.padding_medium))
+                    .padding(dimensionResource(R.dimen.padding_16dp))
                     .fillMaxWidth()
             )
         }
@@ -110,14 +110,14 @@ fun SupplierNewBody(
             fontWeight = FontWeight.Bold,
             style = MaterialTheme.typography.titleMedium
         )
-        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.padding_very_small)))
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.padding_4dp)))
         CustomCard(modifier = Modifier.fillMaxWidth()) {
             TextField(
                 value = newSupplierItem.address,
                 onValueChange = { newSupplierViewModel.updateUiState(supplierItem = newSupplierItem.copy(address = it)) },
                 placeholder = { Text(text = "Ejemplo: Calle HedStock, 123, 2ºA"/*stringResource(R.string.supplier_create_address)*/) },
                 modifier = Modifier
-                    .padding(dimensionResource(R.dimen.padding_medium))
+                    .padding(dimensionResource(R.dimen.padding_16dp))
                     .fillMaxWidth(),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,
@@ -132,7 +132,7 @@ fun SupplierNewBody(
                 onValueChange = { newSupplierViewModel.updateUiState(supplierItem = newSupplierItem.copy(country = it)) },
                 placeholder = { Text(text = stringResource(R.string.supplier_create_country)) },
                 modifier = Modifier
-                    .padding(dimensionResource(R.dimen.padding_medium))
+                    .padding(dimensionResource(R.dimen.padding_16dp))
                     .fillMaxWidth(),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,
@@ -147,7 +147,7 @@ fun SupplierNewBody(
                 onValueChange = { newSupplierViewModel.updateUiState(supplierItem = newSupplierItem.copy(city = it)) },
                 placeholder = { Text(text = stringResource(R.string.supplier_create_city)) },
                 modifier = Modifier
-                    .padding(dimensionResource(R.dimen.padding_medium))
+                    .padding(dimensionResource(R.dimen.padding_16dp))
                     .fillMaxWidth(),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,
@@ -162,7 +162,7 @@ fun SupplierNewBody(
                 onValueChange = { newSupplierViewModel.updateUiState(supplierItem = newSupplierItem.copy(zipCode = it)) },
                 placeholder = { Text(text = stringResource(R.string.supplier_create_zip_code)) },
                 modifier = Modifier
-                    .padding(dimensionResource(R.dimen.padding_medium))
+                    .padding(dimensionResource(R.dimen.padding_16dp))
                     .fillMaxWidth(),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,

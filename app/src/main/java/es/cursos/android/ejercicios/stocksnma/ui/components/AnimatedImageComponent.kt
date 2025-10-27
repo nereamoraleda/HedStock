@@ -27,7 +27,7 @@ import es.cursos.android.ejercicios.stocksnma.R
 fun NothingCreateScreen(nothingCreateText: String) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_small)),
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_8dp)),
         modifier = Modifier.fillMaxSize()
     ) {
         GifImage(modifier = Modifier.padding(top = 16.dp))
@@ -49,7 +49,7 @@ fun GifImage(modifier: Modifier = Modifier) {
         painter = rememberDrawablePainter(
             drawable = getDrawable(
                 LocalContext.current,
-                R.drawable.gif_hedgehog_sleeping
+                R.drawable.hedgehog_sleep
             )
         ),
         contentDescription = stringResource(R.string.image_animated_description),

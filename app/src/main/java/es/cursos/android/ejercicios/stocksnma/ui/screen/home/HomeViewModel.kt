@@ -4,20 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import es.cursos.android.ejercicios.stocksnma.R
-import es.cursos.android.ejercicios.stocksnma.data.local.entity.SupplierEntity
-import es.cursos.android.ejercicios.stocksnma.data.datastore.AppDataStore
+import es.cursos.android.ejercicios.stocksnma.data.local.datastore.AppDataStore
 import es.cursos.android.ejercicios.stocksnma.data.local.entity.relations.ProductWithSupplierAndCategory
-import es.cursos.android.ejercicios.stocksnma.data.mapper.toUser
-import es.cursos.android.ejercicios.stocksnma.data.remote.HedstockApiService
 import es.cursos.android.ejercicios.stocksnma.data.repository.product.ProductRepository
-import es.cursos.android.ejercicios.stocksnma.data.repository.supplier.SupplierRepository
-import es.cursos.android.ejercicios.stocksnma.utils.enums.ActiveFilters
-import es.cursos.android.ejercicios.stocksnma.utils.item.NavDrawerItem
+import es.cursos.android.ejercicios.stocksnma.utils.items.NavDrawerItem
 import es.cursos.android.ejercicios.stocksnma.utils.enums.ProductSortOptions
-import es.cursos.android.ejercicios.stocksnma.utils.enums.SupplierSortOptions
-import es.cursos.android.ejercicios.stocksnma.utils.enums.UserFilter
-import es.cursos.android.ejercicios.stocksnma.utils.enums.UserGroupOptions
-import es.cursos.android.ejercicios.stocksnma.utils.enums.UserSortOptions
 import es.cursos.android.ejercicios.stocksnma.utils.enums.UserRoles
 import es.cursos.android.ejercicios.stocksnma.utils.enums.HomeSections
 import kotlinx.coroutines.Dispatchers
@@ -30,7 +21,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -39,57 +29,72 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val productRepository: ProductRepository,
-    private val supplierRepository: SupplierRepository,
     private val dataStoreManager: AppDataStore,
-    private val apiService: HedstockApiService
 ) : ViewModel() {
+    //dataStoreManager.session.userRole -> No funciona ya que SessionPreferences no tiene métodos ni se usan donde corresponde (SessionManager)
 
     init {
-        viewModelScope.launch {
-            dataStoreManager.userRole.collect {
-                _userRole.value = it
-                loadLists()
-            }
-        }
+        loadHomeData()
+    }
 
-        viewModelScope.launch {
-            dataStoreManager.productOrderBy.collect {
-                _productOrderType.value = it
-            }
-        }
 
+    // -------------------- HOME UI STATE -------------------- //
+    private val _homeUiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
+    val homeUiState: StateFlow<HomeUiState> = _homeUiState.asStateFlow()
+
+    private val _userRole = MutableStateFlow(UserRoles.DESCONOCIDO)
+    //val userRole: StateFlow<UserRoles> = _userRole.asStateFlow()
+
+    private val _hasPermission = MutableStateFlow(false)
+    val hasPermission: StateFlow<Boolean> = _hasPermission.asStateFlow()
+
+    // Variables - Lista de elementos del Navigation Drawer
+    private val _listOfNavDrawerItems = MutableStateFlow(emptyList<NavDrawerItem>())
+
+    // Variables - Índice del elemento seleccionado en el Navigation Drawer
+    private val _selectedHomeSection = MutableStateFlow(HomeSections.STORES)
+    val selectedHomeSection: StateFlow<HomeSections> = _selectedHomeSection
+
+
+    // -------------------- CARGAR DATOS PARA LA HOME UI -------------------- //
+    private fun loadHomeData() {
         viewModelScope.launch {
-            dataStoreManager.supplierOrderBy.collect {
-                _supplierOrderType.value = it
+            try {
+                dataStoreManager.userRole.collectLatest { role ->
+
+                    /**
+                     * Según el rol obtenido en el Login se mostrará un listado u otro en el
+                     * NavigationDrawer, además de restringir acciones/permisos
+                     */
+                    _userRole.value = role
+                    _hasPermission.value = _userRole.value == UserRoles.ADMIN
+                    loadLists(role)
+
+                    _homeUiState.value = HomeUiState.Success(
+                        userRole = role,
+                        navDrawerSections = _listOfNavDrawerItems.value,
+                        selectedSection = _selectedHomeSection.value
+                    )
+                }
+
+            } catch (e: Exception) {
+                _homeUiState.value = HomeUiState.Error(e.message ?: "Error inesperado")
             }
         }
     }
-
-    private val _userRole = MutableStateFlow(UserRoles.DESCONOCIDO)
-    val userRole: StateFlow<UserRoles> = _userRole.asStateFlow()
 
 
 
     // -------------------- VARIABLES - OBTENCIÓN DE PRODUCTOS --------------------
 
     // Variables - Tipos de orden de la tabla Products
-    private val _productOrderType = MutableStateFlow(ProductSortOptions.NAME_ASC)
-    val productOrderTypeProducts: StateFlow<ProductSortOptions> = _productOrderType.asStateFlow()
-
-    private val _supplierOrderType = MutableStateFlow(SupplierSortOptions.NAME_ASC)
-    val supplierOrderTypeSuppliers: StateFlow<SupplierSortOptions> = _supplierOrderType.asStateFlow()
-
-    private val _userFilter = MutableStateFlow(
-        UserFilter(
-            sortOption = UserSortOptions.NAME_ASC,
-            groupOption = null,
-            ActiveFilters.ALL
-        )
+    private val _productOrderType = dataStoreManager.sort.productSortBy.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = ProductSortOptions.NAME_ASC
     )
-    val userFilter: StateFlow<UserFilter> = _userFilter.asStateFlow()
-
-    private val _isRefreshing = MutableStateFlow(false)
-    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+    //private val _productOrderType = MutableStateFlow(ProductSortOptions.NAME_ASC)
+    //val productOrderTypeProducts: StateFlow<ProductSortOptions> = _productOrderType.asStateFlow()
 
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -115,23 +120,8 @@ class HomeViewModel @Inject constructor(
          * para que cuando se ejecute ya esté home inicializada, si no da un null pointer)
          */
         viewModelScope.launch {
-            productsUiState
-                .filterIsInstance<ProductHomeUiState.Success>()
-                .collectLatest { loadLists() }
+            productsUiState.filterIsInstance<ProductHomeUiState.Success>()
         }
-
-        // Cargar historial de búsqueda al iniciar el ViewModel
-//        viewModelScope.launch {
-//            dataStoreManager.productSearchHistory.collect {
-//                _productSearchHistory.value = it
-//            }
-//        }
-
-//        viewModelScope.launch {
-//            dataStoreManager.supplierSearchHistory.collect {
-//                _supplierSearchHistory.value = it
-//            }
-//        }
 
         /* Manera más clean?
         dataStoreManager.searchHistory
@@ -146,88 +136,25 @@ class HomeViewModel @Inject constructor(
          */
     }
 
-//    private fun getUsers() {
-//        viewModelScope.launch {
-//            try {
-//                val response = apiService.getUsers(
-//                    sortBy = _userFilter.value.sortOption.sortBy ?: "name",
-//                    direction = _userFilter.value.sortOption.direction ?: "asc",
-//                    active = _userFilter.value.activeFilter.value
-//                )
-//
-//                if (response.isSuccessful) {
-//                    val users = response.body() ?: emptyList()
-//                    _usersList.value = users.map { it.toUser() }
-//                    Log.d("GET-ALL-USERS", "Recibidos: $users")
-//                } else {
-//                    Log.e("GET-ALL-USERS", "Error: ${response.code()}")
-//                }
-//            } catch (e: Exception) {
-//                Log.e("USERS", "Fallo: ${e.message}", e)
-//            }
-//        }
-//    }
-
-    fun refreshUsers() {
-        _isRefreshing.value = true
-        //getUsers()
-        _isRefreshing.value = false
-    }
-
 
     // -------------------- VARIABLES - SEARCH BAR --------------------
 
     // Variables - Está buscando (Boolean)
-    private val _isSearching = MutableStateFlow(false)
-    val isSearching = _isSearching.asStateFlow()
-
-
     // Variables - Texto escrito en el Search Bar (String)
-    private val _searchQuery = MutableStateFlow("")
-    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
-
     // Variables - Resultados de búsqueda de productos
-    //private val _productSearchResults = MutableStateFlow<List<ProductWithSupplierAndCategory>>(emptyList())
-    //val productSearchResults: StateFlow<List<ProductWithSupplierAndCategory>> = _productSearchResults.asStateFlow()
-
-
     // Variables - Resultados de búsqueda de proveedores
-//    private val _supplierSearchResults = MutableStateFlow<List<SupplierEntity>>(emptyList())
-//    val supplierSearchResults: StateFlow<List<SupplierEntity>> = _supplierSearchResults.asStateFlow()
-
-
     // Variables - Historial de búsqueda
-//    private val _productSearchHistory = MutableStateFlow<List<String>>(emptyList())
-//    val productSearchHistory: StateFlow<List<String>> = _productSearchHistory.asStateFlow()
 
-//    private val _supplierSearchHistory = MutableStateFlow<List<String>>(emptyList())
-//    val supplierSearchHistory: StateFlow<List<String>> = _supplierSearchHistory.asStateFlow()
 
 
     // -------------------- VARIABLES - CHECKBOX --------------------
 
     // Variables - Lista de productos seleccionados
-//    private val _selectedProducts = MutableStateFlow<Set<String>>(emptySet()) // IDs seleccionados
-//    val selectedProducts: StateFlow<Set<String>> = _selectedProducts.asStateFlow()
-
-
     // Variables - Lista de proveedores seleccionados
-//    private val _selectedSuppliers = MutableStateFlow<Set<String>>(emptySet()) // IDs seleccionados
-//    val selectedSuppliers: StateFlow<Set<String>> = _selectedSuppliers.asStateFlow()
+
 
 
     // -------------------- VARIABLES - LISTAS ELEMENTOS --------------------
-
-    // Variables - Lista de elementos del Navigation Drawer
-    private val _listOfNavDrawerItems = MutableStateFlow(emptyList<NavDrawerItem>())
-    val listOfNavDrawerItems: StateFlow<List<NavDrawerItem>> = _listOfNavDrawerItems
-
-
-    // Variables - Índice del elemento seleccionado en el Navigation Drawer
-    private val _selectedHomeSection = MutableStateFlow(HomeSections.PRODUCTS)
-    val selectedHomeSection: StateFlow<HomeSections> = _selectedHomeSection
-
-
     private val _showAboutDialog = MutableStateFlow(false)
     val showAboutDialog: StateFlow<Boolean> = _showAboutDialog
 
@@ -270,46 +197,20 @@ class HomeViewModel @Inject constructor(
      * Función - Cambiar el texto de búsqueda (Search Bar)
      * @param newQuery - Nuevo texto de búsqueda
      */
-    fun onSearchQueryChange(newQuery: String) {
-        _searchQuery.value = newQuery
-    }
-
-
     /**
      * Función - Borrar el texto de búsqueda (Search Bar)
      */
-    fun onSearchQueryDelete() {
-        _searchQuery.value = ""
-    }
-
-
     /**
      * Función - Alternar el estado de búsqueda (isSearching)
      */
-//    fun onToggleSearch() {
-//        _isSearching.value = !_isSearching.value
-//
-//        if (_selectedProducts.value.isNotEmpty()) _selectedProducts.value = emptySet()
-//
-//        if (!_isSearching.value) {
-//            _searchQuery.value = ""
-//            _productSearchResults.value = emptyList()
-//            _supplierSearchResults.value = emptyList()
-//        }
-//    }
-
-
-    // -------------------- FUNCIONES - CHECKBOX --------------------
 
 
 
     // -------------------- FUNCIONES - LISTAS ELEMENTOS --------------------
 
-    private fun loadLists() {
-        //val uiState = homeUiState.value
-
-        when (userRole.value) {
-            UserRoles.ADMIN -> { _listOfNavDrawerItems.value = listOf(
+    private fun loadLists(role: UserRoles = _userRole.value) {
+        _listOfNavDrawerItems.value = when (role) {
+            UserRoles.ADMIN -> listOf(
                     NavDrawerItem.Item(
                         title = R.string.purchase_order_title,
                         iconSelected = R.drawable.ic_purchase_order_filled,
@@ -342,6 +243,12 @@ class HomeViewModel @Inject constructor(
                         iconUnselected = R.drawable.ic_user,
                         action = { setSelectedItem(HomeSections.USERS) }
                     ),
+                    NavDrawerItem.Item(
+                        title = R.string.store_title,
+                        iconSelected = R.drawable.ic_store_filled,
+                        iconUnselected = R.drawable.ic_store,
+                        action = { setSelectedItem(HomeSections.STORES) }
+                    ),
 
                     NavDrawerItem.Divider,
 
@@ -357,8 +264,8 @@ class HomeViewModel @Inject constructor(
                         iconUnselected = R.drawable.ic_info,
                         action = { /*setSelectedItem(NavDrawerItemSelected.ABOUT) ;*/ toggleAboutDialog(true) }
                     )
-                ) }
-            UserRoles.GERENTE -> { _listOfNavDrawerItems.value = listOf(
+                )
+            UserRoles.GERENTE -> listOf(
                     NavDrawerItem.Item(
                         title = R.string.purchase_order_title,
                         iconSelected = R.drawable.ic_purchase_order_filled,
@@ -367,10 +274,10 @@ class HomeViewModel @Inject constructor(
                     ),
 
                     NavDrawerItem.Item(
-                        title = R.string.user_title,
-                        iconSelected = R.drawable.ic_user_filled,
-                        iconUnselected = R.drawable.ic_user,
-                        action = { setSelectedItem(HomeSections.USERS) }
+                        title = R.string.store_title,
+                        iconSelected = R.drawable.ic_store_filled,
+                        iconUnselected = R.drawable.ic_store,
+                        action = { setSelectedItem(HomeSections.STORES) }
                     ),
 
                     NavDrawerItem.Divider,
@@ -387,8 +294,8 @@ class HomeViewModel @Inject constructor(
                         iconUnselected = R.drawable.ic_info,
                         action = { /*setSelectedItem(NavDrawerItemSelected.ABOUT) ;*/ toggleAboutDialog(true) }
                     )
-                ) }
-            UserRoles.VENDEDOR -> { _listOfNavDrawerItems.value = listOf(
+                )
+            UserRoles.VENDEDOR -> listOf(
                     NavDrawerItem.Item(
                         title = R.string.product_title,
                         iconSelected = R.drawable.ic_product_filled,
@@ -397,6 +304,13 @@ class HomeViewModel @Inject constructor(
                         action = { setSelectedItem(HomeSections.PRODUCTS) }
                     ),
 
+                    NavDrawerItem.Item(
+                        title = R.string.store_title,
+                        iconSelected = R.drawable.ic_store_filled,
+                        iconUnselected = R.drawable.ic_store,
+                        action = { setSelectedItem(HomeSections.STORES) }
+                    ),
+
                     NavDrawerItem.Divider,
 
                     NavDrawerItem.Item(
@@ -411,8 +325,8 @@ class HomeViewModel @Inject constructor(
                         iconUnselected = R.drawable.ic_info,
                         action = { /*setSelectedItem(NavDrawerItemSelected.ABOUT) ;*/ toggleAboutDialog(true) }
                     )
-                ) }
-            UserRoles.DESCONOCIDO -> { _listOfNavDrawerItems.value = emptyList() }
+                )
+            UserRoles.DESCONOCIDO -> emptyList()
         }
     }
 

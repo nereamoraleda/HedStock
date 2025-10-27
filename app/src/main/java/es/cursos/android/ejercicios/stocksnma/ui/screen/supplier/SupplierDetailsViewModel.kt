@@ -9,7 +9,7 @@ import es.cursos.android.ejercicios.stocksnma.data.local.entity.SupplierEntity
 import es.cursos.android.ejercicios.stocksnma.data.repository.supplier.SupplierRepository
 import es.cursos.android.ejercicios.stocksnma.domain.model.Supplier
 import es.cursos.android.ejercicios.stocksnma.ui.state.DetailsUiState
-import es.cursos.android.ejercicios.stocksnma.utils.SupplierValidationState
+import es.cursos.android.ejercicios.stocksnma.utils.validations.SupplierValidationState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,7 +30,9 @@ class SupplierDetailsViewModel @Inject constructor(
     private val _tempSupplier = MutableStateFlow<Supplier>(Supplier())
     val tempSupplier: StateFlow<Supplier> = _tempSupplier.asStateFlow()
 
-    private val _validationsSupplierState = MutableStateFlow<SupplierValidationState>(SupplierValidationState())
+    private val _validationsSupplierState = MutableStateFlow<SupplierValidationState>(
+        SupplierValidationState()
+    )
     val validationsSupplierState: StateFlow<SupplierValidationState> = _validationsSupplierState.asStateFlow()
 
     private val _initialSupplierName = MutableStateFlow("")
@@ -112,9 +114,9 @@ class SupplierDetailsViewModel @Inject constructor(
 
     private suspend fun validateSupplier(supplier: Supplier = _tempSupplier.value): Boolean {
         val errors = SupplierValidationState(
-            nameError = validateNameSupplier(supplier.name, _initialSupplierName.value),
-            phoneError = validatePhoneSupplier(supplier.phone),
-            emailError =
+            nameErrorMessage = validateNameSupplier(supplier.name, _initialSupplierName.value),
+            phoneErrorMessage = validatePhoneSupplier(supplier.phone),
+            emailErrorMessage =
             if (supplier.phone.isBlank() && supplier.email.isBlank()) {
                 "Debe especificar un número de teléfono o un email"
             } else validateEmailSupplier(supplier.email)
@@ -123,9 +125,9 @@ class SupplierDetailsViewModel @Inject constructor(
         _validationsSupplierState.value = errors
 
         return errors.run {
-            nameError == null &&
-            phoneError == null &&
-            emailError == null
+            nameErrorMessage == null &&
+            phoneErrorMessage == null &&
+            emailErrorMessage == null
         }
     }
 

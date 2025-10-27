@@ -27,21 +27,20 @@ const val SHOW_SINGULAR_STRING = 1
 /**
  * COMPOSABLE - BOTTOM APP BAR (GENERAL DE LA APP, BOTONES)
  *
- * @param enabled - Botón Aceptar habilitado o no
  * @param onAcceptAction - Acción al pulsar el botón Aceptar
  * @param onCancelAction - Acción al pulsar el botón Cancelar
- *
+ * @param acceptButtonEnabled - Botón Aceptar habilitado o no
  */
 @Composable
-fun CustomBottomAppBar(
-    enabled: Boolean,
+fun ButtonsBottomBar(
     onAcceptAction: () -> Unit,
     onCancelAction: () -> Unit,
+    acceptButtonEnabled: Boolean,
     modifier: Modifier = Modifier
 ) {
     BottomAppBar(
         containerColor = Color.Transparent,
-        contentPadding = PaddingValues(horizontal = dimensionResource(R.dimen.padding_medium)),
+        contentPadding = PaddingValues(horizontal = dimensionResource(R.dimen.padding_16dp)),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -57,7 +56,7 @@ fun CustomBottomAppBar(
 
             ButtonAccept(
                 action = { onAcceptAction() },
-                enabled = enabled,
+                enabled = acceptButtonEnabled,
                 modifier = Modifier.weight(1f)
             )
         }
@@ -84,7 +83,7 @@ fun HomeBottomBar(
     if (selectedCheckBoxCount > SHOW_BOTTOM_BAR) {
         BottomAppBar(
             containerColor = MaterialTheme.colorScheme.primary,
-            contentPadding = PaddingValues(horizontal = dimensionResource(R.dimen.padding_medium)),
+            contentPadding = PaddingValues(horizontal = dimensionResource(R.dimen.padding_16dp)),
             modifier = modifier
         ) {
             Row(
@@ -126,7 +125,7 @@ fun HomeBottomBar2(
 
     BottomAppBar(
         containerColor = MaterialTheme.colorScheme.background,
-        contentPadding = PaddingValues(horizontal = dimensionResource(R.dimen.padding_medium)),
+        contentPadding = PaddingValues(horizontal = dimensionResource(R.dimen.padding_16dp)),
         modifier = modifier
     ) {
         Row(

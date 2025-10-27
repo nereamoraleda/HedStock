@@ -31,18 +31,16 @@ import es.cursos.android.ejercicios.stocksnma.data.mapper.toSupplier
 import es.cursos.android.ejercicios.stocksnma.domain.model.Supplier
 import es.cursos.android.ejercicios.stocksnma.ui.components.ChildCheckBox
 import es.cursos.android.ejercicios.stocksnma.ui.components.CustomSearchBarHistory
-import es.cursos.android.ejercicios.stocksnma.ui.components.CustomSearchNotFound
+import es.cursos.android.ejercicios.stocksnma.ui.components.SearchNotFoundContent
+import es.cursos.android.ejercicios.stocksnma.ui.components.ErrorContent
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralSearchBar
+import es.cursos.android.ejercicios.stocksnma.ui.components.LoadingContent
 import es.cursos.android.ejercicios.stocksnma.ui.components.NothingCreateScreen
 import es.cursos.android.ejercicios.stocksnma.ui.components.ParentCheckBox
 import es.cursos.android.ejercicios.stocksnma.ui.components.TableCell
 import es.cursos.android.ejercicios.stocksnma.ui.components.TableHeader
-import es.cursos.android.ejercicios.stocksnma.ui.screen.home.HomeErrorScreen
-import es.cursos.android.ejercicios.stocksnma.ui.screen.home.HomeLoadingScreen
 import es.cursos.android.ejercicios.stocksnma.ui.screen.home.SupplierHomeUiState
 import es.cursos.android.ejercicios.stocksnma.ui.screen.home.SupplierSearchTable
-import es.cursos.android.ejercicios.stocksnma.ui.screen.home.products.ProductSectionBodyScreen
-
 
 @Composable
 fun SupplierSectionScreen(navigateToSupplierDetails: (String) -> Unit) {
@@ -50,14 +48,8 @@ fun SupplierSectionScreen(navigateToSupplierDetails: (String) -> Unit) {
     val state by viewModel.uiState.collectAsState()
 
     when (val uiState = state) {
-        is SupplierHomeUiState.Loading -> {
-            HomeLoadingScreen()
-        }
-
-        is SupplierHomeUiState.Error -> {
-            HomeErrorScreen(messageError = uiState.messageError)
-        }
-
+        is SupplierHomeUiState.Loading -> { LoadingContent() }
+        is SupplierHomeUiState.Error -> { ErrorContent(uiState.messageError) }
         is SupplierHomeUiState.Success -> {
             SupplierSectionBodyScreen(
                 suppliers = uiState.suppliers.map { it.toSupplier() },
@@ -66,7 +58,6 @@ fun SupplierSectionScreen(navigateToSupplierDetails: (String) -> Unit) {
         }
     }
 }
-
 
 
 @Composable
@@ -125,7 +116,7 @@ fun SupplierSectionBodyScreen(
                         )
                     }
 
-                    else if (searchResults.isEmpty()) { CustomSearchNotFound() }
+                    else if (searchResults.isEmpty()) { SearchNotFoundContent() }
 
                     else {
                         SupplierSearchTable(
@@ -137,7 +128,7 @@ fun SupplierSectionBodyScreen(
                             },
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(dimensionResource(R.dimen.padding_medium))
+                                .padding(dimensionResource(R.dimen.padding_16dp))
                                 .horizontalScroll(rememberScrollState())  // Scroll horizontal para toda la tabla
                         )
                     }

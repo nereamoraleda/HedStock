@@ -8,11 +8,11 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import es.cursos.android.ejercicios.stocksnma.data.mapper.toUser
 import es.cursos.android.ejercicios.stocksnma.data.mapper.toUserDto
-import es.cursos.android.ejercicios.stocksnma.data.remote.HedstockApiService
-import es.cursos.android.ejercicios.stocksnma.domain.model.Store
+import es.cursos.android.ejercicios.stocksnma.data.remote.api.UserApi
+import es.cursos.android.ejercicios.stocksnma.domain.model.store.StoreSelection
 import es.cursos.android.ejercicios.stocksnma.domain.model.User
 import es.cursos.android.ejercicios.stocksnma.ui.state.DetailsUiState
-import es.cursos.android.ejercicios.stocksnma.utils.UserValidationState
+import es.cursos.android.ejercicios.stocksnma.utils.validations.UserValidationState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,7 +23,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UserDetailsViewModel @Inject constructor(
-    private val apiService: HedstockApiService
+    private val api: UserApi
 ) : ViewModel() {
 
     init {
@@ -32,18 +32,19 @@ class UserDetailsViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow<DetailsUiState<User>>(DetailsUiState.Loading)
     val uiState: StateFlow<DetailsUiState<User>> = _uiState.asStateFlow()
-
-    private val usernameNotChanged = MutableStateFlow("")
-    private val emailNotChanged = MutableStateFlow("")
-    private val phoneNotChanged = MutableStateFlow("")
-
     private val _userOriginal = MutableStateFlow(User())
 
     private val _userEditable = MutableStateFlow(User())
     val userEditable: StateFlow<User> = _userEditable.asStateFlow()
 
-    private val _storeOptions = MutableStateFlow<List<Store>>(emptyList())
-    val storeOptions: StateFlow<List<Store>> = _storeOptions.asStateFlow()
+    private val _resetResult = MutableStateFlow(false)
+    val resetResult: StateFlow<Boolean> = _resetResult.asStateFlow()
+
+    private val emailNotChanged = MutableStateFlow("")
+    private val phoneNotChanged = MutableStateFlow("")
+
+    private val _storeOptions = MutableStateFlow<List<StoreSelection>>(emptyList())
+    val storeOptions: StateFlow<List<StoreSelection>> = _storeOptions.asStateFlow()
 
     private val _validationState = MutableStateFlow(UserValidationState())
     val validationState: StateFlow<UserValidationState> = _validationState
@@ -51,7 +52,7 @@ class UserDetailsViewModel @Inject constructor(
     fun loadUserDetails(id: Long) {
         viewModelScope.launch {
             try {
-                val response = apiService.getUserById(id)
+                val response = api.getUserById(id)
                 if (response.isSuccessful) {
                     if (response.body() != null) {
                         //Log.d("GET-USER-DETAILS-BEFORE", "Información del usuario: ${response.body()}")
@@ -92,35 +93,27 @@ class UserDetailsViewModel @Inject constructor(
         if ( !validateInput() ) return
         viewModelScope.launch {
             try {
-                //val newUsername = user.username
                 val newEmail = user.email
                 val newPhone = user.phone
 
                 // Comprobación de duplicados
-//                if (usernameNotChanged.value != newUsername) {
-//                    if (apiService.checkUsername(newUsername).body() == true) {
-//                        _validationState.value = _validationState.value.copy(usernameError = "El nombre de usuario ya existe")
-//                        return@launch
-//                    }
-//                }
-
                 if (emailNotChanged.value != newEmail) {
-                    if (apiService.checkEmail(newEmail).body() == true) {
-                        _validationState.value = _validationState.value.copy(emailError = "El email ya existe")
+                    if (api.checkEmail(newEmail).body() == true) {
+                        _validationState.value = _validationState.value.copy(emailErrorMessage = "El email ya existe")
                         return@launch
                     }
                 }
 
                 if (phoneNotChanged.value != newPhone) {
-                    if (apiService.checkPhone(newPhone).body() == true) {
-                        _validationState.value = _validationState.value.copy(phoneError = "El teléfono ya existe")
+                    if (api.checkPhone(newPhone).body() == true) {
+                        _validationState.value = _validationState.value.copy(phoneErrorMessage = "El teléfono ya existe")
                         return@launch
                     }
                 }
 
                 // Actualización de Usuario
                 val userDto = _userEditable.value.toUserDto()
-                val response = apiService.updateUser(userDto.id!!, userDto)
+                val response = api.updateUser(userDto.id!!, userDto)
                 onResult(response.isSuccessful)
 
                 if (response.isSuccessful) {
@@ -142,11 +135,17 @@ class UserDetailsViewModel @Inject constructor(
     fun resetPassword() {
         viewModelScope.launch {
             try {
-                apiService.resetPassword(_userOriginal.value.id!!)
-                Log.d("RESET-PASSWORD", "Contraseña reseteada?")
+                val response = api.resetPassword(_userOriginal.value.id!!)
+                if (response.isSuccessful) {
+                    _resetResult.value = true
+                    Log.d("RESET-PASSWORD", "Contraseña reseteada correctamente: ${response.body()}")
+                } else {
+                    _resetResult.value = false
+                    Log.e("RESET-PASSWORD", "Error en reset: ${response.code()} - ${response.message()}")
+                }
 
             } catch (e: Exception) {
-
+                Log.e("RESET-PASSWORD", "Error: ${e.message}", e)
             }
         }
     }
@@ -154,7 +153,7 @@ class UserDetailsViewModel @Inject constructor(
     fun deleteUser() {
         viewModelScope.launch {
             try {
-                val response = apiService.deleteUser(_userOriginal.value.id!!)
+                val response = api.deleteUser(_userOriginal.value.id!!)
                 if (response.isSuccessful) {
                     Log.d("DELETE-USER", "Usuario eliminado: ${response.body()}")
                 } else {
@@ -173,11 +172,11 @@ class UserDetailsViewModel @Inject constructor(
 
     private fun validateInput(user: User = _userEditable.value): Boolean {
         _validationState.value = UserValidationState(
-            nameError = validateName(user.name),
-            emailError = validateEmail(user.email),
-            phoneError = validatePhone(user.phone),
-            emailOrPhoneError = validateEmailOrPhone(user.email, user.phone),
-            roleError = validateRole(user.role)
+            nameErrorMessage = validateName(user.name),
+            emailErrorMessage = validateEmail(user.email),
+            phoneErrorMessage = validatePhone(user.phone),
+            contactInformationErrorMessage = validateEmailOrPhone(user.email, user.phone),
+            roleErrorMessage = validateRole(user.role)
         )
 
         return listOf(
@@ -254,7 +253,7 @@ class UserDetailsViewModel @Inject constructor(
     private fun loadStoresList() {
         viewModelScope.launch {
             try {
-                val response = apiService.getStoresSummary()
+                val response = api.getStoresForSelection()
                 if (response.isSuccessful) {
                     val stores = response.body() ?: emptyList()
                     _storeOptions.value = stores

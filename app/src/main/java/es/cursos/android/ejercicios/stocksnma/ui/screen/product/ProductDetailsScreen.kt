@@ -42,7 +42,7 @@ import es.cursos.android.ejercicios.stocksnma.data.local.entity.SupplierEntity
 import es.cursos.android.ejercicios.stocksnma.domain.model.Product
 import es.cursos.android.ejercicios.stocksnma.ui.components.CategoryDialog
 import es.cursos.android.ejercicios.stocksnma.ui.components.ConfirmationDialog
-import es.cursos.android.ejercicios.stocksnma.ui.components.CustomBottomAppBar
+import es.cursos.android.ejercicios.stocksnma.ui.components.ButtonsBottomBar
 import es.cursos.android.ejercicios.stocksnma.ui.components.CustomDropDownMenuCategoriesExposed
 import es.cursos.android.ejercicios.stocksnma.ui.components.CustomDropDownMenuSuppliersExposed
 import es.cursos.android.ejercicios.stocksnma.ui.components.CustomOutlinedTextField
@@ -52,12 +52,13 @@ import es.cursos.android.ejercicios.stocksnma.ui.components.CustomSegmentedButto
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralTopAppBar
 import es.cursos.android.ejercicios.stocksnma.ui.components.DetailsCard
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralIconButton
-import es.cursos.android.ejercicios.stocksnma.ui.components.IconButtonGoBack
+import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralSegmentedButton
+import es.cursos.android.ejercicios.stocksnma.ui.components.NavigateBackButton
 import es.cursos.android.ejercicios.stocksnma.ui.components.ShowMessageErrorText
 import es.cursos.android.ejercicios.stocksnma.ui.components.colorsSimpleTextField
 import es.cursos.android.ejercicios.stocksnma.ui.state.DetailsUiState
 import es.cursos.android.ejercicios.stocksnma.utils.enums.ProductSections
-import es.cursos.android.ejercicios.stocksnma.utils.ProductValidationState
+import es.cursos.android.ejercicios.stocksnma.utils.validations.ProductValidationState
 
 
 @Composable
@@ -84,7 +85,7 @@ fun ProductoDetailsScreen(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(dimensionResource(R.dimen.padding_medium))
+                    .padding(dimensionResource(R.dimen.padding_16dp))
             ) {
                 CircularProgressIndicator(modifier = Modifier.size(50.dp))
             }
@@ -197,7 +198,7 @@ fun ProductDetailsBodyScreen(
         topBar = {
             GeneralTopAppBar(
                 title = stringResource(R.string.product_details_title),
-                navigationButton = { if (!isEditing) IconButtonGoBack(onNavigateBack) },
+                navigationButton = { if (!isEditing) NavigateBackButton(onNavigateBack) },
                 actionButton = {
                     GeneralIconButton(
                         icon = R.drawable.ic_edit,
@@ -216,8 +217,8 @@ fun ProductDetailsBodyScreen(
         },
         bottomBar = {
             if (isEditing) {
-                CustomBottomAppBar(
-                    enabled = stateProduct.isEntryValid,
+                ButtonsBottomBar(
+                    acceptButtonEnabled = stateProduct.isEntryValid,
                     onAcceptAction = {
                         Log.d(
                             "UpdateDebug", "Product: $tempProduct"
@@ -257,15 +258,19 @@ fun ProductDetailsBodyScreen(
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
         ) {
-            CustomSegmentedButton(
-                selectedProductSection = activeProductSection,
-                onProductSectionChange = { activeProductSection = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(dimensionResource(R.dimen.padding_medium))
-                    .clip(RoundedCornerShape(50.dp))
-                    .background(MaterialTheme.colorScheme.primary)
+            GeneralSegmentedButton(
+                selectedSection = activeProductSection,
+                onSectionChange = { activeProductSection = it },
+                sections = ProductSections.entries.toList(),
+                label = {
+                    when (it) {
+                        ProductSections.INFO -> stringResource(R.string.product_section_info)
+                        ProductSections.PRICE -> stringResource(R.string.product_section_price)
+                        ProductSections.STOCK -> stringResource(R.string.product_section_stock)
+                    }
+                }
             )
+
 
             ProductInfoCard(
                 viewModel,
@@ -307,7 +312,7 @@ fun ProductInfoCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(dimensionResource(R.dimen.padding_medium))
+            .padding(dimensionResource(R.dimen.padding_16dp))
     ) {
         DetailsCard(
             content = {
@@ -329,7 +334,7 @@ fun ProductInfoCard(
                             onValueChange = viewModel::updateField,
                             validacionState = validationState,
                             isEditing = isEditing,
-                            modifier = Modifier.padding(dimensionResource(R.dimen.padding_medium))
+                            modifier = Modifier.padding(dimensionResource(R.dimen.padding_16dp))
                         )
                     }
 
@@ -339,7 +344,7 @@ fun ProductInfoCard(
                         ),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(dimensionResource(R.dimen.padding_medium))
+                            .padding(dimensionResource(R.dimen.padding_16dp))
                     ) {
                         // Contenido Card
                         when (selectedProductSection) {
@@ -391,7 +396,7 @@ fun EncabezadoCard(
         TextField(
             value = tempProduct.name,
             onValueChange = { onValueChange("name", it) },
-            isError = validacionState.nameError != null,
+            isError = validacionState.nameErrorMessage != null,
             enabled = isEditing,
             placeholder = {
                 Text(
@@ -403,7 +408,7 @@ fun EncabezadoCard(
             colors = colorsSimpleTextField(),
             modifier = Modifier.fillMaxWidth()
         )
-        ShowMessageErrorText(validacionState.nameError, modifier = Modifier.padding(horizontal = dimensionResource(R.dimen.padding_medium)))
+        ShowMessageErrorText(validacionState.nameErrorMessage, modifier = Modifier.padding(horizontal = dimensionResource(R.dimen.padding_16dp)))
 
         TextField(
             value = tempProduct.description,
@@ -437,8 +442,8 @@ fun GeneralInfoSection(
         onSupplierSelected = { onValueChange("supplierId", it) },
         supplierOptions = suppliersList,
         enabled = isEditing,
-        isError = validacionState.supplierError != null,
-        messageError = validacionState.supplierError
+        isError = validacionState.supplierErrorMessage != null,
+        messageError = validacionState.supplierErrorMessage
     )
 
 
@@ -467,8 +472,8 @@ fun GeneralInfoSection(
         onValueChange = { onValueChange("barcode", it) },
         label = R.string.product_barcode,
         enabled = isEditing,
-        isError = validacionState.barcodeError != null,
-        messageError = validacionState.barcodeError,
+        isError = validacionState.barcodeErrorMessage != null,
+        messageError = validacionState.barcodeErrorMessage,
     )
 }
 
@@ -484,30 +489,30 @@ fun InventorySection(
         title = R.string.product_stock,
         value = tempProduct.stock,
         onValueChange = { onValueChange("stock", it) },
-        isError = validationState.stockError != null,
+        isError = validationState.stockErrorMessage != null,
         enabled = isEditing
     )
-    ShowMessageErrorText(validationState.stockError, isEditing)
+    ShowMessageErrorText(validationState.stockErrorMessage, isEditing)
 
 
     CustomRowAndTextFieldStocks(
         title = R.string.product_min_stock,
         value = tempProduct.minStock,
         onValueChange = { onValueChange("minStock", it) },
-        isError = validationState.minStockError != null,
+        isError = validationState.minStockErrorMessage != null,
         enabled = isEditing
     )
-    ShowMessageErrorText(validationState.minStockError, isEditing)
+    ShowMessageErrorText(validationState.minStockErrorMessage, isEditing)
 
 
     CustomRowAndTextFieldStocks(
         title = R.string.product_max_stock,
         value = tempProduct.maxStock,
         onValueChange = { onValueChange("maxStock", it) },
-        isError = validationState.maxStockError != null,
+        isError = validationState.maxStockErrorMessage != null,
         enabled = isEditing
     )
-    ShowMessageErrorText(validationState.maxStockError, isEditing)
+    ShowMessageErrorText(validationState.maxStockErrorMessage, isEditing)
 }
 
 
@@ -519,7 +524,7 @@ fun PricesSection(
     isEditing: Boolean
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_medium)),
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_16dp)),
         modifier = Modifier
             .background(MaterialTheme.colorScheme.background)
     ) {
@@ -527,18 +532,18 @@ fun PricesSection(
             title = R.string.product_cost_price,
             value = tempProduct.costPrice,
             onValueChange = { onValueChange("costPrice", it) },
-            isError = validationState.costPriceError != null,
+            isError = validationState.costPriceErrorMessage != null,
             enabled = isEditing
         )
-        ShowMessageErrorText(validationState.costPriceError, isEditing)
+        ShowMessageErrorText(validationState.costPriceErrorMessage, isEditing)
 
         CustomRowAndTextFieldPrices(
             title = R.string.product_sold_price,
             value = tempProduct.price,
             onValueChange = { onValueChange("price", it) },
-            isError = validationState.priceError != null,
+            isError = validationState.sellingPriceErrorMessage != null,
             enabled = isEditing
         )
-        ShowMessageErrorText(validationState.priceError, isEditing)
+        ShowMessageErrorText(validationState.sellingPriceErrorMessage, isEditing)
     }
 }

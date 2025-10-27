@@ -15,7 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import es.cursos.android.ejercicios.stocksnma.R
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralTopAppBar
-import es.cursos.android.ejercicios.stocksnma.ui.components.IconButtonGoBack
+import es.cursos.android.ejercicios.stocksnma.ui.components.NavigateBackButton
 
 
 @Composable
@@ -24,7 +24,7 @@ fun SettingsScreen(navigateBack: () -> Unit) {
         topBar = {
             GeneralTopAppBar(
                 title = stringResource(R.string.settings_title),
-                navigationButton = { IconButtonGoBack(navigateBack) }
+                navigationButton = { NavigateBackButton(navigateBack) }
             )
         }
     ) { innerPadding ->

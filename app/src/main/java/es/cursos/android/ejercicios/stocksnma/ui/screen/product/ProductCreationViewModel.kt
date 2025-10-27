@@ -15,7 +15,7 @@ import es.cursos.android.ejercicios.stocksnma.data.repository.product.ProductRep
 import es.cursos.android.ejercicios.stocksnma.data.repository.supplier.SupplierRepository
 import es.cursos.android.ejercicios.stocksnma.domain.model.Product
 import es.cursos.android.ejercicios.stocksnma.utils.Constants.TIMEOUT_MILLIS
-import es.cursos.android.ejercicios.stocksnma.utils.ProductValidationState
+import es.cursos.android.ejercicios.stocksnma.utils.validations.ProductValidationState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -119,13 +119,13 @@ class ProductCreationViewModel @Inject constructor(
         //uiState.category.isBlank() || categoriesList.value.any { it.id.toString() == uiState.category }
 
         _validationState.value = ProductValidationState(
-            nameError = nameErrorMessage,
-            barcodeError = barcodeErrorMessage,
-            stockError = stockErrorMessage,
-            minStockError = minStockErrorMessage,
-            maxStockError = maxStockErrorMessage,
-            priceError = priceErrorMessage,
-            costPriceError = costPriceErrorMessage
+            nameErrorMessage = nameErrorMessage,
+            barcodeErrorMessage = barcodeErrorMessage,
+            stockErrorMessage = stockErrorMessage,
+            minStockErrorMessage = minStockErrorMessage,
+            maxStockErrorMessage = maxStockErrorMessage,
+            sellingPriceErrorMessage = priceErrorMessage,
+            costPriceErrorMessage = costPriceErrorMessage
         )
 
         return listOf(

@@ -24,7 +24,7 @@ fun TableHeader(
         text = text,
         fontWeight = FontWeight.Bold,
         modifier = modifier
-            .padding(dimensionResource(R.dimen.padding_very_small))
+            .padding(dimensionResource(R.dimen.padding_4dp))
     )
 }
 
@@ -44,6 +44,6 @@ fun TableCell(
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
         modifier = modifier
-            .padding(dimensionResource(R.dimen.padding_very_small))
+            .padding(dimensionResource(R.dimen.padding_4dp))
     )
 }

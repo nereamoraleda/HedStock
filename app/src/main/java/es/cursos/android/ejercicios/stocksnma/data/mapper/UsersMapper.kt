@@ -1,6 +1,6 @@
 package es.cursos.android.ejercicios.stocksnma.data.mapper
 
-import es.cursos.android.ejercicios.stocksnma.data.dto.UserDto
+import es.cursos.android.ejercicios.stocksnma.data.remote.dto.UserDto
 import es.cursos.android.ejercicios.stocksnma.domain.model.User
 
 fun UserDto.toUser(): User = User(

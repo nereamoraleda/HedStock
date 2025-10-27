@@ -4,10 +4,23 @@ import es.cursos.android.ejercicios.stocksnma.data.local.entity.SupplierEntity
 import es.cursos.android.ejercicios.stocksnma.data.local.entity.relations.ProductWithSupplierAndCategory
 import es.cursos.android.ejercicios.stocksnma.domain.model.User
 import es.cursos.android.ejercicios.stocksnma.utils.enums.ActiveFilters
+import es.cursos.android.ejercicios.stocksnma.utils.enums.HomeSections
 import es.cursos.android.ejercicios.stocksnma.utils.enums.ProductSortOptions
 import es.cursos.android.ejercicios.stocksnma.utils.enums.SupplierSortOptions
 import es.cursos.android.ejercicios.stocksnma.utils.enums.UserGroupOptions
+import es.cursos.android.ejercicios.stocksnma.utils.enums.UserRoles
 import es.cursos.android.ejercicios.stocksnma.utils.enums.UserSortOptions
+import es.cursos.android.ejercicios.stocksnma.utils.items.NavDrawerItem
+
+sealed class HomeUiState {
+    data object Loading : HomeUiState()
+    data class Success(
+        val userRole: UserRoles,
+        val navDrawerSections: List<NavDrawerItem>,
+        val selectedSection: HomeSections
+    ) : HomeUiState()
+    data class Error(val messageError: String) : HomeUiState()
+}
 
 /*
  * SEALED CLASS - Manejar el estado de la pantalla de Home por Sections

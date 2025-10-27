@@ -36,7 +36,7 @@ fun ProductSearchTable(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(dimensionResource(R.dimen.padding_medium))
+            .padding(dimensionResource(R.dimen.padding_16dp))
             .horizontalScroll(rememberScrollState())
     ) {
         ProductTableHeader()
@@ -52,7 +52,7 @@ fun ProductSearchTable(
                         .fillMaxWidth()
                         .height(50.dp)
                         .clickable { onProductClick(product.product.id, product.product.name) }
-                        .padding(end = dimensionResource(R.dimen.padding_medium))
+                        .padding(end = dimensionResource(R.dimen.padding_16dp))
                 ) {
                     ProductTableBody(product)
                 }
