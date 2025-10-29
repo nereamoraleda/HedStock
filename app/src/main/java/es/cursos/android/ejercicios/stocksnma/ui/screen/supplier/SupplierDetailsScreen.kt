@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -33,7 +32,6 @@ import es.cursos.android.ejercicios.stocksnma.domain.model.Supplier
 import es.cursos.android.ejercicios.stocksnma.ui.components.ButtonsBottomBar
 import es.cursos.android.ejercicios.stocksnma.ui.components.ConfirmationDialog
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralCard
-import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralIconButton
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralOutlinedTextField
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralSegmentedButton
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralTextFieldTitle
@@ -43,11 +41,11 @@ import es.cursos.android.ejercicios.stocksnma.ui.components.NavigateBackButton
 import es.cursos.android.ejercicios.stocksnma.ui.components.ShowMessageErrorText
 import es.cursos.android.ejercicios.stocksnma.ui.components.VerticalScrollableColumn
 import es.cursos.android.ejercicios.stocksnma.ui.components.supportingErrorText
-import es.cursos.android.ejercicios.stocksnma.ui.screen.store.StoreFields
 import es.cursos.android.ejercicios.stocksnma.ui.state.DetailsUiState
+import es.cursos.android.ejercicios.stocksnma.utils.constants.SupplierFieldsLenghts
 import es.cursos.android.ejercicios.stocksnma.utils.enums.StoreSections
 import es.cursos.android.ejercicios.stocksnma.utils.enums.SupplierFields
-import es.cursos.android.ejercicios.stocksnma.utils.validations.SupplierValidationState
+import es.cursos.android.ejercicios.stocksnma.utils.validations.SupplierValidationForm
 
 @Composable
 fun SupplierDetailsScreen(
@@ -61,7 +59,7 @@ fun SupplierDetailsScreen(
 
 
     val state by viewModel.uiState.collectAsState()
-    val validationState by viewModel.validationsSupplierState.collectAsState()
+    val validationForm by viewModel.validationForm.collectAsState()
 
     var showDeleteSupplierConfirmation by remember { mutableStateOf(false) }
     var showLostChangesDialog by remember { mutableStateOf(false) }
@@ -151,7 +149,7 @@ fun SupplierDetailsScreen(
                         editableSupplier = uiState.editableItem,
                         onValueChange = viewModel::onFieldChange,
                         onCheckedChange = viewModel::onFieldChange,
-                        validationState = validationState,
+                        validationForm = validationForm,
                         //isEditing = uiState.isEditing ?: true,
                     )
                 }
@@ -166,7 +164,7 @@ fun SupplierDetailsBody(
     editableSupplier: Supplier,
     onValueChange: (SupplierFields, String) -> Unit,
     onCheckedChange: (SupplierFields, Boolean) -> Unit,
-    validationState: SupplierValidationState,
+    validationForm: SupplierValidationForm,
     isEditing: Boolean = true,
 ) {
     var sectionSelected by remember { mutableStateOf(StoreSections.CONTACT) }
@@ -201,12 +199,15 @@ fun SupplierDetailsBody(
                 ) {
                     GeneralTextFieldTitle(
                         value = editableSupplier.name,
-                        onValueChange = { onValueChange(SupplierFields.NAME, it) },
+                        onValueChange = {
+                            if (it.length <= SupplierFieldsLenghts.SUPPLIER_NAME_MAX)
+                            onValueChange(SupplierFields.NAME, it)
+                        },
                         label = stringResource(R.string.supplier_name),
-                        isError = validationState.nameErrorMessage != null,
+                        isError = validationForm.nameErrorMessage != null,
                         enabled = isEditing,
                     )
-                    ShowMessageErrorText(validationState.nameErrorMessage)
+                    ShowMessageErrorText(validationForm.nameErrorMessage)
                 }
 
                 // Body
@@ -218,35 +219,49 @@ fun SupplierDetailsBody(
                         StoreSections.CONTACT -> {
                             GeneralOutlinedTextField(
                                 value = editableSupplier.contactName,
-                                onValueChange = { onValueChange(SupplierFields.CONTACT_NAME, it) },
+                                onValueChange = {
+                                    if (it.length <= SupplierFieldsLenghts.SUPPLIER_CONTACT_NAME_MAX)
+                                    onValueChange(SupplierFields.CONTACT_NAME, it)
+                                },
                                 label = stringResource(R.string.supplier_contact_name),
                                 enabled = isEditing
                             )
 
                             GeneralOutlinedTextField(
                                 value = editableSupplier.email,
-                                onValueChange = { onValueChange(SupplierFields.EMAIL, it) },
+                                onValueChange = {
+                                    if (it.length <= SupplierFieldsLenghts.SUPPLIER_EMAIL_MAX)
+                                    onValueChange(SupplierFields.EMAIL, it)
+                                },
                                 label = stringResource(R.string.supplier_email),
-                                supportingText = supportingErrorText(validationState.emailErrorMessage),
-                                isError = validationState.emailErrorMessage != null,
+                                supportingText = supportingErrorText(validationForm.emailErrorMessage),
+                                isError = validationForm.emailErrorMessage != null,
                                 enabled = isEditing,
                                 keyboardType = KeyboardType.Email
                             )
 
                             GeneralOutlinedTextField(
                                 value = editableSupplier.phone,
-                                onValueChange = { onValueChange(SupplierFields.PHONE, it) },
+                                onValueChange = {
+                                    val phonePattern = Regex("^[0-9+ ]*$")
+                                    if (it.matches(phonePattern) && it.length <= SupplierFieldsLenghts.SUPPLIER_PHONE_MAX)
+                                    onValueChange(SupplierFields.PHONE, it)
+                                },
                                 label = stringResource(R.string.supplier_phone),
-                                supportingText = supportingErrorText(validationState.phoneErrorMessage),
-                                isError = validationState.phoneErrorMessage != null,
+                                supportingText = supportingErrorText(validationForm.phoneErrorMessage),
+                                isError = validationForm.phoneErrorMessage != null,
                                 enabled = isEditing,
                                 keyboardType = KeyboardType.Phone
                             )
+                            ShowMessageErrorText(validationForm.contactInformationErrorMessage)
                         }
                         StoreSections.ADDRESS -> {
                             GeneralOutlinedTextField(
                                 value = editableSupplier.address,
-                                onValueChange = { onValueChange(SupplierFields.ADDRESS, it) },
+                                onValueChange = {
+                                    if (it.length <= SupplierFieldsLenghts.SUPPLIER_ADDRESS_MAX)
+                                    onValueChange(SupplierFields.ADDRESS, it)
+                                },
                                 label = stringResource(R.string.supplier_address),
                                 enabled = isEditing,
                                 singleLine = false,
@@ -256,20 +271,33 @@ fun SupplierDetailsBody(
 
                             GeneralOutlinedTextField(
                                 value = editableSupplier.city,
-                                onValueChange = { onValueChange(SupplierFields.CITY, it) },
+                                onValueChange = {
+                                    if (it.length <= SupplierFieldsLenghts.SUPPLIER_CITY_MAX)
+                                    onValueChange(SupplierFields.CITY, it)
+                                },
                                 label = stringResource(R.string.supplier_create_city),
+                                supportingText = supportingErrorText(validationForm.cityErrorMessage),
+                                isError = validationForm.cityErrorMessage != null,
                                 enabled = isEditing
                             )
 
                             GeneralOutlinedTextField(
                                 value = editableSupplier.country,
-                                onValueChange = { onValueChange(SupplierFields.COUNTRY, it) },
+                                onValueChange = {
+                                    if (it.length <= SupplierFieldsLenghts.SUPPLIER_COUNTRY_MAX)
+                                    onValueChange(SupplierFields.COUNTRY, it)
+                                },
                                 label = stringResource(R.string.supplier_create_country),
+                                supportingText = supportingErrorText(validationForm.countryErrorMessage),
+                                isError = validationForm.countryErrorMessage != null
                             )
 
                             GeneralOutlinedTextField(
                                 value = editableSupplier.zipCode,
-                                onValueChange = { onValueChange(SupplierFields.ZIP_CODE, it) },
+                                onValueChange = {
+                                    if (it.length <= SupplierFieldsLenghts.SUPPLIER_POSTAL_CODE_MAX)
+                                    onValueChange(SupplierFields.ZIP_CODE, it)
+                                },
                                 label = stringResource(R.string.supplier_create_zip_code),
                             )
                         }

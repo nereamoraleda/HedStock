@@ -2,6 +2,7 @@ package es.cursos.android.ejercicios.stocksnma.ui.screen.supplier
 
 import android.telephony.PhoneNumberUtils
 import android.util.Log
+import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -12,6 +13,7 @@ import es.cursos.android.ejercicios.stocksnma.data.repository.supplier.SupplierR
 import es.cursos.android.ejercicios.stocksnma.domain.model.Supplier
 import es.cursos.android.ejercicios.stocksnma.ui.state.DetailsUiState
 import es.cursos.android.ejercicios.stocksnma.utils.enums.SupplierFields
+import es.cursos.android.ejercicios.stocksnma.utils.validations.SupplierValidationForm
 import es.cursos.android.ejercicios.stocksnma.utils.validations.SupplierValidationState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,8 +31,8 @@ class SupplierDetailsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<DetailsUiState<Supplier>>(DetailsUiState.Loading)
     val uiState: StateFlow<DetailsUiState<Supplier>> = _uiState.asStateFlow()
 
-    private val _validationsSupplierState = MutableStateFlow(SupplierValidationState())
-    val validationsSupplierState: StateFlow<SupplierValidationState> = _validationsSupplierState.asStateFlow()
+    private val _validationForm = MutableStateFlow(SupplierValidationForm())
+    val validationForm: StateFlow<SupplierValidationForm> = _validationForm.asStateFlow()
 
 
     fun getSupplierById(id: Long) {
@@ -59,7 +61,7 @@ class SupplierDetailsViewModel @Inject constructor(
                 isEditing = false
             )
         }
-        _validationsSupplierState.value = SupplierValidationState()
+        _validationForm.value = SupplierValidationForm()
     }
 
 
@@ -147,53 +149,68 @@ class SupplierDetailsViewModel @Inject constructor(
                 editableItem = if (state.isEditing) state.currentItem.copy()  // Cancelar edición -> Restaurar original
                 else state.editableItem                                       // Entrar a edición -> Dejar igual
             )
-            _validationsSupplierState.value = SupplierValidationState()
+            _validationForm.value = SupplierValidationForm()
         }
     }
 
 
-    private suspend fun validateSupplier(supplier: Supplier): Boolean {
+    private fun validateSupplier(supplier: Supplier): Boolean {
         val state = _uiState.value
         if (state is DetailsUiState.Success) {
-            val errors = SupplierValidationState(
-                nameErrorMessage = validateNameSupplier(supplier.name, state.currentItem.name),
+
+            _validationForm.value = SupplierValidationForm(
+                nameErrorMessage = validateNameSupplier(supplier.name/*, state.currentItem.name*/),
                 phoneErrorMessage = validatePhoneSupplier(supplier.phone),
-                emailErrorMessage =
-                if (supplier.phone.isBlank() && supplier.email.isBlank()) {
-                    "Debe especificar un número de teléfono o un email"
-                } else validateEmailSupplier(supplier.email)
+                emailErrorMessage = validateEmailSupplier(supplier.email),
+                contactInformationErrorMessage = validateContactInformation(supplier.email, supplier.phone),
+                cityErrorMessage = validateCitySupplier(supplier.city),
+                countryErrorMessage = validateCountrySupplier(supplier.country)
             )
 
 
-            _validationsSupplierState.value = errors
-
-            return errors.run {
-                nameErrorMessage == null && phoneErrorMessage == null && emailErrorMessage == null
-            }
+            return listOf(
+                validateNameSupplier(supplier.name/*, state.currentItem.name*/),
+                validatePhoneSupplier(supplier.phone),
+                validateEmailSupplier(supplier.email),
+                validateContactInformation(supplier.email, supplier.phone),
+                validateCitySupplier(supplier.city),
+                validateCountrySupplier(supplier.country)
+            ).all { it == null }
         }
         return false
     }
 
 
-    private suspend fun validateNameSupplier(name: String, initialName: String): String? {
+    private fun validateNameSupplier(name: String): String? {
         if (name.isBlank()) return "El nombre del proveedor es obligatorio"
-        else if (name != initialName && supplierRepository.existsSupplierWithName(name)) return "Ya existe un proveedor con ese nombre"
+        //else if (name != initialName && supplierRepository.existsSupplierWithName(name)) return "Ya existe un proveedor con ese nombre"
         return null
     }
 
     private fun validatePhoneSupplier(phone: String): String? {
-        if (phone.isNotBlank()) {
-            return if (!PhoneNumberUtils.isGlobalPhoneNumber(phone)) { "El número de teléfono no es válido" }
-            else null
-        }
+        if (phone.isNotBlank() && !Patterns.PHONE.matcher(phone).matches())
+            return "Teléfono no válido"
         return null
     }
 
     private fun validateEmailSupplier(email: String): String? {
-        if (email.isNotBlank()) {
-            return if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) { "El email no es válido" }
-            else null
-        }
+        if (email.isNotBlank() && !Patterns.EMAIL_ADDRESS.matcher(email).matches())
+            return "Email no válido"
+        return null
+    }
+
+    private fun validateContactInformation(email: String, phone: String): String? {
+        if (email.isBlank() && phone.isBlank()) return "El proveedor debe tener información de contacto"
+        return null
+    }
+
+    private fun validateCitySupplier(city: String): String? {
+        if (city.isBlank()) return "La ciudad es obligatoria"
+        return null
+    }
+
+    private fun validateCountrySupplier(country: String): String? {
+        if (country.isBlank()) return "El país es obligatorio"
         return null
     }
 }
