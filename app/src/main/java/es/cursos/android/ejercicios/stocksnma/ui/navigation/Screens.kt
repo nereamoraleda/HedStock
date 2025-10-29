@@ -21,7 +21,7 @@ data class ProductDetails(val idProduct: String)
 object SupplierCreation
 
 @Serializable
-data class SupplierDetails(val idSupplier: String)
+data class SupplierDetails(val idSupplier: Long)
 
 
 // -------------------- USER SCREENS -------------------- //

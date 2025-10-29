@@ -7,6 +7,7 @@ import es.cursos.android.ejercicios.stocksnma.R
 import es.cursos.android.ejercicios.stocksnma.data.local.datastore.AppDataStore
 import es.cursos.android.ejercicios.stocksnma.data.local.entity.relations.ProductWithSupplierAndCategory
 import es.cursos.android.ejercicios.stocksnma.data.repository.product.ProductRepository
+import es.cursos.android.ejercicios.stocksnma.ui.state.DetailsUiState
 import es.cursos.android.ejercicios.stocksnma.utils.items.NavDrawerItem
 import es.cursos.android.ejercicios.stocksnma.utils.enums.ProductSortOptions
 import es.cursos.android.ejercicios.stocksnma.utils.enums.UserRoles
@@ -52,8 +53,8 @@ class HomeViewModel @Inject constructor(
     private val _listOfNavDrawerItems = MutableStateFlow(emptyList<NavDrawerItem>())
 
     // Variables - Índice del elemento seleccionado en el Navigation Drawer
-    private val _selectedHomeSection = MutableStateFlow(HomeSections.STORES)
-    val selectedHomeSection: StateFlow<HomeSections> = _selectedHomeSection
+    //private val _selectedHomeSection = MutableStateFlow(HomeSections.STORES)
+    //val selectedHomeSection: StateFlow<HomeSections> = _selectedHomeSection
 
 
     // -------------------- CARGAR DATOS PARA LA HOME UI -------------------- //
@@ -73,7 +74,7 @@ class HomeViewModel @Inject constructor(
                     _homeUiState.value = HomeUiState.Success(
                         userRole = role,
                         navDrawerSections = _listOfNavDrawerItems.value,
-                        selectedSection = _selectedHomeSection.value
+                        selectedSection = HomeSections.SUPPLIERS
                     )
                 }
 
@@ -331,7 +332,11 @@ class HomeViewModel @Inject constructor(
     }
 
      private fun setSelectedItem(section: HomeSections) {
-        _selectedHomeSection.value = section
+         _homeUiState.value = (_homeUiState.value as HomeUiState.Success).copy(
+             selectedSection = section
+         )
+        //_selectedHomeSection.value = section
+
     }
 
     fun toggleAboutDialog(show: Boolean) {

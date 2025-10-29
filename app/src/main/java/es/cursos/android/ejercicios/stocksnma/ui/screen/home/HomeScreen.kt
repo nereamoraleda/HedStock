@@ -81,7 +81,7 @@ fun HomeScreen(
     navigateToProductCreation: (String?) -> Unit,
     navigateToProductDetails: (String) -> Unit,
     navigateToSupplierCreation: () -> Unit,
-    navigateToSupplierDetails: (String) -> Unit,
+    navigateToSupplierDetails: (Long) -> Unit,
     navigateToUserCreation: () -> Unit,
     navigateToUserDetails: (Long) -> Unit,
     navigateToStoreCreation: () -> Unit,
@@ -116,7 +116,7 @@ fun HomeScreen(
     var showNewFunction by remember { mutableStateOf(false) }
 
     // Variables - Navigation Drawer
-    val selectedHomeSection by viewModel.selectedHomeSection.collectAsState()    // Índice del elemento seleccionado
+    //val selectedHomeSection by viewModel.selectedHomeSection.collectAsState()    // Índice del elemento seleccionado
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)     // Estado del Navigation Drawer
     val scope = rememberCoroutineScope()
 
@@ -458,10 +458,10 @@ val isSearching by homeViewModel.isSearching.collectAsState()
 
                     // --- SCAFFOLD - TOP BAR ---
                     topBar = {
-                        when (selectedHomeSection) {
+                        when (state.selectedSection) {
                             HomeSections.PRODUCTS -> {
                                 HomeTopAppBar(
-                                    section = selectedHomeSection,
+                                    //section = selectedHomeSection,
                                     isSearching = isSearchingProducts,
                                     onNavClick = { toggleDrawer() },
                                     actionButton = {
@@ -483,7 +483,7 @@ val isSearching by homeViewModel.isSearching.collectAsState()
                             }
                             HomeSections.SUPPLIERS -> {
                                 HomeTopAppBar(
-                                    section = selectedHomeSection,
+                                    //section = selectedHomeSection,
                                     isSearching = isSearchingSuppliers,
                                     onNavClick = { toggleDrawer() },
                                     actionButton = {
@@ -502,7 +502,7 @@ val isSearching by homeViewModel.isSearching.collectAsState()
                             }
                             HomeSections.USERS -> {
                                 HomeTopAppBar(
-                                    section = selectedHomeSection,
+                                    //section = selectedHomeSection,
                                     isSearching = isSearchingUsers,
                                     onNavClick = { toggleDrawer() },
                                     actionButton = {
@@ -519,7 +519,7 @@ val isSearching by homeViewModel.isSearching.collectAsState()
                             }
                             HomeSections.STORES -> {
                                 HomeTopAppBar(
-                                    section = selectedHomeSection,
+                                    //section = selectedHomeSection,
                                     isSearching = isSearchingStores,
                                     onNavClick = { toggleDrawer() },
                                     actionButton = {
@@ -536,7 +536,7 @@ val isSearching by homeViewModel.isSearching.collectAsState()
                             }
                             else -> {
                                 HomeTopAppBar(
-                                    section = selectedHomeSection,
+                                    //section = selectedHomeSection,
                                     isSearching = false,
                                     onNavClick = { toggleDrawer() },
                                     actionButton = {
@@ -556,7 +556,7 @@ val isSearching by homeViewModel.isSearching.collectAsState()
 
                     // --- SCAFFOLD - BOTTOM BAR ---
                     bottomBar = {
-                        when (selectedHomeSection) {
+                        when (state.selectedSection) {
                             HomeSections.PRODUCTS -> {}
 //                                HomeBottomBar(
 //                                textCountSingular = R.string.selected_products_singular,
@@ -582,7 +582,7 @@ val isSearching by homeViewModel.isSearching.collectAsState()
 
                     // --- SCAFFOLD - FLOATING ACTION BUTTON ---
                     floatingActionButton = {
-                        when (selectedHomeSection) {
+                        when (state.selectedSection) {
                             HomeSections.PRODUCTS -> {
                                 FABContainer(
                                     isVisible = !isSearchingProducts,
@@ -693,7 +693,7 @@ val isSearching by homeViewModel.isSearching.collectAsState()
                             .padding(innerPadding)
                             .alpha(if (isButtonsAddVisible) 0.3f else 1f)
                     ) {
-                        when (selectedHomeSection) {
+                        when (state.selectedSection) {
                             HomeSections.PRODUCTS -> {
                                 //val productViewModel: ProductViewModel = hiltViewModel()
                                 //val uiState by productViewModel.productsUiState.collectAsState()
