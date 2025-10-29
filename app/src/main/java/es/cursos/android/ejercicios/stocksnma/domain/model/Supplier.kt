@@ -26,5 +26,6 @@ data class Supplier(
     val address: String = "",
     val country: String = "",
     val city: String = "",
-    val zipCode: String = ""
+    val zipCode: String = "",
+    val isActive: Boolean = true
 )

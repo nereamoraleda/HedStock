@@ -17,6 +17,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -43,7 +44,7 @@ import es.cursos.android.ejercicios.stocksnma.ui.screen.home.SupplierHomeUiState
 import es.cursos.android.ejercicios.stocksnma.ui.screen.home.SupplierSearchTable
 
 @Composable
-fun SupplierSectionScreen(navigateToSupplierDetails: (String) -> Unit) {
+fun SupplierSectionScreen(navigateToSupplierDetails: (Long) -> Unit) {
     val viewModel: SupplierSectionViewModel = hiltViewModel()
     val state by viewModel.uiState.collectAsState()
 
@@ -52,7 +53,7 @@ fun SupplierSectionScreen(navigateToSupplierDetails: (String) -> Unit) {
         is SupplierHomeUiState.Error -> { ErrorContent(uiState.messageError) }
         is SupplierHomeUiState.Success -> {
             SupplierSectionBodyScreen(
-                suppliers = uiState.suppliers.map { it.toSupplier() },
+                suppliers = uiState.suppliers,
                 navigateToSupplierDetails = navigateToSupplierDetails
             )
         }
@@ -64,7 +65,7 @@ fun SupplierSectionScreen(navigateToSupplierDetails: (String) -> Unit) {
 fun SupplierSectionBodyScreen(
     viewModel: SupplierSectionViewModel = hiltViewModel(),
     suppliers: List<Supplier>,
-    navigateToSupplierDetails: (String) -> Unit
+    navigateToSupplierDetails: (Long) -> Unit
 ) {
     // Variables - Search Bar
     val isSearching by viewModel.isSearching.collectAsState()
@@ -122,7 +123,7 @@ fun SupplierSectionBodyScreen(
                         SupplierSearchTable(
                             suppliersList = searchResults,
                             onSupplierClick = { id, name ->
-                                navigateToSupplierDetails(id)
+                                navigateToSupplierDetails(id.toLong())
                                 viewModel.addSupplierSearchHistory(name)
                                 viewModel.onToggleSearch()
                             },
@@ -187,7 +188,7 @@ fun SupplierSectionBodyScreen(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { navigateToSupplierDetails(supplier.id) }
+                                .clickable { navigateToSupplierDetails(supplier.id.toLong()) }
                         ) {
                             ChildCheckBox(
                                 checked = supplier.id in selectedSuppliers,
@@ -196,10 +197,10 @@ fun SupplierSectionBodyScreen(
                             )
                             //TableCell(supplier.id, Modifier.width(100.dp))
                             TableCell(supplier.name, Modifier.width(160.dp))
-                            TableCell(supplier.contactName ?: "", Modifier.width(120.dp))
-                            TableCell(supplier.phone ?: "", Modifier.width(100.dp))
-                            TableCell(supplier.email ?: "", Modifier.width(120.dp))
-                            TableCell(supplier.address ?: "", Modifier.width(200.dp))
+                            TableCell(supplier.contactName, Modifier.width(120.dp))
+                            TableCell(supplier.phone, Modifier.width(100.dp))
+                            TableCell(supplier.email, Modifier.width(120.dp))
+                            TableCell(supplier.address, Modifier.width(200.dp))
                         }
 
                         HorizontalDivider()

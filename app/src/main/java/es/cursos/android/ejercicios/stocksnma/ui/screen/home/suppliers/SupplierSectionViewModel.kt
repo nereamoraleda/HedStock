@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import es.cursos.android.ejercicios.stocksnma.data.local.datastore.AppDataStore
 import es.cursos.android.ejercicios.stocksnma.data.local.entity.SupplierEntity
+import es.cursos.android.ejercicios.stocksnma.data.mapper.toSupplier
+import es.cursos.android.ejercicios.stocksnma.data.remote.api.SupplierApi
 import es.cursos.android.ejercicios.stocksnma.data.repository.supplier.SupplierRepository
 import es.cursos.android.ejercicios.stocksnma.domain.model.Supplier
 import es.cursos.android.ejercicios.stocksnma.ui.screen.home.SupplierHomeUiState
@@ -18,14 +20,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
 @HiltViewModel
 class SupplierSectionViewModel @Inject constructor(
+    private val api: SupplierApi,
     private val supplierRepository: SupplierRepository,
     private val dataStoreManager: AppDataStore
 ): ViewModel() {
@@ -69,20 +71,63 @@ class SupplierSectionViewModel @Inject constructor(
 //    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val uiState: StateFlow<SupplierHomeUiState> = dataStoreManager.sort.supplierSortBy //_supplierSortOption
-        .flatMapLatest { sortOption ->
-            supplierRepository.getAllSuppliers(sortOption)
-                .map<List<SupplierEntity>, SupplierHomeUiState> { suppliers ->
-                    SupplierHomeUiState.Success(suppliers, sortOption)
+    val uiState: StateFlow<SupplierHomeUiState> =
+        dataStoreManager.sort.supplierSortBy
+            .flatMapLatest { sortOption ->
+                flow {
+                    emit(SupplierHomeUiState.Loading)
+                    val suppliers = api.getAllSuppliers().map { it.toSupplier() }
+
+//                    val sorted = when (sortOption) {
+//                        SupplierSortOption.NAME_ASC -> suppliers.sortedBy { it.name.lowercase() }
+//                        SupplierSortOption.NAME_DESC -> suppliers.sortedByDescending { it.name.lowercase() }
+//                        SupplierSortOption.RECENT -> suppliers.sortedByDescending { it.createdAt }
+//                        else -> suppliers
+//                    }
+
+                    //emit(SupplierHomeUiState.Success(sorted, sortOption))
+                    emit(SupplierHomeUiState.Success(suppliers, sortOption))
+                }.catch { e ->
+                    emit(SupplierHomeUiState.Error(e.message ?: "Error al obtener proveedores"))
                 }
-                .catch { e ->
-                    emit(SupplierHomeUiState.Error(e.message ?: "Error inesperado"))
-                }
-        }.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = SupplierHomeUiState.Loading
-        )
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = SupplierHomeUiState.Loading
+            )
+
+
+//    @OptIn(ExperimentalCoroutinesApi::class)
+//    val uiState: StateFlow<SupplierHomeUiState> = dataStoreManager.sort.supplierSortBy //_supplierSortOption
+//        .flatMapLatest { sortOption ->
+//            supplierRepository.getAllSuppliers(sortOption)
+//                .map<List<SupplierEntity>, SupplierHomeUiState> { suppliers ->
+//                    val sup = suppliers.map { it.toSupplier() }
+//                    SupplierHomeUiState.Success(sup, sortOption)
+//                }
+//                .catch { e ->
+//                    emit(SupplierHomeUiState.Error(e.message ?: "Error inesperado"))
+//                }
+//        }.stateIn(
+//            scope = viewModelScope,
+//            started = SharingStarted.WhileSubscribed(5000),
+//            initialValue = SupplierHomeUiState.Loading
+//        )
+//
+//
+//    fun getSuppliers() {
+//        viewModelScope.launch {
+//            try {
+//                val suppliers = api.getAllSuppliers().map { it.toSupplier() }
+//                val state = uiState.value
+//                if (state is SupplierHomeUiState.Success) {
+//                    state.copy(suppliers = suppliers)
+//                }
+//            } catch (e: Exception) {
+//                Log.i("ERROR", "Error al obtener la lista de proveedores")
+//            }
+//        }
+//    }
 
 
     // -------------------- SEARCH BAR --------------------

@@ -8,6 +8,7 @@ import es.cursos.android.ejercicios.stocksnma.data.local.datastore.AppDataStore
 import es.cursos.android.ejercicios.stocksnma.data.remote.api.AuthApi
 import es.cursos.android.ejercicios.stocksnma.data.remote.api.HedstockApiService
 import es.cursos.android.ejercicios.stocksnma.data.remote.api.StoreApi
+import es.cursos.android.ejercicios.stocksnma.data.remote.api.SupplierApi
 import es.cursos.android.ejercicios.stocksnma.data.remote.api.UserApi
 import es.cursos.android.ejercicios.stocksnma.ui.screen.login.AuthInterceptor
 import okhttp3.OkHttpClient
@@ -56,6 +57,12 @@ object NetworkModule {
     @Singleton
     fun provideAuthApi(retrofit: Retrofit): AuthApi {
         return retrofit.create(AuthApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSupplierApi(retrofit: Retrofit): SupplierApi {
+        return retrofit.create(SupplierApi::class.java)
     }
 
     @Provides

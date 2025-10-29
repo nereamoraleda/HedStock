@@ -1,28 +1,19 @@
 package es.cursos.android.ejercicios.stocksnma.ui.screen.supplier
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -30,43 +21,58 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import es.cursos.android.ejercicios.stocksnma.R
-import es.cursos.android.ejercicios.stocksnma.data.local.entity.SupplierEntity
 import es.cursos.android.ejercicios.stocksnma.domain.model.Supplier
-import es.cursos.android.ejercicios.stocksnma.ui.components.ConfirmationDialog
 import es.cursos.android.ejercicios.stocksnma.ui.components.ButtonsBottomBar
-import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralTopAppBar
+import es.cursos.android.ejercicios.stocksnma.ui.components.ConfirmationDialog
+import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralCard
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralIconButton
+import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralOutlinedTextField
+import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralSegmentedButton
+import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralTextFieldTitle
+import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralTopAppBar
+import es.cursos.android.ejercicios.stocksnma.ui.components.LoadingContent
 import es.cursos.android.ejercicios.stocksnma.ui.components.NavigateBackButton
 import es.cursos.android.ejercicios.stocksnma.ui.components.ShowMessageErrorText
-import es.cursos.android.ejercicios.stocksnma.ui.components.campoColores
+import es.cursos.android.ejercicios.stocksnma.ui.components.VerticalScrollableColumn
+import es.cursos.android.ejercicios.stocksnma.ui.components.supportingErrorText
+import es.cursos.android.ejercicios.stocksnma.ui.screen.store.StoreFields
 import es.cursos.android.ejercicios.stocksnma.ui.state.DetailsUiState
+import es.cursos.android.ejercicios.stocksnma.utils.enums.StoreSections
+import es.cursos.android.ejercicios.stocksnma.utils.enums.SupplierFields
 import es.cursos.android.ejercicios.stocksnma.utils.validations.SupplierValidationState
 
 @Composable
 fun SupplierDetailsScreen(
     viewModel: SupplierDetailsViewModel,
-    idSupplier: String,
+    idSupplier: Long,
     navigateBack: () -> Unit
 ) {
     LaunchedEffect(idSupplier) {
         viewModel.getSupplierById(idSupplier)
     }
 
-    var isEditing by remember { mutableStateOf(false) }
+
     val state by viewModel.uiState.collectAsState()
-    val tempSupplier by viewModel.tempSupplier.collectAsState()
     val validationState by viewModel.validationsSupplierState.collectAsState()
 
     var showDeleteSupplierConfirmation by remember { mutableStateOf(false) }
+    var showLostChangesDialog by remember { mutableStateOf(false) }
 
 
     when (val uiState = state) {
-        is DetailsUiState.Loading -> {}
+        is DetailsUiState.Loading -> {
+            LoadingContent()
+        }
+        is DetailsUiState.NotFound -> {}
+        is DetailsUiState.Error -> {}
         is DetailsUiState.Success -> {
             if (showDeleteSupplierConfirmation) {
                 ConfirmationDialog(
@@ -75,275 +81,219 @@ fun SupplierDetailsScreen(
                     confirmButtonText = stringResource(R.string.button_accept),
                     onDismissRequest = { showDeleteSupplierConfirmation = false },
                     onConfirmAction = {
-                        viewModel.deleteSupplier(uiState.item)
+                        viewModel.deleteSupplier()
                         showDeleteSupplierConfirmation = false
                         navigateBack()
                     }
                 )
             }
 
+            if (showLostChangesDialog) {
+                Dialog(
+                    onDismissRequest = {}
+                ) {
+                    GeneralCard {
+                        Column(
+                            modifier = Modifier.padding(dimensionResource(R.dimen.padding_16dp))
+                        ) {
+                            Text(text = "Perderás los cambios sin guardar, ¿deseas continuar?")
+                            Row {
+                                TextButton(
+                                    onClick = { showLostChangesDialog = false }
+                                ) {
+                                    Text(text = "Cancelar")
+                                }
+
+                                TextButton(
+                                    onClick = {
+                                        //viewModel.toggleEdit()
+                                        navigateBack()
+                                        showLostChangesDialog = false
+                                    }
+                                ) { Text(text = "Aceptar") }
+                            }
+                        }
+                    }
+                }
+            }
+
+            //val isEditing = uiState.isEditing ?: true
+
             Scaffold(
                 topBar = {
                     GeneralTopAppBar(
                         title = stringResource(R.string.supplier_details_title),
-                        navigationButton = { NavigateBackButton(navigateBack) },
+                        navigationButton = { NavigateBackButton({ showLostChangesDialog = true }) },
                         actionButton = {
-                            GeneralIconButton(
-                                icon = R.drawable.ic_edit,
-                                onClick = { isEditing = !isEditing }
-                            )
-
-                            if (isEditing) {
-                                GeneralIconButton(
-                                    icon = R.drawable.ic_delete,
-                                    onClick = { showDeleteSupplierConfirmation = true }
-                                )
-                            }
+//                            GeneralIconButton(
+//                                icon = R.drawable.ic_delete,
+//                                onClick = { showDeleteSupplierConfirmation = true }
+//                            ) TODO - Manejar primero si tiene productos asociados
                         }
                     )
                 },
 
                 bottomBar = {
-                    if (isEditing) {
-                        ButtonsBottomBar(
-                            acceptButtonEnabled = true,
-                            onAcceptAction = {
-                                Log.d("UpdateDebug", "Supplier: $tempSupplier")
-
-                                val updatedSupplier = uiState.item.copy(
-                                    name = tempSupplier.name,
-                                    contactName = tempSupplier.contactName,
-                                    phone = tempSupplier.phone,
-                                    email = tempSupplier.email,
-                                    address = tempSupplier.address
-                                )
-
-                                updatedSupplier.let {
-                                    viewModel.updateSupplier(updatedSupplier)
-                                    isEditing = false
-                                }
-                            },
-                            onCancelAction = {
-                                viewModel.setInitialSupplier(uiState.item)
-                                isEditing = false
-                            }
-                        )
-                    }
+                    ButtonsBottomBar(
+                        acceptButtonEnabled = uiState.isFormValid,
+                        onAcceptAction = { viewModel.saveSupplier() },
+                        onCancelAction = { viewModel.resetUi() }
+                    )
                 }
 
             ) { innerPadding ->
-                Column(
+                Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(innerPadding)
-                        .verticalScroll(rememberScrollState())
                 ) {
                     SupplierDetailsBody(
-                        tempSupplier = tempSupplier,
-                        onValueChange = viewModel::updateSupplierFields,
+                        editableSupplier = uiState.editableItem,
+                        onValueChange = viewModel::onFieldChange,
+                        onCheckedChange = viewModel::onFieldChange,
                         validationState = validationState,
-                        isEditing = isEditing,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(dimensionResource(R.dimen.padding_16dp))
+                        //isEditing = uiState.isEditing ?: true,
                     )
                 }
             }
         }
-        is DetailsUiState.NotFound -> {}
-        is DetailsUiState.Error -> {}
     }
 }
-
 
 
 @Composable
 fun SupplierDetailsBody(
-    tempSupplier: Supplier,
-    onValueChange: (String, String) -> Unit,
+    editableSupplier: Supplier,
+    onValueChange: (SupplierFields, String) -> Unit,
+    onCheckedChange: (SupplierFields, Boolean) -> Unit,
     validationState: SupplierValidationState,
-    isEditing: Boolean = false,
-    modifier: Modifier = Modifier
+    isEditing: Boolean = true,
 ) {
-    var hasEdited by remember { mutableStateOf(false) }
+    var sectionSelected by remember { mutableStateOf(StoreSections.CONTACT) }
 
-    Card(
-        shape = RoundedCornerShape(16.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        elevation = CardDefaults.cardElevation(6.dp)
+
+    Column(
+        modifier = Modifier.fillMaxSize()
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.background)
-        ) {
-            // Encabezado
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.secondary)
-                    .padding(16.dp)
-            ) {
-                BasicTextField(
-                    value = if (tempSupplier.name.isEmpty() && !hasEdited) "Proveedor" else tempSupplier.name,
-                    onValueChange = { onValueChange("name", it); hasEdited = true },
-                    textStyle = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.fillMaxWidth()
-                    //color = MaterialTheme.colorScheme.primary
-                )
-                ShowMessageErrorText(validationState.nameErrorMessage)
+        // -------------------- SEGMENTED BUTTON -------------------- //
+        GeneralSegmentedButton(
+            selectedSection = sectionSelected,
+            onSectionChange = { sectionSelected = it },
+            sections = StoreSections.entries,
+            label = {
+                when (it) {
+                    StoreSections.CONTACT -> stringResource(R.string.store_section_contact)
+                    StoreSections.ADDRESS -> stringResource(R.string.store_section_address)
+                }
             }
+        )
 
+
+        // -------------------- CARD -------------------- //
+        VerticalScrollableColumn {
+            GeneralCard {
+
+                // Encabezado
                 Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.secondary)
                 ) {
-                    OutlinedTextField(
-                        value = tempSupplier.contactName,
-                        onValueChange = { onValueChange("contactName", it) },
-                        label = { Text(stringResource(R.string.supplier_contact_name)) },
-                        modifier = Modifier.fillMaxWidth(),
+                    GeneralTextFieldTitle(
+                        value = editableSupplier.name,
+                        onValueChange = { onValueChange(SupplierFields.NAME, it) },
+                        label = stringResource(R.string.supplier_name),
+                        isError = validationState.nameErrorMessage != null,
                         enabled = isEditing,
-                        colors = campoColores(),
-                        //supportingText = { Text("Especifica $label") }
                     )
-
-                    OutlinedTextField(
-                        value = tempSupplier.phone,
-                        onValueChange = { onValueChange("phone", it) },
-                        label = { Text(stringResource(R.string.supplier_phone)) },
-                        modifier = Modifier.fillMaxWidth(),
-                        enabled = isEditing,
-                        colors = campoColores(),
-                        //supportingText = { Text("Especifica $label") }
-                    )
-                    ShowMessageErrorText(validationState.phoneErrorMessage)
-
-                    OutlinedTextField(
-                        value = tempSupplier.email,
-                        onValueChange = { onValueChange("email", it) },
-                        label = { Text(stringResource(R.string.supplier_email)) },
-                        modifier = Modifier.fillMaxWidth(),
-                        enabled = isEditing,
-                        colors = campoColores(),
-                        //supportingText = { Text("Especifica $label") }
-                    )
-
-                    OutlinedTextField(
-                        value = tempSupplier.address,
-                        onValueChange = { onValueChange("address", it) },
-                        label = { Text(stringResource(R.string.supplier_address)) },
-                        minLines = 3,
-                        modifier = Modifier.fillMaxWidth(),
-                        enabled = isEditing,
-                        colors = campoColores(),
-                        //supportingText = { Text("Especifica $label") }
-                    )
-                    ShowMessageErrorText(validationState.emailErrorMessage)
+                    ShowMessageErrorText(validationState.nameErrorMessage)
                 }
 
+                // Body
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    when (sectionSelected) {
+                        StoreSections.CONTACT -> {
+                            GeneralOutlinedTextField(
+                                value = editableSupplier.contactName,
+                                onValueChange = { onValueChange(SupplierFields.CONTACT_NAME, it) },
+                                label = stringResource(R.string.supplier_contact_name),
+                                enabled = isEditing
+                            )
+
+                            GeneralOutlinedTextField(
+                                value = editableSupplier.email,
+                                onValueChange = { onValueChange(SupplierFields.EMAIL, it) },
+                                label = stringResource(R.string.supplier_email),
+                                supportingText = supportingErrorText(validationState.emailErrorMessage),
+                                isError = validationState.emailErrorMessage != null,
+                                enabled = isEditing,
+                                keyboardType = KeyboardType.Email
+                            )
+
+                            GeneralOutlinedTextField(
+                                value = editableSupplier.phone,
+                                onValueChange = { onValueChange(SupplierFields.PHONE, it) },
+                                label = stringResource(R.string.supplier_phone),
+                                supportingText = supportingErrorText(validationState.phoneErrorMessage),
+                                isError = validationState.phoneErrorMessage != null,
+                                enabled = isEditing,
+                                keyboardType = KeyboardType.Phone
+                            )
+                        }
+                        StoreSections.ADDRESS -> {
+                            GeneralOutlinedTextField(
+                                value = editableSupplier.address,
+                                onValueChange = { onValueChange(SupplierFields.ADDRESS, it) },
+                                label = stringResource(R.string.supplier_address),
+                                enabled = isEditing,
+                                singleLine = false,
+                                maxLines = 2,
+                                //modifier = Modifier.heightIn(min = 100.dp)
+                            )
+
+                            GeneralOutlinedTextField(
+                                value = editableSupplier.city,
+                                onValueChange = { onValueChange(SupplierFields.CITY, it) },
+                                label = stringResource(R.string.supplier_create_city),
+                                enabled = isEditing
+                            )
+
+                            GeneralOutlinedTextField(
+                                value = editableSupplier.country,
+                                onValueChange = { onValueChange(SupplierFields.COUNTRY, it) },
+                                label = stringResource(R.string.supplier_create_country),
+                            )
+
+                            GeneralOutlinedTextField(
+                                value = editableSupplier.zipCode,
+                                onValueChange = { onValueChange(SupplierFields.ZIP_CODE, it) },
+                                label = stringResource(R.string.supplier_create_zip_code),
+                            )
+                        }
+                    }
+
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(text = stringResource(R.string.user_active))
+                        Switch(
+                            checked = editableSupplier.isActive,
+                            onCheckedChange = {
+                                onCheckedChange(
+                                    SupplierFields.IS_ACTIVE,
+                                    !editableSupplier.isActive
+                                )
+                            },
+                            //enabled = hasPermission
+                        )
+                    }
+                }
+            }
         }
-    }
-}
-
-
-@Composable
-fun SupplierDetailsCard(
-    supplier: SupplierEntity,
-) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_8dp)),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(dimensionResource(R.dimen.padding_16dp))
-    ) {
-        BasicTextField(
-            value = supplier.name,
-            onValueChange = {},
-            readOnly = true,
-            textStyle = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.fillMaxWidth()
-        )
-//        OutlinedTextField(
-//            value = supplier.name,
-//            onValueChange = {},
-//            label = { Text(stringResource(R.string.supplier_name)) },
-//            modifier = Modifier.fillMaxWidth(),
-//            readOnly = true
-//        )
-        Spacer(modifier = Modifier.padding(dimensionResource(R.dimen.padding_4dp)))
-        TextField(
-            value = supplier.contactName ?: "No especificado",
-            onValueChange = {},
-            placeholder = { Text(stringResource(R.string.supplier_contact_name)) },
-            leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
-            modifier = Modifier.fillMaxWidth(),
-            readOnly = true,
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.surface,
-                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                unfocusedIndicatorColor = MaterialTheme.colorScheme.surface,
-                disabledContainerColor = MaterialTheme.colorScheme.surface,
-                disabledIndicatorColor = MaterialTheme.colorScheme.surface,
-                errorContainerColor = MaterialTheme.colorScheme.surface,
-                errorIndicatorColor = MaterialTheme.colorScheme.surface
-            )
-        )
-        OutlinedTextField(
-            value = supplier.phone ?: "No especificado",
-            onValueChange = {},
-            label = { Text(stringResource(R.string.supplier_phone)) },
-            modifier = Modifier.fillMaxWidth(),
-            readOnly = true
-        )
-
-        OutlinedTextField(
-            value = supplier.email ?: "No especificado",
-            onValueChange = {},
-            label = { Text(stringResource(R.string.supplier_email)) },
-            modifier = Modifier.fillMaxWidth(),
-            readOnly = true
-        )
-        OutlinedTextField(
-            value = supplier.address ?: "No especificado",
-            onValueChange = {},
-            label = { Text(stringResource(R.string.supplier_address)) },
-            modifier = Modifier.fillMaxWidth(),
-            readOnly = true
-        )
-
-//        CustomTextFieldProduct(
-//            label = stringResource(R.string.supplier_name),
-//            value = supplier.name,
-//            onValueChange = {},
-//        )
-//
-//
-//        CustomTextFieldProduct(
-//            label = stringResource(R.string.supplier_contact_name),
-//            value = supplier.contactName ?: "No especificado",
-//            onValueChange = {},
-//        )
-//
-//        CustomTextFieldProduct(
-//            label = stringResource(R.string.supplier_phone),
-//            value = supplier.phone ?: "No especificado",
-//            onValueChange = {},
-//        )
-//
-//        CustomTextFieldProduct(
-//            label = stringResource(R.string.supplier_email),
-//            value = supplier.email ?: "No especificado",
-//            onValueChange = {},
-//        )
-//
-//        CustomTextFieldProduct(
-//            label = stringResource(R.string.supplier_address),
-//            value = supplier.address ?: "No especificado",
-//            onValueChange = {},
-//            singleLine = false,
-//        )
     }
 }
