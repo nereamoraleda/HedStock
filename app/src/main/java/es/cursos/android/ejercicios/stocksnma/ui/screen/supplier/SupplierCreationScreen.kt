@@ -1,36 +1,38 @@
 package es.cursos.android.ejercicios.stocksnma.ui.screen.supplier
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import es.cursos.android.ejercicios.stocksnma.R
 import es.cursos.android.ejercicios.stocksnma.domain.model.Supplier
 import es.cursos.android.ejercicios.stocksnma.ui.components.ButtonsBottomBar
-import es.cursos.android.ejercicios.stocksnma.ui.components.CustomCard
-import es.cursos.android.ejercicios.stocksnma.ui.components.CustomTextFieldProduct
+import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralCard
+import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralOutlinedTextField
+import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralSegmentedButton
+import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralTextFieldTitle
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralTopAppBar
 import es.cursos.android.ejercicios.stocksnma.ui.components.NavigateBackButton
+import es.cursos.android.ejercicios.stocksnma.ui.components.VerticalScrollableColumn
+import es.cursos.android.ejercicios.stocksnma.utils.enums.StoreSections
 import kotlinx.coroutines.launch
 
 @Composable
@@ -63,15 +65,16 @@ fun SupplierCreationScreen(
             )
         },
 
-        modifier = Modifier.fillMaxSize().imePadding(),
+        modifier = Modifier
+            .fillMaxSize()
+            .imePadding(),
 
 
     ) { innerPadding ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .verticalScroll(rememberScrollState())
         ) {
             SupplierNewBody(
                 newSupplierViewModel = viewModel
@@ -86,90 +89,104 @@ fun SupplierNewBody(
     newSupplierViewModel: SupplierCreationViewModel
 ) {
     val newSupplierItem = newSupplierViewModel.supplierUiState.supplierItem
+    var sectionSelected by remember { mutableStateOf(StoreSections.CONTACT) }
 
     Column(
-        modifier = Modifier
-            .padding(dimensionResource(R.dimen.padding_16dp))
-            .fillMaxWidth()
+        modifier = Modifier.fillMaxWidth()
     ) {
-        CustomCard(modifier = Modifier.fillMaxWidth()) {
-            SupplierNewCard(
-                supplierUiState = newSupplierViewModel.supplierUiState,
-                onSupplierValueChange = newSupplierViewModel::updateUiState,
-                modifier = Modifier
-                    .padding(dimensionResource(R.dimen.padding_16dp))
-                    .fillMaxWidth()
-            )
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Text(
-            text = stringResource(R.string.supplier_address),
-            fontWeight = FontWeight.Bold,
-            style = MaterialTheme.typography.titleMedium
+        GeneralSegmentedButton(
+            selectedSection = sectionSelected,
+            onSectionChange = { sectionSelected = it },
+            sections = StoreSections.entries,
+            label = {
+                when (it) {
+                    StoreSections.CONTACT -> stringResource(R.string.store_section_contact)
+                    StoreSections.ADDRESS -> stringResource(R.string.store_section_address)
+                }
+            }
         )
-        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.padding_4dp)))
-        CustomCard(modifier = Modifier.fillMaxWidth()) {
-            TextField(
-                value = newSupplierItem.address,
-                onValueChange = { newSupplierViewModel.updateUiState(supplierItem = newSupplierItem.copy(address = it)) },
-                placeholder = { Text(text = "Ejemplo: Calle HedStock, 123, 2ºA"/*stringResource(R.string.supplier_create_address)*/) },
-                modifier = Modifier
-                    .padding(dimensionResource(R.dimen.padding_16dp))
-                    .fillMaxWidth(),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    errorIndicatorColor = Color.Transparent,
-                    errorContainerColor = Color.Transparent
-                )
-            )
 
-            TextField(
-                value = newSupplierItem.country,
-                onValueChange = { newSupplierViewModel.updateUiState(supplierItem = newSupplierItem.copy(country = it)) },
-                placeholder = { Text(text = stringResource(R.string.supplier_create_country)) },
-                modifier = Modifier
-                    .padding(dimensionResource(R.dimen.padding_16dp))
-                    .fillMaxWidth(),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    errorIndicatorColor = Color.Transparent,
-                    errorContainerColor = Color.Transparent
-                )
-            )
+        VerticalScrollableColumn {
+            GeneralCard {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.secondary)
+                ) {
+                    GeneralTextFieldTitle(
+                        value = newSupplierItem.name,
+                        onValueChange = { newSupplierViewModel.updateUiState(newSupplierItem.copy(name = it)) },
+                        label = stringResource(R.string.supplier_name)
+                    )
+                }
 
-            TextField(
-                value = newSupplierItem.city,
-                onValueChange = { newSupplierViewModel.updateUiState(supplierItem = newSupplierItem.copy(city = it)) },
-                placeholder = { Text(text = stringResource(R.string.supplier_create_city)) },
-                modifier = Modifier
-                    .padding(dimensionResource(R.dimen.padding_16dp))
-                    .fillMaxWidth(),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    errorIndicatorColor = Color.Transparent,
-                    errorContainerColor = Color.Transparent
-                )
-            )
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(dimensionResource(R.dimen.padding_16dp))
+                ) {
+                    when (sectionSelected) {
+                        StoreSections.CONTACT -> {
+                            SupplierNewCard(
+                                supplierUiState = newSupplierViewModel.supplierUiState,
+                                onSupplierValueChange = newSupplierViewModel::updateUiState,
+                                modifier = Modifier
+                                    .padding(dimensionResource(R.dimen.padding_16dp))
+                                    .fillMaxWidth()
+                            )
+                        }
+                        StoreSections.ADDRESS -> {
+                            GeneralOutlinedTextField(
+                                value = newSupplierItem.address,
+                                onValueChange = {
+                                    newSupplierViewModel.updateUiState(
+                                        supplierItem = newSupplierItem.copy(address = it)
+                                    )
+                                },
+                                label = stringResource(R.string.supplier_address),
+                                supportingText = { Text("Ej: C/ HedStock, N123, 2ºA") }
+                            )
 
-            TextField(
-                value = newSupplierItem.zipCode,
-                onValueChange = { newSupplierViewModel.updateUiState(supplierItem = newSupplierItem.copy(zipCode = it)) },
-                placeholder = { Text(text = stringResource(R.string.supplier_create_zip_code)) },
-                modifier = Modifier
-                    .padding(dimensionResource(R.dimen.padding_16dp))
-                    .fillMaxWidth(),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    errorIndicatorColor = Color.Transparent,
-                    errorContainerColor = Color.Transparent
-                )
-            )
+                            GeneralOutlinedTextField(
+                                value = newSupplierItem.country,
+                                onValueChange = {
+                                    newSupplierViewModel.updateUiState(
+                                        supplierItem = newSupplierItem.copy(
+                                            country = it
+                                        )
+                                    )
+                                },
+                                label = stringResource(R.string.supplier_create_country)
+                            )
+
+                            GeneralOutlinedTextField(
+                                value = newSupplierItem.city,
+                                onValueChange = {
+                                    newSupplierViewModel.updateUiState(
+                                        supplierItem = newSupplierItem.copy(
+                                            city = it
+                                        )
+                                    )
+                                },
+                                label = stringResource(R.string.supplier_create_city)
+                            )
+
+                            GeneralOutlinedTextField(
+                                value = newSupplierItem.zipCode,
+                                onValueChange = {
+                                    newSupplierViewModel.updateUiState(
+                                        supplierItem = newSupplierItem.copy(
+                                            zipCode = it
+                                        )
+                                    )
+                                },
+                                label = stringResource(R.string.supplier_create_zip_code)
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -183,64 +200,26 @@ fun SupplierNewCard(
 ) {
     val supplierItem = supplierUiState.supplierItem
 
+    GeneralOutlinedTextField(
+        value = supplierItem.contactName,
+        onValueChange = { onSupplierValueChange(supplierItem.copy(contactName = it)) },
+        label = stringResource(R.string.supplier_contact_name),
+        //textAling = TextAlign.Start,
+    )
 
-    Column(modifier) {
-        CustomTextFieldProduct(
-            value = supplierItem.name,
-            onValueChange = { onSupplierValueChange(supplierItem.copy(name = it)) },
-            label = stringResource(R.string.supplier_form_name),
-            textAling = TextAlign.Start,
-        )
+    GeneralOutlinedTextField(
+        value = supplierItem.phone,
+        onValueChange = { onSupplierValueChange(supplierItem.copy(phone = it)) },
+        label = stringResource(R.string.supplier_phone),
+        //textAling = TextAlign.Start,
+        keyboardType = KeyboardType.Phone
+    )
 
-        CustomTextFieldProduct(
-            value = supplierItem.contactName,
-            onValueChange = { onSupplierValueChange(supplierItem.copy(contactName = it)) },
-            label = stringResource(R.string.supplier_contact_name),
-            textAling = TextAlign.Start,
-        )
-
-        CustomTextFieldProduct(
-            value = supplierItem.phone,
-            onValueChange = { onSupplierValueChange(supplierItem.copy(phone = it)) },
-            label = stringResource(R.string.supplier_phone),
-            textAling = TextAlign.Start,
-            keyboardType = KeyboardType.Phone
-        )
-
-        CustomTextFieldProduct(
-            value = supplierItem.email,
-            onValueChange = { onSupplierValueChange(supplierItem.copy(email = it)) },
-            label = stringResource(R.string.supplier_email),
-            textAling = TextAlign.Start,
-            keyboardType = KeyboardType.Email
-        )
-
-//        CustomTextFieldProduct(
-//            value = supplierItem.address,
-//            onValueChange = { onSupplierValueChange(supplierItem.copy(address = it)) },
-//            label = stringResource(R.string.supplier_create_address),
-//            textAling = TextAlign.Start,
-//        )
-//
-//        CustomTextFieldProduct(
-//            value = supplierItem.country,
-//            onValueChange = { onSupplierValueChange(supplierItem.copy(country = it)) },
-//            label = stringResource(R.string.supplier_create_country),
-//            textAling = TextAlign.Start,
-//        )
-//
-//        CustomTextFieldProduct(
-//            value = supplierItem.city,
-//            onValueChange = { onSupplierValueChange(supplierItem.copy(city = it)) },
-//            label = stringResource(R.string.supplier_create_city),
-//            textAling = TextAlign.Start,
-//        )
-//
-//        CustomInputProduct(
-//            text = stringResource(R.string.supplier_create_zip_code),
-//            value = supplierItem.zipCode,
-//            onValueChange = { onSupplierValueChange(supplierItem.copy(zipCode = it)) },
-//            typeBoard = KeyboardType.Number
-//        )
-    }
+    GeneralOutlinedTextField(
+        value = supplierItem.email,
+        onValueChange = { onSupplierValueChange(supplierItem.copy(email = it)) },
+        label = stringResource(R.string.supplier_email),
+        //textAling = TextAlign.Start,
+        keyboardType = KeyboardType.Email
+    )
 }
