@@ -47,17 +47,21 @@ interface StoreApi {
 
     // Endpoint para obtener una tienda por su ID (Todos los campos)
     @GET("api/stores/{id}")
-    suspend fun getStoreById(@Path("id") id: Long): Response<StoreResponseDto>
+    suspend fun getStoreById(
+        @Path("id") id: Long
+    ): Response<StoreResponseDto>
 
 
 
-    // -------------------- BÚSQUEDA Y COMPROBACIÓN -------------------- //
+    // -------------------- BÚSQUEDA -------------------- //
     @GET("api/stores/search")
     suspend fun searchStores(
         @Query("query") query: String
     ): Response<List<StoreGeneralViewDto>>
 
 
+
+    // -------------------- COMPROBACIÓN -------------------- //
     @GET("api/stores/check-name")
     suspend fun checkName(
         @Query("name") name: String
