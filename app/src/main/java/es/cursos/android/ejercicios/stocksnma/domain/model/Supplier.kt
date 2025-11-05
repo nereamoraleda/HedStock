@@ -1,24 +1,21 @@
 package es.cursos.android.ejercicios.stocksnma.domain.model
 
-import java.util.UUID
-
 
 /**
- * DATA CLASS - Supplier
- * Clase intermedia con SupplierEntity, la BD y la UI (conversiones)
+ * MODEL - General
  *
- * @param id Identificador único del proveedor
- * @param name Nombre del proveedor
- * @param contactName Nombre del contacto
- * @param phone Teléfono del contacto
- * @param email Email del contacto
- * @param address Dirección del proveedor
- * @param country País del proveedor
- * @param city Ciudad del proveedor
- * @param zipCode Código postal del proveedor
+ * @param id - Identificador único del proveedor
+ * @param name - Nombre del proveedor
+ * @param contactName - Nombre del contacto
+ * @param email - Email del contacto
+ * @param phone - Teléfono del contacto
+ * @param address - Dirección del proveedor
+ * @param country - País del proveedor
+ * @param city - Ciudad del proveedor
+ * @param zipCode - Código postal del proveedor
  */
 data class Supplier(
-    val id: String = UUID.randomUUID().toString(),
+    val id: Long? = null,
     val name: String = "",
     val contactName: String = "",
     val phone: String = "",
@@ -28,4 +25,35 @@ data class Supplier(
     val city: String = "",
     val zipCode: String = "",
     val isActive: Boolean = true
+)
+
+
+/**
+ * MODEL - Para la lista de proveedores en Home
+ *
+ * @param id - Id del proveedor
+ * @param name - Nombre del proveedor
+ * @param contactName - Nombre de la persona de contacto
+ * @param email - Email del proveedor
+ * @param phone - Teléfono del proveedor
+ */
+data class SupplierHomeView(
+    val id: Long,
+    val name: String = "",
+    val contactName: String = "",
+    val email: String = "",
+    val phone: String = ""
+    //val isActive: Boolean = true
+)
+
+
+/**
+ * MODEL - Para la lista de proveedores en un menú de selección
+ *
+ * @param id - Id del proveedor
+ * @param name - Nombre del proveedor
+ */
+data class SupplierSelectionMenu(
+    val id: Long,
+    val name: String
 )
