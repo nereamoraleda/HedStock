@@ -13,7 +13,7 @@ import es.cursos.android.ejercicios.stocksnma.data.remote.api.SupplierApi
 import es.cursos.android.ejercicios.stocksnma.domain.model.Supplier
 import es.cursos.android.ejercicios.stocksnma.ui.state.CreateUiState
 import es.cursos.android.ejercicios.stocksnma.utils.Constants
-import es.cursos.android.ejercicios.stocksnma.utils.enums.SupplierFields
+import es.cursos.android.ejercicios.stocksnma.utils.enums.fields.SupplierFields
 import es.cursos.android.ejercicios.stocksnma.utils.validations.SupplierValidationForm
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

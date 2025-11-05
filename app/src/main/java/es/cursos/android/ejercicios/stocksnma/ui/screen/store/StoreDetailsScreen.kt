@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import es.cursos.android.ejercicios.stocksnma.R
@@ -31,6 +32,7 @@ import es.cursos.android.ejercicios.stocksnma.ui.components.ButtonsBottomBar
 import es.cursos.android.ejercicios.stocksnma.ui.components.ErrorContent
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralCard
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralOutlinedTextField
+import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralPhoneOutlinedTextField
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralSegmentedButton
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralTextFieldTitle
 import es.cursos.android.ejercicios.stocksnma.ui.components.GeneralTopAppBar
@@ -40,8 +42,9 @@ import es.cursos.android.ejercicios.stocksnma.ui.components.ShowMessageErrorText
 import es.cursos.android.ejercicios.stocksnma.ui.components.VerticalScrollableColumn
 import es.cursos.android.ejercicios.stocksnma.ui.components.supportingErrorText
 import es.cursos.android.ejercicios.stocksnma.ui.state.DetailsUiState
+import es.cursos.android.ejercicios.stocksnma.utils.constants.FieldMaxLengths
 import es.cursos.android.ejercicios.stocksnma.utils.enums.StoreSections
-import es.cursos.android.ejercicios.stocksnma.utils.validations.StoreFieldsLenghts
+import es.cursos.android.ejercicios.stocksnma.utils.enums.fields.StoreFields
 import es.cursos.android.ejercicios.stocksnma.utils.validations.StoreValidationForm
 
 @Composable
@@ -102,7 +105,7 @@ fun StoreDetailsScreen(
         bottomBar = {
             if (uiState is DetailsUiState.Success && hasPermission) {
                 ButtonsBottomBar(
-                    acceptButtonEnabled = (uiState as DetailsUiState.Success).isEntryValid,
+                    acceptButtonEnabled = (uiState as DetailsUiState.Success).isFormValid,
                     onAcceptAction = { viewModel.saveChanges { success ->
                         if (success) navigateBack()
                     } },
@@ -171,10 +174,8 @@ fun StoreDetailsBodyScreen(
                 ) {
                     GeneralTextFieldTitle(
                         value = store.name,
-                        onValueChange = {
-                            if (it.length <= StoreFieldsLenghts.STORE_NAME_MAX)
-                            onFieldChange(StoreFields.NAME, it)
-                        },
+                        valueLength = StoreFields.NAME.maxLength,
+                        onValueChange = { onFieldChange(StoreFields.NAME, it) },
                         label = stringResource(R.string.store_name),
                         readOnly = !hasPermission,
                         isError = validacionState.nameMessageError != null
@@ -192,24 +193,18 @@ fun StoreDetailsBodyScreen(
                         StoreSections.CONTACT -> {
                         GeneralOutlinedTextField(
                             value = store.email,
-                            onValueChange = {
-                                if (it.length <= StoreFieldsLenghts.STORE_EMAIL_MAX)
-                                onFieldChange(StoreFields.EMAIL, it)
-                            },
+                            valueLength = StoreFields.EMAIL.maxLength,
+                            onValueChange = { onFieldChange(StoreFields.EMAIL, it) },
                             readOnly = !hasPermission,
                             label = stringResource(R.string.store_email),
                             supportingText = supportingErrorText(validacionState.emailMessageError),
                             isError = validacionState.emailMessageError != null || validacionState.contactInformationErrorMessage != null
                         )
 
-                        GeneralOutlinedTextField(
+                        GeneralPhoneOutlinedTextField(
                             value = store.phone,
-                            onValueChange = {
-                                val phonePattern = Regex("^[0-9+ ]*$")
-                                if (it.matches(phonePattern) && it.length <= StoreFieldsLenghts.STORE_PHONE_MAX) {
-                                    onFieldChange(StoreFields.PHONE, it)
-                                }
-                            },
+                            valueLength = StoreFields.PHONE.maxLength,
+                            onValueChange = { onFieldChange(StoreFields.PHONE, it) },
                             readOnly = !hasPermission,
                             label = stringResource(R.string.store_phone),
                             supportingText = supportingErrorText(validacionState.phoneMessageError),
@@ -220,37 +215,34 @@ fun StoreDetailsBodyScreen(
                         StoreSections.ADDRESS -> {
                             GeneralOutlinedTextField(
                                 value = store.address,
+                                valueLength = StoreFields.ADDRESS.maxLength,
                                 onValueChange = { onFieldChange(StoreFields.ADDRESS, it) },
-                                readOnly = !hasPermission,
                                 label = stringResource(R.string.store_address),
+                                readOnly = !hasPermission,
+                                singleLine = false,
+                                minLines = 2
                             )
 
                             GeneralOutlinedTextField(
                                 value = store.city,
-                                onValueChange = {
-                                    if (it.length <= StoreFieldsLenghts.STORE_CITY_MAX)
-                                    onFieldChange(StoreFields.CITY, it)
-                                },
+                                valueLength = StoreFields.CITY.maxLength,
+                                onValueChange = { onFieldChange(StoreFields.CITY, it) },
                                 readOnly = !hasPermission,
                                 label = stringResource(R.string.store_city),
                             )
 
                             GeneralOutlinedTextField(
                                 value = store.country,
-                                onValueChange = {
-                                    if (it.length <= StoreFieldsLenghts.STORE_COUNTRY_MAX)
-                                    onFieldChange(StoreFields.COUNTRY, it)
-                                },
+                                valueLength = StoreFields.COUNTRY.maxLength,
+                                onValueChange = { onFieldChange(StoreFields.COUNTRY, it) },
                                 readOnly = !hasPermission,
                                 label = stringResource(R.string.store_country),
                             )
 
                             GeneralOutlinedTextField(
                                 value = store.postalCode,
-                                onValueChange = {
-                                    if (it.length <= StoreFieldsLenghts.STORE_CODE_MAX)
-                                    onFieldChange(StoreFields.POSTAL_CODE, it)
-                                },
+                                valueLength = StoreFields.ZIP_CODE.maxLength,
+                                onValueChange = { onFieldChange(StoreFields.ZIP_CODE, it) },
                                 readOnly = !hasPermission,
                                 label = stringResource(R.string.store_postal_code),
                             )

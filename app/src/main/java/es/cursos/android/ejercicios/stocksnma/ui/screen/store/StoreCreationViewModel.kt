@@ -12,6 +12,7 @@ import es.cursos.android.ejercicios.stocksnma.data.mapper.toStoreRequest
 import es.cursos.android.ejercicios.stocksnma.data.remote.api.StoreApi
 import es.cursos.android.ejercicios.stocksnma.domain.model.store.Store
 import es.cursos.android.ejercicios.stocksnma.ui.state.CreateUiState
+import es.cursos.android.ejercicios.stocksnma.utils.enums.fields.StoreFields
 import es.cursos.android.ejercicios.stocksnma.utils.validations.StoreValidationForm
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -101,7 +102,7 @@ class StoreCreationViewModel @Inject constructor(
                 StoreFields.ADDRESS -> it.copy(address = value)
                 StoreFields.CITY -> it.copy(city = value)
                 StoreFields.COUNTRY -> it.copy(country = value)
-                StoreFields.POSTAL_CODE -> it.copy(postalCode = value)
+                StoreFields.ZIP_CODE -> it.copy(postalCode = value)
                 else -> it
             }
         }

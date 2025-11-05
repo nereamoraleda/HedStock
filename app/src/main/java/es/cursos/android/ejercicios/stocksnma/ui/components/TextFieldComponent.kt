@@ -1,9 +1,8 @@
 package es.cursos.android.ejercicios.stocksnma.ui.components
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -16,21 +15,128 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import es.cursos.android.ejercicios.stocksnma.R
 import es.cursos.android.ejercicios.stocksnma.utils.getCurrencySymbol
+import es.cursos.android.ejercicios.stocksnma.utils.isValidPhoneNumber
+import es.cursos.android.ejercicios.stocksnma.utils.isValidPrice
 
 @Composable
 fun GeneralOutlinedTextField(
     value: String,
+    valueLength: Int? = null,
+    onValueChange: (String) -> Unit,
+    label: String,
+    trailingIcon: @Composable (() -> Unit)? = null,
+    supportingText: @Composable (() -> Unit)? = null,
+    isError: Boolean = false,
+    enabled: Boolean = true,
+    readOnly: Boolean = false,
+    singleLine: Boolean = true,
+    maxLines: Int = 1,
+    minLines: Int = 1,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    modifier: Modifier = Modifier
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = {
+            if (valueLength != null) { if (it.length <= valueLength) onValueChange(it) }
+            else { onValueChange(it) }
+        },
+        label = { Text(text = label) },
+        trailingIcon = trailingIcon,
+        supportingText = supportingText,
+        isError = isError,
+        enabled = enabled,
+        readOnly = readOnly,
+        singleLine = singleLine,
+        maxLines = minLines,
+        minLines = minLines,
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+        colors = coloresOutlinedTextField(),
+        modifier = modifier.fillMaxWidth()
+    )
+}
+
+
+@Composable
+fun GeneralPhoneOutlinedTextField(
+    value: String,
+    valueLength: Int? = null,
+    onValueChange: (String) -> Unit,
+    label: String,
+    supportingText: @Composable (() -> Unit)? = null,
+    isError: Boolean = false,
+    enabled: Boolean = true,
+    readOnly: Boolean = false,
+    modifier: Modifier = Modifier
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = {
+            if (isValidPhoneNumber(it)) {
+                if (valueLength != null) { if (it.length <= valueLength) onValueChange(it) }
+                else { onValueChange(it) }
+            }
+        },
+        label = { Text(text = label) },
+        supportingText = supportingText,
+        isError = isError,
+        enabled = enabled,
+        readOnly = readOnly,
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+        colors = coloresOutlinedTextField(),
+        modifier = modifier.fillMaxWidth()
+    )
+}
+
+
+@Composable
+fun GeneralPriceOutlinedTextField(
+    value: String,
+    valueLength: Int? = null,
+    onValueChange: (String) -> Unit,
+    label: String,
+    supportingText: @Composable (() -> Unit)? = null,
+    isError: Boolean = false,
+    enabled: Boolean = true,
+    readOnly: Boolean = false,
+    modifier: Modifier = Modifier
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = {
+            if (isValidPrice(it)) {
+                if (valueLength != null) { if (it.length <= valueLength) onValueChange(it) }
+                else { onValueChange(it) }
+            }
+        },
+        label = { Text(text = label) },
+        supportingText = supportingText,
+        isError = isError,
+        enabled = enabled,
+        readOnly = readOnly,
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        colors = coloresOutlinedTextField(),
+        modifier = modifier.fillMaxWidth()
+    )
+}
+
+
+@Composable
+fun GeneralTextFieldTitle(
+    value: String,
+    valueLength: Int? = null,
     onValueChange: (String) -> Unit,
     label: String,
     leadingIcon: @Composable (() -> Unit)? = null,
@@ -39,120 +145,32 @@ fun GeneralOutlinedTextField(
     isError: Boolean = false,
     enabled: Boolean = true,
     readOnly: Boolean = false,
-    singleLine: Boolean = true,
     keyboardType: KeyboardType = KeyboardType.Text,
-    modifier: Modifier = Modifier
-) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = { onValueChange(it) },
-        label = { Text(text = label) },
-        leadingIcon = leadingIcon,
-        trailingIcon = trailingIcon,
-        supportingText = supportingText,
-        isError = isError,
-        enabled = enabled,
-        readOnly = readOnly,
-        singleLine = singleLine,
-        keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-        colors = coloresOutlinedTextField(),
-        //colors = colorsSimpleTextField(),
-        modifier = modifier.fillMaxWidth()
-    )
-}
-
-
-@Composable
-fun CustomTextFieldProduct(
-    value: String,
-    onValueChange: (String) -> Unit,
-    label: String = "",
-    textAling: TextAlign = TextAlign.End,
-    singleLine: Boolean = true,
-    enabled: Boolean = true,
-    keyboardType: KeyboardType = KeyboardType.Text,
-    //keyboardAction: KeyboardActions = KeyboardActions(),
     modifier: Modifier = Modifier
 ) {
     TextField(
         value = value,
-        onValueChange = { onValueChange(it) },
-        textStyle = TextStyle(textAlign = textAling),
-        label = { Text(label) },
-        enabled = enabled,
-        singleLine = singleLine,
+        onValueChange = {
+            if (valueLength != null) { if (it.length <= valueLength) onValueChange(it) }
+            else { onValueChange(it) }
+        },
+        placeholder = {
+            Text(
+                label,
+                style = MaterialTheme.typography.titleLarge
+            )
+        },
+        textStyle = MaterialTheme.typography.titleLarge,
+        readOnly = readOnly,
+        isError = isError,
+        maxLines = 2,
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-        //keyboardActions = keyboardAction,
-        colors = TextFieldDefaults.colors(
-            focusedContainerColor = MaterialTheme.colorScheme.secondary,
-            unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
-            disabledContainerColor = MaterialTheme.colorScheme.secondary,
-            errorContainerColor = Color.Transparent,
-        ),
+        colors = colorsSimpleTextField(),
         modifier = Modifier.fillMaxWidth()
     )
 }
 
 
-@Composable
-fun CustomBasicTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    typography: TextStyle,
-    enabled: Boolean,
-    isError: Boolean = false,
-    singleLine: Boolean = true,
-) {
-    BasicTextField(
-        value = value,
-        onValueChange = { onValueChange(it) },
-        enabled = enabled,
-        textStyle = typography,
-        singleLine = singleLine,
-        cursorBrush = if (isError) SolidColor(MaterialTheme.colorScheme.error) else SolidColor(MaterialTheme.colorScheme.tertiary),
-        modifier = if (enabled) Modifier.fillMaxWidth().alpha(1f)
-        else Modifier.fillMaxWidth().alpha(0.5f)
-    )
-}
-
-
-@Composable
-fun CustomColumnAndTextField(
-    title: Int,
-    value: String,
-    onValueChange: (String) -> Unit,
-    singleLine: Boolean = true,
-    isError: Boolean = false,
-    messageError: String? = null,
-    enabled: Boolean = true
-) {
-    Column(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text(text = stringResource(title), fontWeight = FontWeight.Bold)
-        TextField(
-            value = value,
-            onValueChange = { onValueChange(it) },
-            //placeholder = { Text(text = stringResource(title)) },
-            //label = { Text(text = stringResource(title)) },
-            singleLine = singleLine,
-            enabled = enabled,
-            isError = isError,
-            supportingText = { if (isError) Text(text = messageError ?: "") },
-            //textStyle = TextStyle(fontSize = 16.sp, fontFamily = FontFamily(Font(R.font.ci_gamedev))),
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent,
-                disabledContainerColor = Color.Transparent,
-                //unfocusedIndicatorColor = Color.Transparent,
-                disabledTextColor = Color.Black,
-                disabledIndicatorColor = Color.Transparent,
-                errorContainerColor = Color.Transparent
-            ),
-            modifier = Modifier.fillMaxWidth()
-        )
-    }
-}
 
 @Composable
 fun CustomOutlinedTextField(
@@ -271,6 +289,8 @@ fun ShowMessageErrorText(message: String? = null, isEditing: Boolean = true, mod
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.error,
             modifier = modifier
+                .padding(horizontal = dimensionResource(R.dimen.padding_16dp))
+                .padding(bottom = dimensionResource(R.dimen.padding_16dp))
         )
     }
 }
@@ -306,7 +326,8 @@ fun coloresTextFields() = TextFieldDefaults.colors(
 
 @Composable
 fun coloresOutlinedTextField() = OutlinedTextFieldDefaults.colors(
-    focusedContainerColor = MaterialTheme.colorScheme.surface,
+    focusedContainerColor = MaterialTheme.colorScheme.surface
+
     //disabledBorderColor = Color.Transparent,
     //focusedBorderColor = MaterialTheme.colorScheme.primary,
     //unfocusedBorderColor = MaterialTheme.colorScheme.surface
