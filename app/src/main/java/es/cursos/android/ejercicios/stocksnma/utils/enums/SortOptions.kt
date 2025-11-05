@@ -7,9 +7,15 @@ enum class ProductSortOptions {
 }
 
 
-enum class SupplierSortOptions {
-    NAME_ASC,
-    NAME_DESC
+enum class SupplierSortOptions(val sortBy: String?, val direction: String?) {
+    NAME_ASC("name", "asc"),
+    NAME_DESC("name", "desc"),
+
+    CONT_NAME_ASC("contactName", "asc"),
+    CONT_NAME_DESC("contactName", "desc"),
+
+    DATE_OLDEST("createdAt", "asc"),
+    DATE_NEWEST("createdAt", "desc")
 }
 
 
