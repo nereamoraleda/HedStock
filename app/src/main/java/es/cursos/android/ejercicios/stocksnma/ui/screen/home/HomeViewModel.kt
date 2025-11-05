@@ -7,11 +7,10 @@ import es.cursos.android.ejercicios.stocksnma.R
 import es.cursos.android.ejercicios.stocksnma.data.local.datastore.AppDataStore
 import es.cursos.android.ejercicios.stocksnma.data.local.entity.relations.ProductWithSupplierAndCategory
 import es.cursos.android.ejercicios.stocksnma.data.repository.product.ProductRepository
-import es.cursos.android.ejercicios.stocksnma.ui.state.DetailsUiState
-import es.cursos.android.ejercicios.stocksnma.utils.items.NavDrawerItem
+import es.cursos.android.ejercicios.stocksnma.utils.enums.HomeSections
 import es.cursos.android.ejercicios.stocksnma.utils.enums.ProductSortOptions
 import es.cursos.android.ejercicios.stocksnma.utils.enums.UserRoles
-import es.cursos.android.ejercicios.stocksnma.utils.enums.HomeSections
+import es.cursos.android.ejercicios.stocksnma.utils.items.NavDrawerItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,10 +51,6 @@ class HomeViewModel @Inject constructor(
     // Variables - Lista de elementos del Navigation Drawer
     private val _listOfNavDrawerItems = MutableStateFlow(emptyList<NavDrawerItem>())
 
-    // Variables - Índice del elemento seleccionado en el Navigation Drawer
-    //private val _selectedHomeSection = MutableStateFlow(HomeSections.STORES)
-    //val selectedHomeSection: StateFlow<HomeSections> = _selectedHomeSection
-
 
     // -------------------- CARGAR DATOS PARA LA HOME UI -------------------- //
     private fun loadHomeData() {
@@ -83,7 +78,6 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
-
 
 
     // -------------------- VARIABLES - OBTENCIÓN DE PRODUCTOS --------------------
@@ -138,20 +132,9 @@ class HomeViewModel @Inject constructor(
     }
 
 
-    // -------------------- VARIABLES - SEARCH BAR --------------------
-
-    // Variables - Está buscando (Boolean)
-    // Variables - Texto escrito en el Search Bar (String)
-    // Variables - Resultados de búsqueda de productos
-    // Variables - Resultados de búsqueda de proveedores
-    // Variables - Historial de búsqueda
 
 
 
-    // -------------------- VARIABLES - CHECKBOX --------------------
-
-    // Variables - Lista de productos seleccionados
-    // Variables - Lista de proveedores seleccionados
 
 
 
@@ -206,137 +189,157 @@ class HomeViewModel @Inject constructor(
      */
 
 
-
     // -------------------- FUNCIONES - LISTAS ELEMENTOS --------------------
 
     private fun loadLists(role: UserRoles = _userRole.value) {
         _listOfNavDrawerItems.value = when (role) {
             UserRoles.ADMIN -> listOf(
-                    NavDrawerItem.Item(
-                        title = R.string.purchase_order_title,
-                        iconSelected = R.drawable.ic_purchase_order_filled,
-                        iconUnselected = R.drawable.ic_purchase_order,
-                        action = { setSelectedItem(HomeSections.PURCHASE_ORDERS) }
-                    ),
-                    NavDrawerItem.Item(
-                        title = R.string.product_title,
-                        iconSelected = R.drawable.ic_product_filled,
-                        iconUnselected = R.drawable.ic_product,
-                        //count = if (uiState is HomeUiState.Success) uiState.productsList.size else 0,
-                        action = { setSelectedItem(HomeSections.PRODUCTS) }
-                    ),
-                    NavDrawerItem.Item(
-                        title = R.string.discount_title,
-                        iconSelected = R.drawable.ic_discount_filled,
-                        iconUnselected = R.drawable.ic_discount,
-                        action = { setSelectedItem(HomeSections.DISCOUNTS) }
-                    ),
-                    NavDrawerItem.Item(
-                        title = R.string.supplier_title,
-                        iconSelected = R.drawable.ic_supplier_filled,
-                        iconUnselected = R.drawable.ic_supplier,
-                        //count = if (uiState is HomeUiState.Success) uiState.suppliersList.size else 0,
-                        action = { setSelectedItem(HomeSections.SUPPLIERS) }
-                    ),
-                    NavDrawerItem.Item(
-                        title = R.string.user_title,
-                        iconSelected = R.drawable.ic_user_filled,
-                        iconUnselected = R.drawable.ic_user,
-                        action = { setSelectedItem(HomeSections.USERS) }
-                    ),
-                    NavDrawerItem.Item(
-                        title = R.string.store_title,
-                        iconSelected = R.drawable.ic_store_filled,
-                        iconUnselected = R.drawable.ic_store,
-                        action = { setSelectedItem(HomeSections.STORES) }
-                    ),
+                NavDrawerItem.Item(
+                    title = R.string.purchase_order_title,
+                    iconSelected = R.drawable.ic_purchase_order_filled,
+                    iconUnselected = R.drawable.ic_purchase_order,
+                    action = { setSelectedItem(HomeSections.PURCHASE_ORDERS) }
+                ),
+                NavDrawerItem.Item(
+                    title = R.string.product_title,
+                    iconSelected = R.drawable.ic_product_filled,
+                    iconUnselected = R.drawable.ic_product,
+                    //count = if (uiState is HomeUiState.Success) uiState.productsList.size else 0,
+                    action = { setSelectedItem(HomeSections.PRODUCTS) }
+                ),
+                NavDrawerItem.Item(
+                    title = R.string.discount_title,
+                    iconSelected = R.drawable.ic_discount_filled,
+                    iconUnselected = R.drawable.ic_discount,
+                    action = { setSelectedItem(HomeSections.DISCOUNTS) }
+                ),
+                NavDrawerItem.Item(
+                    title = R.string.supplier_title,
+                    iconSelected = R.drawable.ic_supplier_filled,
+                    iconUnselected = R.drawable.ic_supplier,
+                    //count = if (uiState is HomeUiState.Success) uiState.suppliersList.size else 0,
+                    action = { setSelectedItem(HomeSections.SUPPLIERS) }
+                ),
+                NavDrawerItem.Item(
+                    title = R.string.user_title,
+                    iconSelected = R.drawable.ic_user_filled,
+                    iconUnselected = R.drawable.ic_user,
+                    action = { setSelectedItem(HomeSections.USERS) }
+                ),
+                NavDrawerItem.Item(
+                    title = R.string.store_title,
+                    iconSelected = R.drawable.ic_store_filled,
+                    iconUnselected = R.drawable.ic_store,
+                    action = { setSelectedItem(HomeSections.STORES) }
+                ),
 
-                    NavDrawerItem.Divider,
+                NavDrawerItem.Divider,
 
-                    NavDrawerItem.Item(
-                        title = R.string.settings_title,
-                        iconSelected = R.drawable.ic_settings_filled,
-                        iconUnselected = R.drawable.ic_settings,
-                        action = { setSelectedItem(HomeSections.SETTINGS) /*toggleNavigateSettings(true)*/ }
-                    ),
-                    NavDrawerItem.Item(
-                        title = R.string.about_title,
-                        iconSelected = R.drawable.ic_info_filled,
-                        iconUnselected = R.drawable.ic_info,
-                        action = { /*setSelectedItem(NavDrawerItemSelected.ABOUT) ;*/ toggleAboutDialog(true) }
-                    )
+                NavDrawerItem.Item(
+                    title = R.string.settings_title,
+                    iconSelected = R.drawable.ic_settings_filled,
+                    iconUnselected = R.drawable.ic_settings,
+                    action = { setSelectedItem(HomeSections.SETTINGS) /*toggleNavigateSettings(true)*/ }
+                ),
+                NavDrawerItem.Item(
+                    title = R.string.about_title,
+                    iconSelected = R.drawable.ic_info_filled,
+                    iconUnselected = R.drawable.ic_info,
+                    action = { toggleAboutDialog(true) }
                 )
+            )
+
             UserRoles.GERENTE -> listOf(
-                    NavDrawerItem.Item(
-                        title = R.string.purchase_order_title,
-                        iconSelected = R.drawable.ic_purchase_order_filled,
-                        iconUnselected = R.drawable.ic_purchase_order,
-                        action = { setSelectedItem(HomeSections.PURCHASE_ORDERS) }
-                    ),
+                NavDrawerItem.Item(
+                    title = R.string.purchase_order_title,
+                    iconSelected = R.drawable.ic_purchase_order_filled,
+                    iconUnselected = R.drawable.ic_purchase_order,
+                    action = { setSelectedItem(HomeSections.PURCHASE_ORDERS) }
+                ),
 
-                    NavDrawerItem.Item(
-                        title = R.string.store_title,
-                        iconSelected = R.drawable.ic_store_filled,
-                        iconUnselected = R.drawable.ic_store,
-                        action = { setSelectedItem(HomeSections.STORES) }
-                    ),
+                NavDrawerItem.Item(
+                    title = R.string.supplier_title,
+                    iconSelected = R.drawable.ic_supplier_filled,
+                    iconUnselected = R.drawable.ic_supplier,
+                    //count = if (uiState is HomeUiState.Success) uiState.suppliersList.size else 0,
+                    action = { setSelectedItem(HomeSections.SUPPLIERS) }
+                ),
 
-                    NavDrawerItem.Divider,
+                NavDrawerItem.Item(
+                    title = R.string.store_title,
+                    iconSelected = R.drawable.ic_store_filled,
+                    iconUnselected = R.drawable.ic_store,
+                    action = { setSelectedItem(HomeSections.STORES) }
+                ),
 
-                    NavDrawerItem.Item(
-                        title = R.string.settings_title,
-                        iconSelected = R.drawable.ic_settings_filled,
-                        iconUnselected = R.drawable.ic_settings,
-                        action = { setSelectedItem(HomeSections.SETTINGS) /*toggleNavigateSettings(true)*/ }
-                    ),
-                    NavDrawerItem.Item(
-                        title = R.string.about_title,
-                        iconSelected = R.drawable.ic_info_filled,
-                        iconUnselected = R.drawable.ic_info,
-                        action = { /*setSelectedItem(NavDrawerItemSelected.ABOUT) ;*/ toggleAboutDialog(true) }
+                NavDrawerItem.Divider,
+
+                NavDrawerItem.Item(
+                    title = R.string.settings_title,
+                    iconSelected = R.drawable.ic_settings_filled,
+                    iconUnselected = R.drawable.ic_settings,
+                    action = { setSelectedItem(HomeSections.SETTINGS) /*toggleNavigateSettings(true)*/ }
+                ),
+                NavDrawerItem.Item(
+                    title = R.string.about_title,
+                    iconSelected = R.drawable.ic_info_filled,
+                    iconUnselected = R.drawable.ic_info,
+                    action = { /*setSelectedItem(NavDrawerItemSelected.ABOUT) ;*/ toggleAboutDialog(
+                        true
                     )
+                    }
                 )
+            )
+
             UserRoles.VENDEDOR -> listOf(
-                    NavDrawerItem.Item(
-                        title = R.string.product_title,
-                        iconSelected = R.drawable.ic_product_filled,
-                        iconUnselected = R.drawable.ic_product,
-                        //count = if (uiState is HomeUiState.Success) uiState.productsList.size else 0,
-                        action = { setSelectedItem(HomeSections.PRODUCTS) }
-                    ),
+                NavDrawerItem.Item(
+                    title = R.string.product_title,
+                    iconSelected = R.drawable.ic_product_filled,
+                    iconUnselected = R.drawable.ic_product,
+                    //count = if (uiState is HomeUiState.Success) uiState.productsList.size else 0,
+                    action = { setSelectedItem(HomeSections.PRODUCTS) }
+                ),
 
-                    NavDrawerItem.Item(
-                        title = R.string.store_title,
-                        iconSelected = R.drawable.ic_store_filled,
-                        iconUnselected = R.drawable.ic_store,
-                        action = { setSelectedItem(HomeSections.STORES) }
-                    ),
+                NavDrawerItem.Item(
+                    title = R.string.supplier_title,
+                    iconSelected = R.drawable.ic_supplier_filled,
+                    iconUnselected = R.drawable.ic_supplier,
+                    //count = if (uiState is HomeUiState.Success) uiState.suppliersList.size else 0,
+                    action = { setSelectedItem(HomeSections.SUPPLIERS) }
+                ),
 
-                    NavDrawerItem.Divider,
+                NavDrawerItem.Item(
+                    title = R.string.store_title,
+                    iconSelected = R.drawable.ic_store_filled,
+                    iconUnselected = R.drawable.ic_store,
+                    action = { setSelectedItem(HomeSections.STORES) }
+                ),
 
-                    NavDrawerItem.Item(
-                        title = R.string.settings_title,
-                        iconSelected = R.drawable.ic_settings_filled,
-                        iconUnselected = R.drawable.ic_settings,
-                        action = { setSelectedItem(HomeSections.SETTINGS) /*toggleNavigateSettings(true)*/ }
-                    ),
-                    NavDrawerItem.Item(
-                        title = R.string.about_title,
-                        iconSelected = R.drawable.ic_info_filled,
-                        iconUnselected = R.drawable.ic_info,
-                        action = { /*setSelectedItem(NavDrawerItemSelected.ABOUT) ;*/ toggleAboutDialog(true) }
-                    )
+                NavDrawerItem.Divider,
+
+                NavDrawerItem.Item(
+                    title = R.string.settings_title,
+                    iconSelected = R.drawable.ic_settings_filled,
+                    iconUnselected = R.drawable.ic_settings,
+                    action = { setSelectedItem(HomeSections.SETTINGS) /*toggleNavigateSettings(true)*/ }
+                ),
+                NavDrawerItem.Item(
+                    title = R.string.about_title,
+                    iconSelected = R.drawable.ic_info_filled,
+                    iconUnselected = R.drawable.ic_info,
+                    action = { /*setSelectedItem(NavDrawerItemSelected.ABOUT) ;*/ toggleAboutDialog(true)
+                    }
                 )
+            )
+
             UserRoles.DESCONOCIDO -> emptyList()
         }
     }
 
-     private fun setSelectedItem(section: HomeSections) {
-         _homeUiState.value = (_homeUiState.value as HomeUiState.Success).copy(
-             selectedSection = section
-         )
-        //_selectedHomeSection.value = section
-
+    private fun setSelectedItem(section: HomeSections) {
+        _homeUiState.value = (_homeUiState.value as HomeUiState.Success).copy(
+            selectedSection = section
+        )
     }
 
     fun toggleAboutDialog(show: Boolean) {
