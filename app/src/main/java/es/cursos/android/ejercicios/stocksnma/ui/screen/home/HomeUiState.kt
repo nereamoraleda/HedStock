@@ -1,7 +1,7 @@
 package es.cursos.android.ejercicios.stocksnma.ui.screen.home
 
-import es.cursos.android.ejercicios.stocksnma.data.local.entity.SupplierEntity
 import es.cursos.android.ejercicios.stocksnma.data.local.entity.relations.ProductWithSupplierAndCategory
+import es.cursos.android.ejercicios.stocksnma.domain.model.SupplierHomeView
 import es.cursos.android.ejercicios.stocksnma.domain.model.User
 import es.cursos.android.ejercicios.stocksnma.utils.enums.ActiveFilters
 import es.cursos.android.ejercicios.stocksnma.utils.enums.HomeSections
@@ -41,7 +41,7 @@ sealed class ProductHomeUiState {
 sealed class SupplierHomeUiState {
     data object Loading : SupplierHomeUiState()
     data class Success(
-        val suppliers: List<SupplierEntity> = emptyList(),
+        val suppliers: List<SupplierHomeView> = emptyList(),
         val sortOption: SupplierSortOptions = SupplierSortOptions.NAME_ASC
     ) : SupplierHomeUiState()
     data class Error(val messageError: String) : SupplierHomeUiState()
