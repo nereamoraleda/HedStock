@@ -1,35 +1,51 @@
 package es.cursos.android.ejercicios.stocksnma.ui.screen.supplier
 
-import android.telephony.PhoneNumberUtils
 import android.util.Log
 import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import es.cursos.android.ejercicios.stocksnma.data.local.datastore.AppDataStore
 import es.cursos.android.ejercicios.stocksnma.data.mapper.toSupplier
+import es.cursos.android.ejercicios.stocksnma.data.mapper.toSupplierDto
 import es.cursos.android.ejercicios.stocksnma.data.mapper.toSupplierEntity
 import es.cursos.android.ejercicios.stocksnma.data.remote.api.SupplierApi
 import es.cursos.android.ejercicios.stocksnma.data.repository.supplier.SupplierRepository
 import es.cursos.android.ejercicios.stocksnma.domain.model.Supplier
 import es.cursos.android.ejercicios.stocksnma.ui.state.DetailsUiState
-import es.cursos.android.ejercicios.stocksnma.utils.enums.SupplierFields
+import es.cursos.android.ejercicios.stocksnma.utils.enums.fields.SupplierFields
+import es.cursos.android.ejercicios.stocksnma.utils.enums.UserRoles
 import es.cursos.android.ejercicios.stocksnma.utils.validations.SupplierValidationForm
-import es.cursos.android.ejercicios.stocksnma.utils.validations.SupplierValidationState
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
 
 @HiltViewModel
 class SupplierDetailsViewModel @Inject constructor(
     private val api: SupplierApi,
-    private val supplierRepository: SupplierRepository
+    private val supplierRepository: SupplierRepository,
+    dataStore: AppDataStore
 ): ViewModel() {
 
     private val _uiState = MutableStateFlow<DetailsUiState<Supplier>>(DetailsUiState.Loading)
     val uiState: StateFlow<DetailsUiState<Supplier>> = _uiState.asStateFlow()
+
+    // -------------------- ROL DEL USUARIO -------------------- //
+    private val _userRole: Flow<UserRoles> = dataStore.userRole
+
+    val hasPermission: StateFlow<Boolean> = _userRole
+        .map { role -> role == UserRoles.ADMIN }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
+        )
 
     private val _validationForm = MutableStateFlow(SupplierValidationForm())
     val validationForm: StateFlow<SupplierValidationForm> = _validationForm.asStateFlow()
@@ -41,14 +57,14 @@ class SupplierDetailsViewModel @Inject constructor(
             val response = api.getSupplierById(id)
                 //.catch { error -> _uiState.value = DetailsUiState.Error(error.message ?: "Error desconocido") }
                 //.collect { supplier ->
-            val supplierModel = response.toSupplier()
-
-            _uiState.value = DetailsUiState.Success(
-                currentItem = supplierModel,
-                editableItem = supplierModel.copy(),
-                //isEditing = false
-            )
-
+            if (response.isSuccessful) {
+                val supplierModel = response.body()?.toSupplier() ?: Supplier(id = 0) // TODO - Quitar ese 0
+                _uiState.value = DetailsUiState.Success(
+                    currentItem = supplierModel,
+                    editableItem = supplierModel.copy()
+                    //isEditing = false
+                )
+            }
         //}
         }
     }
@@ -58,7 +74,7 @@ class SupplierDetailsViewModel @Inject constructor(
         if (state is DetailsUiState.Success) {
             _uiState.value = (_uiState.value as DetailsUiState.Success).copy(
                 editableItem = state.currentItem,
-                isEditing = false
+                //isEditing = false
             )
         }
         _validationForm.value = SupplierValidationForm()
@@ -66,17 +82,43 @@ class SupplierDetailsViewModel @Inject constructor(
 
 
 
-    fun saveSupplier() {
+    fun saveSupplier(onResult: (Boolean) -> Unit) {
         val state = _uiState.value
         if (state is DetailsUiState.Success && state.isFormValid) {
             viewModelScope.launch {
                 try {
-                    supplierRepository.updateSupplier(state.editableItem.toSupplier())
-                    _uiState.value = state.copy(
-                        currentItem = state.editableItem.copy(),
-                        //isEditing = false
-                    )
+                    val current = state.currentItem; val editable = state.editableItem
+                    val errors = mutableMapOf<String, String?>()
+
+                    if (current.name != editable.name && api.checkName(editable.name).body() == true)
+                        errors["name"] = "Ya existe un proveedor con ese nombre"
+
+                    if (current.email != editable.email && api.checkEmail(editable.email).body() == true)
+                        errors["email"] = "Ya existe un proveedor con ese email"
+
+                    if (current.phone != editable.phone && api.checkPhone(editable.phone).body() == true)
+                        errors["phone"] = "Ya existe un proveedor con ese teléfono"
+
+                    // Si hay errores, los mostramos todos y no seguimos
+                    if (errors.isNotEmpty()) {
+                        _validationForm.value = _validationForm.value.copy(
+                            nameErrorMessage = errors["name"],
+                            emailErrorMessage = errors["email"],
+                            phoneErrorMessage = errors["phone"]
+                        )
+                        return@launch
+                    }
+
+
+                    val response = api.updateSupplier(current.id!!, editable.toSupplierDto())
+                    if (response.isSuccessful) {
+                        Log.d("SupplierDetailsViewModel", "Proveedor actualizado correctamente")
+                        onResult(true)
+                        _uiState.value = state.copy(currentItem = state.editableItem.copy())
+                    }
+
                 } catch (e: Exception) {
+                    Log.e("SupplierDetailsViewModel", "Error al actualizar el proveedor", e)
                     _uiState.value = DetailsUiState.Error(
                         e.message ?: "Error al actualizar el proveedor"
                     )
@@ -159,7 +201,7 @@ class SupplierDetailsViewModel @Inject constructor(
         if (state is DetailsUiState.Success) {
 
             _validationForm.value = SupplierValidationForm(
-                nameErrorMessage = validateNameSupplier(supplier.name/*, state.currentItem.name*/),
+                nameErrorMessage = validateNameSupplier(supplier.name),
                 phoneErrorMessage = validatePhoneSupplier(supplier.phone),
                 emailErrorMessage = validateEmailSupplier(supplier.email),
                 contactInformationErrorMessage = validateContactInformation(supplier.email, supplier.phone),
@@ -169,7 +211,7 @@ class SupplierDetailsViewModel @Inject constructor(
 
 
             return listOf(
-                validateNameSupplier(supplier.name/*, state.currentItem.name*/),
+                validateNameSupplier(supplier.name),
                 validatePhoneSupplier(supplier.phone),
                 validateEmailSupplier(supplier.email),
                 validateContactInformation(supplier.email, supplier.phone),
@@ -183,7 +225,6 @@ class SupplierDetailsViewModel @Inject constructor(
 
     private fun validateNameSupplier(name: String): String? {
         if (name.isBlank()) return "El nombre del proveedor es obligatorio"
-        //else if (name != initialName && supplierRepository.existsSupplierWithName(name)) return "Ya existe un proveedor con ese nombre"
         return null
     }
 
