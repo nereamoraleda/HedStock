@@ -11,7 +11,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import es.cursos.android.ejercicios.stocksnma.data.mapper.toStoreRequest
 import es.cursos.android.ejercicios.stocksnma.data.remote.api.StoreApi
 import es.cursos.android.ejercicios.stocksnma.domain.model.store.Store
-import es.cursos.android.ejercicios.stocksnma.ui.state.CreationUiState
+import es.cursos.android.ejercicios.stocksnma.ui.state.CreateUiState
 import es.cursos.android.ejercicios.stocksnma.utils.validations.StoreValidationForm
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,7 +26,7 @@ class StoreCreationViewModel @Inject constructor(
 ): ViewModel() {
 
     // -------------------- STATE UI -------------------- //
-    var uiState by mutableStateOf(CreationUiState(Store()))
+    var uiState by mutableStateOf(CreateUiState(Store()))
         private set
 
 
@@ -44,6 +44,30 @@ class StoreCreationViewModel @Inject constructor(
         if (validateStoreForm()) {  // Si la validación del formulario es exitosa
             viewModelScope.launch {
                 try {
+                    // Validación de campos únicos, antes de crear la nueva tienda
+                    val errors = mutableMapOf<String, String?>()
+                    val store = uiState.newItem
+
+                    if (api.checkName(store.name).body() == true)
+                        errors["name"] = "Ya existe una tienda con ese nombre"
+
+                    if (api.checkEmail(store.email).body() == true)
+                        errors["email"] = "Ya existe un proveedor con ese email"
+
+                    if (api.checkPhone(store.phone).body() == true)
+                        errors["phone"] = "Ya existe un proveedor con ese teléfono"
+
+                    // Si hay errores, los mostramos todos y no seguimos
+                    if (errors.isNotEmpty()) {
+                        _validations.value = _validations.value.copy(
+                            nameMessageError = errors["name"],
+                            emailMessageError = errors["email"],
+                            phoneMessageError = errors["phone"]
+                        )
+                        return@launch
+                    }
+
+                    // Si no hay errores, creamos la tienda
                     val storeRequest = _newStore.value.toStoreRequest()  // Convertir el objeto Store (obtenido del formulario CREATION) a StoreRequest
                     val response = api.createStore(storeRequest)         // Crear la tienda en la API
 
@@ -82,7 +106,7 @@ class StoreCreationViewModel @Inject constructor(
             }
         }
 
-        uiState = uiState.copy(isEntryValid = validateStoreForm())
+        uiState = uiState.copy(isFormValid = validateStoreForm())
     }
 
 

@@ -73,8 +73,9 @@ class StoreDetailsViewModel @Inject constructor(
                 if (response.isSuccessful) {
                     val storeResponse = response.body()?.toStore() ?: Store()
                     _uiState.value = DetailsUiState.Success(
-                        item = storeResponse,
-                        isEntryValid = true
+                        currentItem = storeResponse,
+                        editableItem = storeResponse.copy(),
+                        isFormValid = true
                     )
 
                     _currentStore.value = storeResponse
@@ -103,28 +104,26 @@ class StoreDetailsViewModel @Inject constructor(
         if (!validateStoreForm()) return
             viewModelScope.launch {
                 try {
-                    val updateName = _editableStore.value.name
-                    if (currentName.value != updateName) {
-                        if (storeApi.checkName(updateName).body() == true) {
-                            _validationState.value = _validationState.value.copy(nameMessageError = "Ya existe una tienda con ese nombre")
-                            return@launch
-                        }
-                    }
+                    val editable = _editableStore.value
+                    val errors = mutableMapOf<String, String?>()
 
-                    val updateEmail = _editableStore.value.email
-                    if (currentEmail.value != updateEmail) {
-                        if (storeApi.checkEmail(updateEmail).body() == true) {
-                            _validationState.value = _validationState.value.copy(emailMessageError = "Ya existe una tienda con ese email")
-                            return@launch
-                        }
-                    }
+                    if (currentName.value != editable.name && storeApi.checkName(editable.name).body() == true)
+                        errors["name"] = "Ya existe una tienda con ese nombre"
 
-                    val updatePhone = _editableStore.value.phone
-                    if (currentPhone.value != updatePhone) {
-                        if (storeApi.checkPhone(updatePhone).body() == true) {
-                            _validationState.value = _validationState.value.copy(phoneMessageError = "Ya existe una tienda con ese teléfono")
-                            return@launch
-                        }
+                    if (currentEmail.value != editable.email && storeApi.checkEmail(editable.email).body() == true)
+                        errors["email"] = "Ya existe un proveedor con ese email"
+
+                    if (currentPhone.value != editable.phone && storeApi.checkPhone(editable.phone).body() == true)
+                        errors["phone"] = "Ya existe un proveedor con ese teléfono"
+
+                    // Si hay errores, los mostramos todos y no seguimos
+                    if (errors.isNotEmpty()) {
+                        _validationState.value = _validationState.value.copy(
+                            nameMessageError = errors["name"],
+                            emailMessageError = errors["email"],
+                            phoneMessageError = errors["phone"]
+                        )
+                        return@launch
                     }
 
                     // Actualización de la tienda (sin fallos en el formulario)
@@ -163,7 +162,7 @@ class StoreDetailsViewModel @Inject constructor(
 
         _uiState.update { currentState ->
             if (currentState is DetailsUiState.Success) {
-                currentState.copy(isEntryValid = validateStoreForm(_editableStore.value))
+                currentState.copy(isFormValid = validateStoreForm(_editableStore.value))
             } else {
                 currentState
             }
@@ -181,7 +180,7 @@ class StoreDetailsViewModel @Inject constructor(
 
         _uiState.update { currentState ->
             if (currentState is DetailsUiState.Success) {
-                currentState.copy(isEntryValid = validateStoreForm(_editableStore.value))
+                currentState.copy(isFormValid = validateStoreForm(_editableStore.value))
             } else {
                 currentState
             }
