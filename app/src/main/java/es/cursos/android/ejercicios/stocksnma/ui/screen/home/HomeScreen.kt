@@ -96,7 +96,6 @@ fun HomeScreen(
     val hasPermission by viewModel.hasPermission.collectAsState()
     val navigateSettings by viewModel.navigateSettings.collectAsState()   // Navegación a la pantalla de configuración
 
-
     val productViewModel: ProductSectionViewModel = hiltViewModel()
     val supplierViewModel: SupplierSectionViewModel = hiltViewModel()
     val userViewModel: UserSectionViewModel = hiltViewModel()
@@ -109,30 +108,13 @@ fun HomeScreen(
 
 
     // Variables - Dialog
-    val showAboutDialog by viewModel.showAboutDialog.collectAsState()               // Muestra el diálogo "Acerca de" (Elemento del Navigation Drawer)
-    var showDialogScanner by remember { mutableStateOf(false) }               // Muestra el diálogo de creacion de producto con el código de barras escaneado
-    // Muestra el diálogo de confirmación de eliminación de productos/proveedores
-    // Muestra el diálogo de confirmación de eliminación de productos/proveedores
+    val showAboutDialog by viewModel.showAboutDialog.collectAsState()  // Muestra el diálogo "Acerca de" (Elemento del Navigation Drawer)
+    var showDialogScanner by remember { mutableStateOf(false) }  // Muestra el diálogo de creacion de producto con el código de barras escaneado
     var showNewFunction by remember { mutableStateOf(false) }
 
     // Variables - Navigation Drawer
-    //val selectedHomeSection by viewModel.selectedHomeSection.collectAsState()    // Índice del elemento seleccionado
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)     // Estado del Navigation Drawer
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)  // Estado del Navigation Drawer
     val scope = rememberCoroutineScope()
-
-
-    // Variables - Búsqueda en Search Bar
-    // Si estamos en búsqueda o no
-    // Consulta de búsqueda
-    // Historial de búsquedas
-    // Historial de búsquedas
-    // Lista de resultados de búsqueda de productos
-    // Lista de resultados de búsqueda de proveedores
-
-
-    // Variables - CheckBoxes
-    // Lista de productos seleccionados (solo Ids)
-    // Lista de proveedores seleccionados (solo Ids)
 
 
     // Variables - Floating Action Button
@@ -191,16 +173,40 @@ fun HomeScreen(
     )    // Lista de elementos del menú desplegable de productos
     val supplierSortMenuItems = listOf(
         DropDownMenuItem(
-            title = R.string.order_by_name_asc,
+            title = R.string.sort_by_name_asc,
             selected = supplierSortOption == SupplierSortOptions.NAME_ASC,
             action = { supplierViewModel.setSupplierSortOption(SupplierSortOptions.NAME_ASC) }
         ),
 
         DropDownMenuItem(
-            title = R.string.order_by_name_desc,
+            title = R.string.sort_by_name_desc,
             selected = supplierSortOption == SupplierSortOptions.NAME_DESC,
             action = { supplierViewModel.setSupplierSortOption(SupplierSortOptions.NAME_DESC) }
         ),
+
+        DropDownMenuItem(
+            title = R.string.sort_by_contact_name_asc,
+            selected = supplierSortOption == SupplierSortOptions.CONT_NAME_ASC,
+            action = { supplierViewModel.setSupplierSortOption(SupplierSortOptions.CONT_NAME_ASC) }
+        ),
+
+        DropDownMenuItem(
+            title = R.string.sort_by_contact_name_desc,
+            selected = supplierSortOption == SupplierSortOptions.CONT_NAME_DESC,
+            action = { supplierViewModel.setSupplierSortOption(SupplierSortOptions.CONT_NAME_DESC) }
+        ),
+
+        DropDownMenuItem(
+            title = R.string.sort_by_date_oldest,
+            selected = supplierSortOption == SupplierSortOptions.DATE_OLDEST,
+            action = { supplierViewModel.setSupplierSortOption(SupplierSortOptions.DATE_OLDEST) }
+        ),
+
+        DropDownMenuItem(
+            title = R.string.sort_by_date_newest,
+            selected = supplierSortOption == SupplierSortOptions.DATE_NEWEST,
+            action = { supplierViewModel.setSupplierSortOption(SupplierSortOptions.DATE_NEWEST) }
+        )
     )   // Lista de elementos del menú desplegable de proveedores
     val userSortMenuItems = listOf(
         DropDownMenuItem(
@@ -618,25 +624,29 @@ val isSearching by homeViewModel.isSearching.collectAsState()
                                 }
                                  */ }
                             HomeSections.SUPPLIERS -> {
-                                FABContainer(
-                                    isVisible = !isSearchingSuppliers,
-                                    isExpanded = isButtonsAddVisible,
-                                    onDismiss = { isButtonsAddVisible = false }
-                                ) {
-                                    fabOptions.forEach { item ->
-                                        CustomFABChild(
-                                            fab = item,
-                                            isExpanded = isButtonsAddVisible,
-                                            onStateChanged = { isButtonsAddVisible = !isButtonsAddVisible }
+                                if (hasPermission) {
+                                    FABContainer(
+                                        isVisible = !isSearchingSuppliers,
+                                        isExpanded = isButtonsAddVisible,
+                                        onDismiss = { isButtonsAddVisible = false }
+                                    ) {
+                                        fabOptions.forEach { item ->
+                                            CustomFABChild(
+                                                fab = item,
+                                                isExpanded = isButtonsAddVisible,
+                                                onStateChanged = {
+                                                    isButtonsAddVisible = !isButtonsAddVisible
+                                                }
+                                            )
+
+                                            Spacer(modifier = Modifier.height(8.dp))
+                                        }
+
+                                        CustomFAB(
+                                            action = { isButtonsAddVisible = !isButtonsAddVisible },
+                                            modifier = Modifier.rotate(rotation)
                                         )
-
-                                        Spacer(modifier = Modifier.height(8.dp))
                                     }
-
-                                    CustomFAB(
-                                        action = { isButtonsAddVisible = !isButtonsAddVisible },
-                                        modifier = Modifier.rotate(rotation)
-                                    )
                                 }
                             }
                             HomeSections.USERS -> {
